@@ -1,0 +1,2641 @@
+//======================================================
+// Mechwarrior: Vengeance | Copyright © 1999-2000
+// Mechbay_main.script
+// Original Author: Paolo Malabuyo | August 4, 2000
+// Update: 2/1/01 | David Silverman, Cyberlore Studios
+//======================================================
+// Note to any programmer editing this file:
+// if you see any remnants of code that could send you to the
+// "BlackMarket" please make sure to track it down and remove/comment
+// it out. I'm just an Artist, so I won't. Thanks.
+// -dsilverman
+//
+// Look for my other words of wisdom throughout this file.
+// they'll be mostly purged by the projects end...just search for:
+// -dsilverman
+//======================================================
+
+#include "Content\\MercsShellScripts\\stddefs.h"
+#include "Content\\MercsShellScripts\\ShellFunctionHeaders.hpp"
+#include "Content\\MercsShellScripts\\MechLabHeaders_MERCS.h"
+#include "Content\\MercsShellScripts\\ScriptStrings.h"
+
+#include "Content\\MercsShellScripts\\buttons.script"
+#include "Content\\MercsShellScripts\\spinbox.script"
+#include "Content\\MercsShellScripts\\editbox.script"
+#include "Content\\MercsShellScripts\\listboxes.script"
+#include "Content\\MercsShellScripts\\mc_listboxes.script"
+#include "Content\\MercsShellScripts\\common_shell.script"
+#include "Content\\MercsShellScripts\\ErrorScreen.script"
+
+#include "Content\\MercsShellScripts\\Mechbay\\mc_listboxes_weapon.script"
+#include "Content\\MercsShellScripts\\Mechbay\\mc_listboxes_blackMarket.script"
+#include "Content\\MercsShellScripts\\Mechbay\\chassis.script"
+#include "Content\\MercsShellScripts\\Mechbay\\weapons.script"
+#include "Content\\MercsShellScripts\\Mechbay\\armor.script"
+#include "Content\\MercsShellScripts\\MechWeight.script"
+#include "Content\\MercsShellScripts\\Mechbay\\AdvanceTime.script"
+
+
+
+#define COMSTAR_GREEN	0xFF5AE35A
+
+main
+{
+	GUI_CREATE
+	{
+		setresource("ScriptStrings_MERCS.dll")
+
+		if ( ! exists( @infobox@ ) )
+		{
+			script_run MB_SPATH "infobox.script", 0x1525
+		}
+
+		object mechinfo = mech_info
+
+		// Dropdown listboxes
+		int max_items = 200
+		int MAX_COLUMNS = 4
+
+		// Multicolumn listboxes
+		int MAX_MC_ITEMS = 200		//MAXIMUM NUMBER OF ITEMS LISTED
+		int MAX_MC_COLUMNS = 10
+
+		// Multicolumn checklistbox
+		int MAX_MCCB_ITEMS = 250	//MAXIMUM NUMBER OF ITEMS LISTED
+		int MAX_MCCB_COLUMNS = 10
+
+		// Spinbox
+		int MAX_SPIN_ITEMS = 40		//MAXIMUM NUMBER OF ITEMS LISTED MUST BE SET (for numeric based, set 1)
+
+		// mektek
+		int mech_id2 = -1
+
+		object o_mainui = mainui
+		initialize(o_mainui)
+		activate(o_mainui)
+		focus(o_mainui)
+
+		//Sets volume of Background Music
+		int nMusicTmp
+		callback($$Shell_CallbackHandler$$,ShellOptionsGetSliderValue,MWO_MUSICVOLUME,nMusicTmp)
+
+		int iIsCampaign = $$m_isCampaign$$
+
+		setvolume (0,nMusicTmp)
+
+		font3d regfont = FPATH localize$( IDS_MICROSTYLE9BOLD )
+		font3d boldfont= FPATH localize$( IDS_MICROSTYLE9BOLDEXT )
+		string microStyle8BoldStr      = localize$( IDS_MICROSTYLE8BOLD )
+		string microStyle8BoldExtStr   = localize$( IDS_MICROSTYLE8BOLDEXT )
+		string microStyle9BoldStr      = localize$( IDS_MICROSTYLE9BOLD )
+		string microStyle9BoldExtStr   = localize$( IDS_MICROSTYLE9BOLDEXT )
+		string microStyle10BoldStr     = localize$( IDS_MICROSTYLE10BOLD )
+		string microStyle10BoldExtStr  = localize$( IDS_MICROSTYLE10BOLDEXT )
+		string microStyle12BoldStr     = localize$( IDS_MICROSTYLE12BOLD )
+		string microStyle12BoldExtStr  = localize$( IDS_MICROSTYLE12BOLDEXT )
+		string microStyle14BoldExtStr  = localize$( IDS_MICROSTYLE14BOLDEXT )
+
+		font3d microStyle8BoldFont      = FPATH microStyle8BoldStr
+		font3d microStyle8BoldExtFont   = FPATH microStyle8BoldExtStr
+		font3d microStyle9BoldFont      = FPATH microStyle9BoldStr
+		font3d microStyle9BoldExtFont   = FPATH microStyle9BoldExtStr
+		font3d microStyle10BoldFont     = FPATH microStyle10BoldStr
+		font3d microStyle10BoldExtFont  = FPATH microStyle10BoldExtStr
+		// font3d microStyle12BoldFont     = FPATH microStyle12BoldStr
+		// font3d microStyle12BoldExtFont  = FPATH microStyle12BoldExtStr
+		font3d microStyle14BoldExtFont  = FPATH microStyle14BoldExtStr
+
+//		font3d regfont = FPATH localize$(IDS_F_ML_LABEL)
+//		font3d boldfont= FPATH localize$(IDS_F_ML_DATA)
+	}
+
+	GUI_INIT
+	{
+		deactivate(o_newmech)
+	}
+
+	GUI_DRAW
+	{
+//		setpencolor(0, 0, 0, 150)
+//		drawrect 11, 527 to 642, 590
+	}
+
+
+	GUI_DESTROY
+	{
+		if ( exists( @infobox@ ) )
+		{
+			script_end "infobox.script"
+		}
+	}
+}
+
+mainui
+{
+	GUI_CREATE
+	{
+
+		object o_frame			= frame
+		o_frame.boldfont		= FPATH localize$(IDS_F_ML_DATA)
+		o_frame.type			= 0
+		o_frame.location		= 0, 0, 100
+		o_frame.screen_name		= localize$( IDS_MECHLAB ) " " MEKTEK_VERSION
+		o_closebutton.location		= 742, 33, 150
+		initialize(o_frame)
+
+//////////////////////////////////////////////////////////////////
+///////////////////////////// Overlay Pane  //////////////////////
+//////////////////////////////////////////////////////////////////
+		pane p_lab_overlay		= GPATH "mechlab-overlay.tga"
+		position ol_pos			= 336, 60, 25
+		alphamode(p_lab_overlay)	= am_alpha_alphainvalpha
+//////////////////////////////////////////////////////////////////
+
+		int mainbuttonx = 646
+		int mainbuttony = 575
+
+		//this list is for printing your opponent's selection
+		string mech_name[LastMechID + 3 ]
+
+		mech_name[0]		= localize$(DNL_ARCTICWOLF)
+		mech_name[1]		= localize$(DNL_ARGUS)
+		mech_name[2]		= localize$(DNL_ATLAS)
+		mech_name[3]		= localize$(DNL_AWESOME)
+		mech_name[4]		= localize$(DNL_BLACKKNIGHT)
+		mech_name[5]		= localize$(DNL_BUSHWACKER)
+		mech_name[6]		= localize$(DNL_CATAPULT)
+		mech_name[7]    	= localize$(DNL_CAULDRONBORN)
+		mech_name[8]		= localize$(DNL_CHIMERA)
+		mech_name[9]		= localize$(DNL_COUGAR)
+		mech_name[10]		= localize$(DNL_DAISHI)
+		mech_name[11]		= localize$(DNL_DRAGON)
+		mech_name[12]		= localize$(DNL_FAFNIR)
+		mech_name[13]		= localize$(DNL_FLEA)
+		mech_name[14]		= localize$(DNL_GLADIATOR)
+		mech_name[15]		= localize$(DNL_HAUPTMANN)
+		mech_name[16]		= localize$(DNL_HELLHOUND)
+		mech_name[17]		= localize$(DNL_HELLSPAWN)
+		mech_name[18]   	= localize$(DNL_HIGHLANDER)
+		mech_name[19]   	= localize$(DNL_HUNCHBACK)
+		mech_name[20]		= localize$(DNL_KODIAK)
+		mech_name[21]		= localize$(DNL_LOKI)
+		mech_name[22]		= localize$(DNL_LONGBOW)
+		mech_name[23]		= localize$(DNL_MADCAT)
+		mech_name[24]		= localize$(DNL_MADCAT2)
+		mech_name[25]		= localize$(DNL_MASAKARI)
+		mech_name[26]		= localize$(DNL_MAULER)
+		mech_name[27]		= localize$(DNL_NOVACAT)
+		mech_name[28]		= localize$(DNL_OSIRIS)
+		mech_name[29]		= localize$(DNL_OWENS)
+		mech_name[30]		= localize$(DNL_PUMA)
+		mech_name[31]		= localize$(DNL_RAVEN)
+		mech_name[32]		= localize$(DNL_RYOKEN)
+		mech_name[33]		= localize$(DNL_SHADOWCAT)
+		mech_name[34]		= localize$(DNL_SUNDER)
+		mech_name[35]		= localize$(DNL_TEMPLAR)
+		mech_name[36]		= localize$(DNL_THANATOS)
+		mech_name[37]		= localize$(DNL_THOR)
+		mech_name[38]		= localize$(DNL_ULLER)
+		mech_name[39]		= localize$(DNL_UZIEL)
+		mech_name[40]		= localize$(DNL_VICTOR)
+		mech_name[41]		= localize$(DNL_VULTURE)
+		mech_name[42]		= localize$(DNL_WOLFHOUND)
+		mech_name[43]   	= localize$(DNL_ZEUS)
+		mech_name[M_Avatar]		= "Avatar"	// mektek
+		mech_name[M_Warhammer]		= "Warhammer"	// mektek
+		mech_name[M_Strider]		= "Strider"	// mektek
+		mech_name[M_Marauder]		= "Marauder"	// mektek
+		mech_name[M_Bloodasp]		= "Blood Asp"	// mektek
+		mech_name[M_UrbanmechIIC]	= "Urban Mech Clan"	// mektek
+		mech_name[M_Stalker]	= "Stalker"	// mektek
+		mech_name[M_Ares]	= "Ares"	// mektek
+		mech_name[M_Urbanmech]	= "Urban Mech IS"	// mektek
+		mech_name[M_BrcticWolf ] 		= "Arctic Wolf II" // Mechstorm
+		mech_name[LastMechID] 		= localize$(IDS_ML_NA_INFO)	// mektek
+		mech_name[NoMechID] 		= localize$(IDS_ML_NA_INFO)	// mektek
+
+		int mech_id = 23
+		float mech_tonnage
+		float mech_max_tonnage
+		int battle_value
+		int armor_value
+		int speed_value
+		int heat_eff
+		int mech_status = 0
+
+// Why is mech_exists an int if it returns T/F? Is there no support for bools? And how can an int = True or False?
+// BTW: remove this comment at some point, someone may get offended...
+// -dsilverman
+		int mech_exists
+		if $$m_mechLabCount$$ == 0
+		{
+			mech_exists = false
+		}
+		else
+		{
+			mech_exists = true
+		}
+
+// I need not comment this, but I'm doing it anyway(more for me than you)
+// stats_num is the number of stats being represented by our lovely game.
+// In this case there are 4: Firepower,Armor,Speed,and Heat Efficiency
+// o_statlines is setting up an array so we can iterate through stats_num, and return an entry for each
+// Here, we're returning a label for the FASH region.
+// -dsilverman
+
+		int stats_num = 4
+		object o_statlines[stats_num]
+		int s
+		for s = 0; s < stats_num; s++
+		//{
+		//	o_statlines[s] = s_statlines
+		//	o_statlines[s].location = 330, 35 + (s * 30), 10
+		//	o_statlines[s].id = 153 + s
+		//}
+		{
+			o_statlines[s] = s_statlines
+//			o_statlines[s].location = 356, 62 + (s * 30), 10
+			o_statlines[s].location = 342, 64 + (s * 30), 10 //-dsilverman
+			o_statlines[s].id = 153 + s
+		}
+		o_statlines[0].label = localize$(IDS_ML_MAIN_FIREPOWER)
+		o_statlines[1].label = localize$(IDS_ML_MAIN_ARMOR)
+		o_statlines[2].label = localize$(IDS_ML_MAIN_SPEED)
+		o_statlines[3].label = localize$(IDS_ML_MAIN_HEATEFF)
+		for s = 0; s < stats_num; s++
+		{
+			initialize(o_statlines[s])
+		}
+
+		int just_saved				= true
+		int first_time				= true
+		spew "flag set to false A"
+		int tempRepairStatusFlag    = false //used so that only saving the mech will set/save the repair flag in the code
+
+		// Restore and Save buttons are being setup here:
+		// The graphic associated with it has 4 button graphics representing each of the button states it might show
+		// The 4 states being represented are: unclicked,onclick,rollover,unclickable
+		// The save button just below is using a similar setup.
+		// The graphic is blited onto a pane and only a portion is displayed as needed. The scripting for that isn't right here
+		// -dsilverman
+
+
+		if ($$m_isCampaign$$ == 1)
+		{
+				object o_repairbutton			= s_multistatepane
+				o_repairbutton.file			= WPATH "button_repair_124x34_4state.tga"
+				o_repairbutton.total_states		= 4
+				o_repairbutton.state			= 3
+				o_repairbutton.text			= localize$( IDS_REPAIR )
+				o_repairbutton.location			= 345, 258, 10
+				o_repairbutton.gFont3d			= FPATH localize$( IDS_MICROSTYLE10BOLDEXT )
+				o_repairbutton.id			= 172
+				o_repairbutton.text_v_offset		= -1
+				initialize(o_repairbutton)
+
+				object o_FreeMarket_button		= s_multistatepane
+				o_FreeMarket_button.file		= WPATH "button_reg_135x23_4state.tga"
+				o_FreeMarket_button.text		= localize$(IDS_COMCEN_FREE_MARKET)
+				o_FreeMarket_button.id			= 170
+				o_FreeMarket_button.text_v_offset	= -2
+				o_FreeMarket_button.total_states	= 4
+				o_FreeMarket_button.location		= mainbuttonx, mainbuttony - 48, 10
+				o_FreeMarket_button.gFont3d		= FPATH localize$( IDS_MICROSTYLE10BOLDEXT )
+				initialize (o_FreeMarket_button)
+
+				object o_restorebutton		= s_multistatepane
+				o_restorebutton.file		= WPATH "button_reg_99x23_4state.tga"
+				o_restorebutton.total_states	= 4
+				o_restorebutton.text		= localize$( IDS_RESTORE )
+				o_restorebutton.location	= 51, 73, 10
+				o_restorebutton.gFont3d		= FPATH localize$( IDS_MICROSTYLE9BOLDEXT )
+				o_restorebutton.id		= 151
+				initialize(o_restorebutton)
+
+				object o_savebutton		= s_multistatepane
+				o_savebutton.file		= WPATH "button_reg_135x23_4state.tga"
+				o_savebutton.total_states	= 4
+				o_savebutton.text		= localize$(IDS_GN_SAVE)
+				o_savebutton.location		= mainbuttonx, mainbuttony - 24, 10
+				o_savebutton.gFont3d		= FPATH localize$( IDS_MICROSTYLE10BOLDEXT )
+				o_savebutton.id			= 160
+				initialize(o_savebutton)
+
+				object o_exitbutton		= s_multistatepane
+				o_exitbutton.file		= WPATH "button_reg_135x23_3state.tga"
+				o_exitbutton.total_states	= 3
+				o_exitbutton.text		= localize$( IDS_CLOSE )
+				o_exitbutton.location		= mainbuttonx, mainbuttony, 10
+				o_exitbutton.gFont3d		= FPATH localize$( IDS_MICROSTYLE10BOLDEXT )
+				o_exitbutton.id			= 152
+				initialize(o_exitbutton)
+		}
+		else
+		{
+				object o_restorebutton		= s_multistatepane
+				o_restorebutton.file		= WPATH "button_reg_99x23_4state.tga"
+				o_restorebutton.total_states	= 4
+				o_restorebutton.text		= localize$( IDS_RESTORE )
+				o_restorebutton.location	= 216, 97, 10
+				o_restorebutton.gFont3d		= FPATH localize$( IDS_MICROSTYLE10BOLDEXT )
+				o_restorebutton.id		= 151
+				initialize(o_restorebutton)
+
+				object o_savebutton		= s_multistatepane
+				o_savebutton.file		= WPATH "button_reg_135x23_4state.tga"
+				o_savebutton.total_states	= 4
+				o_savebutton.text		= localize$(IDS_GN_SAVE)
+				o_savebutton.location		= mainbuttonx, mainbuttony - 34, 10
+				o_savebutton.gFont3d		= FPATH localize$( IDS_MICROSTYLE10BOLDEXT )
+				o_savebutton.id			= 160
+				initialize(o_savebutton)
+
+				object o_exitbutton		= s_multistatepane
+				o_exitbutton.file		= WPATH "button_reg_135x23_3state.tga"
+				o_exitbutton.total_states	= 3
+				o_exitbutton.text		= localize$( IDS_CLOSE )
+				o_exitbutton.location		= mainbuttonx, mainbuttony - 10, 10
+				o_exitbutton.gFont3d		= FPATH localize$( IDS_MICROSTYLE10BOLDEXT )
+				o_exitbutton.id			= 152
+				initialize(o_exitbutton)
+
+				object o_FreeMarket_button		= s_multistatepane
+				o_FreeMarket_button.file		= WPATH "button_reg_129x23_4state.tga"
+				o_FreeMarket_button.text		= localize$(IDS_COMCEN_FREE_MARKET)
+				o_FreeMarket_button.id			= 170
+				o_FreeMarket_button.text_v_offset	= -2
+				o_FreeMarket_button.total_states	= 4
+				o_FreeMarket_button.location		= 850, 650, 10
+				o_FreeMarket_button.gFont3d		= FPATH localize$( IDS_MICROSTYLE10BOLDEXT )
+				initialize (o_FreeMarket_button)
+		}
+
+		object o_tabs					= tabs
+		o_tabs.location					= 0, 0, 5
+		initialize(o_tabs)
+
+		object o_chassis				= chassis
+		o_chassis.location				= 0, 0, 10
+		initialize(o_chassis)
+
+		object o_weapons				= weapons
+		o_weapons.location				= 0, 0, 10
+		initialize(o_weapons)
+		deactivate(o_weapons)
+
+		object o_armor					= armor
+		o_armor.location				= 0, 0, 10
+		initialize(o_armor)
+		deactivate(o_armor)
+
+		object o_overlay				= overlay
+		o_overlay.location				= 0, 0, 60
+		initialize(o_overlay)
+		deactivate(o_overlay)
+
+
+		object o_exitconfirm			= exitconfirm
+		o_exitconfirm.location			= 0, 0, 150
+		initialize(o_exitconfirm)
+		deactivate(o_exitconfirm)
+
+		object o_comstarTabbedPages = comstar_tabbed_pages
+		o_comstarTabbedPages._origin = 10, 515, 50
+		initialize( o_comstarTabbedPages )
+		activate( o_comstarTabbedPages )
+
+
+		// Similar to our old buddy FASH, tonnage is a mech stat
+		// tonnage has 3 stats to track:
+		// Maximum Tonnage, Current Tonnage, and Available Tonnage
+		// this iterates through the 3 stats and displays them below each other
+		// -dsilverman
+		int tonnage_num = 3
+		object o_tonnage_nums[tonnage_num]
+		int o
+		for o = 0; o < tonnage_num; o++
+		//{
+		//	o_tonnage_nums[o] = s_tonnagedisplay
+		//	o_tonnage_nums[o].locx = 450
+		//	o_tonnage_nums[o].locy = 35 + (o * 45)
+		//	o_tonnage_nums[o].id = 161 + o
+		//}
+		{
+			o_tonnage_nums[o] = s_tonnagedisplay
+			//o_tonnage_nums[o].locx = 336 + (o * 90)
+			o_tonnage_nums[o].locy = 28
+			o_tonnage_nums[o].id = 161 + o
+		}
+		o_tonnage_nums[0].locx = 335//361
+		o_tonnage_nums[1].locx = 450//501
+		o_tonnage_nums[2].locx = 565//621
+		o_tonnage_nums[0].label = localize$( IDS_MAX_TONNAGE )
+//		o_tonnage_nums[0].label = localize$(IDS_ML_MAIN_MAXTON)
+		o_tonnage_nums[1].label = localize$(IDS_ML_MAIN_CURRENTTON)
+		o_tonnage_nums[2].label = localize$(IDS_ML_MAIN_AVAILTON)
+		for o = 0; o < tonnage_num; o++
+		{
+			initialize(o_tonnage_nums[o])
+		}
+
+		object o_tabs_block = region_block
+		o_tabs_block.location = 0, 30, 30
+		o_tabs_block.region_width = 329
+		o_tabs_block.region_height = 40
+		o_tabs_block.id = 164
+		initialize(o_tabs_block)
+
+		object o_chassis_block = region_block
+		o_chassis_block.location = 0, 215, 30
+		o_chassis_block.region_width = 329
+		o_chassis_block.region_height = 290
+		o_chassis_block.id = 165
+		initialize(o_chassis_block)
+
+		object o_buttons_block = region_block
+		o_buttons_block.location = 650, 505, 30
+		o_buttons_block.region_width = 150
+		o_buttons_block.region_height = 60
+		o_buttons_block.id = 166
+		initialize(o_buttons_block)
+
+		//added -dsilverman
+		deactivate(o_chassis_block)
+		if mech_exists == true
+		{
+			deactivate(o_tabs_block)
+			deactivate(o_chassis_block)
+			deactivate(o_buttons_block)
+		}
+
+		framerate = 10
+
+		sound btnTriggeredSound = APATH "sfx_button5.wav"
+
+		object o_groupweapons		= groupweapons
+		o_groupweapons.location		= 0, 0, 70
+		initialize(o_groupweapons)
+		deactivate(o_groupweapons)
+
+		// flag for seeing if player should see weapon grouping dialog upon save/exit
+		int grouped = 1
+
+		// support for not showing group weapons dialog if there are no weapons mounted
+		int grp_array_size = 30
+		int grp_typearray[grp_array_size]
+		int grp_id_array[grp_array_size]
+		int grp_loc_array[grp_array_size]
+		int grp_group1_array[grp_array_size]
+		int grp_group2_array[grp_array_size]
+		int grp_group3_array[grp_array_size]
+		int grp_group4_array[grp_array_size]
+		int grp_group5_array[grp_array_size]
+		int grp_group6_array[grp_array_size]
+		int grp_num_weapons
+
+		int playerBalance = -1
+		int costToRepairMech = -1
+		int someMechIsRepairingFlag = -1 //set to 1 when a mech is repairing
+		object o_repair_error
+		object o_repair_confirm
+
+		// Set to 1 if the batch mech repair dlg has run
+		int mechRepairScreenHasRun = 0
+
+		object o_advance_time_dialog
+	}
+
+	GUI_INIT
+	{
+
+
+		callback($$ML_CallbackHandler$$, MLDataSetupGetMechData, mech_id, mech_tonnage, mech_max_tonnage, battle_value, heat_eff, speed_value, armor_value)
+
+		if (mech_id != -1)
+		{
+			mail(battle_value, o_statlines[0])
+			mail(armor_value, o_statlines[1])
+			mail(speed_value, o_statlines[2])
+			mail(heat_eff, o_statlines[3])
+
+			float mech_remaining_tonnage	= mech_max_tonnage - mech_tonnage
+			o_tonnage_nums[0].value		= mech_max_tonnage
+			o_tonnage_nums[1].value		= mech_tonnage
+			o_tonnage_nums[2].value		= mech_remaining_tonnage
+			mail(1, o_tonnage_nums[0])
+			mail(1, o_tonnage_nums[1])
+			mail(1, o_tonnage_nums[2])
+
+			if first_time == true
+			{
+				just_saved = true
+				first_time = false
+			}
+		}
+		else
+		{
+			o_restorebutton.state		= 3
+			initialize(o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				o_savebutton.state		= 3
+				initialize(o_savebutton)
+			//}
+		}
+
+		if (mech_exists == FALSE)
+		{
+			o_tabs.o_radiobutton[1].state = 3
+			o_tabs.o_radiobutton[2].state = 3
+			initialize(o_tabs)
+		}
+		else
+		{
+			if (o_tabs.o_radiobutton[1].state == 3)
+				o_tabs.o_radiobutton[1].state = 0
+
+			if (o_tabs.o_radiobutton[2].state == 3)
+				o_tabs.o_radiobutton[2].state = 0
+			initialize(o_tabs)
+		}
+
+		if ($$m_isCampaign$$ == 1)
+		{
+			if ($$m_mechLabCount$$ > 0)
+			{
+				playerBalance = callback($$GetMoneyBalance$$)
+				costToRepairMech = callback($$GetMechRepairCost$$)
+				int mechIsRepairing
+
+				callback($$ML_CallbackHandler$$, MLGetMechStatus, mech_status, mechIsRepairing)
+				if ( mech_status == 0 || mechIsRepairing == true || tempRepairStatusFlag == true)
+				{
+					o_repairbutton.state = 3
+				}
+				else
+				{
+					spew "La La La"
+					o_repairbutton.state = 0
+				}
+
+				o_FreeMarket_button.state = 0
+				initialize(o_repairbutton)
+				initialize(o_FreeMarket_button)
+			}
+			else
+			{
+				o_FreeMarket_button.state = 3
+			}
+
+			if ( mechRepairScreenHasRun == 0 )
+			{
+				script_run MB_SPATH "Mechbayrepair.script" , 0x1525
+				mechRepairScreenHasRun = 1
+			}
+			
+			//Are Any Mechs Repairing???
+			
+			int i
+			int dummy
+			int mech_is_repairing
+			someMechIsRepairingFlag = 0
+			for (i=0; i<$$m_mechLabCount$$; i++)
+			{
+				callback($$GetMechStatus$$, i, dummy, mech_is_repairing, dummy)
+				if (mech_is_repairing)
+				{
+					someMechIsRepairingFlag = 1
+					break
+				}
+			}
+		}
+		// mail( 2, this )
+	}
+
+	GUI_ACTIVATE
+	{
+			o_restorebutton.state		= 3
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				o_savebutton.state		= 3
+				initialize(o_savebutton)
+			//}
+			initialize(o_restorebutton)
+	}
+
+
+// if you haven't dealt with this as yet, here's the skinny n print3d:
+// it appears to actually give you decent control over the typographic elements in the engine
+// print3d_attributes: font, color(ARGB in HEX), bold(on/off), proportional spacing(on/off), italic(on/off), justification(left/right/center)
+// boldfont is defined elsewhere, but it's likely to be Microstyle Bold Extended
+// further down is regfont, which is likely to be Microstyle
+// -dsilverman
+
+	GUI_DRAW
+	{
+//////////////////////////////////////////////////////////////////
+///////////////////////////// Overlay Pane  //////////////////////
+//////////////////////////////////////////////////////////////////
+		render p_lab_overlay, ol_pos
+//////////////////////////////////////////////////////////////////
+
+
+//		print3d_attributes = boldfont, 0xffff7200, 1, 1, 1, 0, 0
+//		print3d_margins = 30, 12 to 324, 50
+//		print3d_position = 30, 12
+//		print3d localize$(DNL_MECHLAB)
+
+		print3d_attributes = boldfont, 0xffFFCD62, 1, 1, 1, 0, 0, just_left
+		print3d_margins = 18, 18 to getresx() - 10, 50
+		print3d_position = 18, 18
+//		print3d_attributes = boldfont, 0xffffffff, 1, 1, 1, 0, 0, just_left
+//		print3d_margins = 204, 18 to 222, 40
+//		print3d_position = 205, 20
+
+		if mech_id > -1
+		{
+			if (iIsCampaign == 0)
+			{
+				int stock_mech_selected = o_chassis.o_availmechsdroplist.nselected
+				int variant_mech_selected = o_chassis.o_availmechsdroplist2.nselected
+				int mech_selected = o_chassis.stock_array[o_chassis.stock_mech_selected] + o_chassis.variant_mech_selected
+
+				if(equal$(Left$(o_chassis.mech_name[mech_selected], 6), "Avatar"))	// mech_name[M_Avatar]
+				{
+					mech_id = M_Avatar
+				}
+				if(equal$(Left$(o_chassis.mech_name[mech_selected], 7), "Strider"))	// mech_name[M_Strider]
+				{
+						mech_id = M_Strider
+				}
+				if(equal$(Left$(o_chassis.mech_name[mech_selected], 9), "Warhammer"))	// mech_name[M_Warhammer]
+				{
+					mech_id = M_Warhammer
+				}
+				if(equal$(Left$(o_chassis.mech_name[mech_selected], 15), "Urban Mech Clan"))	// mech_name[M_UrbanmechIIC]
+				{
+					mech_id = M_UrbanmechIIC
+				}
+				if(equal$(Left$(o_chassis.mech_name[mech_selected], 13), "Urban Mech IS"))	// mech_name[M_UrbanmechIIC]
+				{
+					mech_id = M_Urbanmech
+				}
+				if(equal$(Left$(o_chassis.mech_name[mech_selected], 8), "Marauder"))	// mech_name[M_Marauder]
+				{
+					mech_id = M_Marauder
+				}
+				if(equal$(Left$(o_chassis.mech_name[mech_selected], 9), "Blood Asp"))	// mektek
+				{
+					mech_id = M_Bloodasp
+				}
+				if(equal$(Left$(o_chassis.mech_name[mech_selected], 7), "Stalker"))	// 
+				{
+					mech_id = M_Stalker
+				}
+				if(equal$(Left$(o_chassis.mech_name[mech_selected], 4), "Ares"))	//
+				{
+					mech_id = M_Ares
+				}
+					if(equal$(Left$(o_chassis.mech_name[mech_selected], 14), "Arctic Wolf II"))	// The number is the String Length of Arctic Wolf II // Mechstorm
+				{
+					mech_id = M_BrcticWolf 
+				}
+
+
+
+				mech_id2 = mech_id	
+
+
+				// note: similar code should go in the else section below as well	// mektek
+
+
+				print3d	o_chassis.mech_name[mech_selected]// " [" conv$(mech_id2) "]"
+			}
+			else
+			{
+				int mech_selected = o_chassis.o_availmechsdroplist.nSelected
+
+
+				if(equal$(Left$(o_chassis.o_availmechsdroplist.list_item[mech_selected], 6), "Avatar"))	// mech_name[M_Avatar]
+				{
+					mech_id = M_Avatar
+				}
+				if(equal$(Left$(o_chassis.o_availmechsdroplist.list_item[mech_selected], 7), "Strider"))	// mech_name[M_Strider]
+				{
+						mech_id = M_Strider
+				}
+				if(equal$(Left$(o_chassis.o_availmechsdroplist.list_item[mech_selected], 9), "Warhammer"))	// mech_name[M_Warhammer]
+				{
+					mech_id = M_Warhammer
+				}
+				if(equal$(Left$(o_chassis.o_availmechsdroplist.list_item[mech_selected], 15), "Urban Mech Clan"))	// mech_name[M_UrbanmechIIC]
+				{
+					mech_id = M_UrbanmechIIC
+				}
+				if(equal$(Left$(o_chassis.o_availmechsdroplist.list_item[mech_selected], 13), "Urban Mech IS"))	// mech_name[M_UrbanmechIIC]
+				{
+					mech_id = M_Urbanmech
+				}
+				if(equal$(Left$(o_chassis.o_availmechsdroplist.list_item[mech_selected], 8), "Marauder"))	// mech_name[M_Marauder]
+				{
+					mech_id = M_Marauder
+				}
+				if(equal$(Left$(o_chassis.o_availmechsdroplist.list_item[mech_selected], 9), "Blood Asp"))	// mektek
+				{
+					mech_id = M_Bloodasp
+				}
+				if(equal$(Left$(o_chassis.o_availmechsdroplist.list_item[mech_selected], 7), "Stalker"))	// 
+				{
+					mech_id = M_Stalker
+				}
+				if(equal$(Left$(o_chassis.o_availmechsdroplist.list_item[mech_selected], 4), "Ares"))	//
+				{
+					mech_id = M_Ares
+				}
+				if(equal$(Left$(o_chassis.o_availmechsdroplist.list_item[mech_selected], 14), "Arctic Wolf II"))	// The number is the String Length of Arctic Wolf II // Mechstorm
+				{
+					mech_id = M_BrcticWolf 
+				}
+
+
+
+				mech_id2 = mech_id	
+
+
+				print3d	o_chassis.o_availmechsdroplist.list_item[mech_selected]// " [" conv$(mech_id2) "]"
+			}
+		}
+		if mech_id == -1
+		{
+			print3d mech_name[ NoMechID ]
+		}
+
+		//if (iIsCampaign == 1)
+		//{
+		//	if (mech_status == 1) // Damaged
+		//	{
+		//		print3d_attributes = regfont, 0xffffff00, 1, 1, 1, 0, 0, just_center
+		//		print3d_margins = 336, 36 to getresx() - 10, 50
+		//		print3d_position = 336, 36
+		//		print3d localize$(IDS_CMW_DAMAGED)
+		//	}
+		//	else
+		//	if (mech_status == 3) // Crippled
+		//	{
+		//		print3d_attributes = regfont, 0xffff0000, 1, 1, 1, 0, 0, just_center
+		//		print3d_margins = 336, 36 to getresx() - 10, 50
+		//		print3d_position = 336, 36
+		//		print3d localize$(IDS_CMW_CRIPPLED)
+		//	}
+		//}
+
+		print3d_attributes = boldfont, 0xffffffff, 1, 1, 1, 0, 0, just_center
+		print3d_margins = 400, 250 to 720, 450
+		print3d_position = 400, 250
+		if mech_exists == false
+				{
+					print3d localize$(IDS_ML_MAIN_NOMECHS)
+				}
+			}
+
+	GUI_MAILBOX
+	{
+		if ( (getmessage() == nMSG_AUX_OP_A) && ($$m_isCampaign$$ == 1) )
+		{
+			//rediscover if any mechs are repairing
+			int i
+			int dummy
+			int mech_is_repairing
+			someMechIsRepairingFlag = 0
+			for (i=0; i<$$m_mechLabCount$$; i++)
+			{
+				callback($$GetMechStatus$$, i, dummy, mech_is_repairing, dummy)
+				if (mech_is_repairing)
+				{
+					someMechIsRepairingFlag = 1
+					break
+				}
+			}
+			return
+		}
+
+		if (sender == o_restorebutton)
+		{
+			play btnTriggeredSound,1
+			callback($$ML_CallbackHandler$$, MLRestore)
+
+			initialize(this)
+			initialize(o_chassis)
+			initialize(o_weapons)
+			initialize(o_armor)
+			deactivate(o_chassis)
+			deactivate(o_weapons)
+			deactivate(o_armor)
+
+			o_restorebutton.state	= 3
+			initialize(o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				o_savebutton.state		= 3
+				initialize(o_savebutton)
+			//}
+
+			if o_tabs.on_tab == 0
+			{
+				activate(o_chassis)
+			}
+			if o_tabs.on_tab == 1
+			{
+				activate(o_weapons)
+			}
+			if o_tabs.on_tab == 2
+			{
+				activate(o_armor)
+			}
+
+			just_saved = true
+
+			return
+		}
+
+		if ($$m_isCampaign$$ == 1)
+		{
+			if (sender == o_FreeMarket_button)
+			{
+				play btnTriggeredSound,1
+				if (just_saved == false)
+				{
+					@SHELL@lastScreen[@SHELL@lastScreenDepth+1] = MECHBAY_SCREEN
+					@SHELL@lastScreen[@SHELL@lastScreenDepth+2] = BLACK_MARKET
+					@SHELL@lastScreenDepth = @SHELL@lastScreenDepth + 2
+					activate(o_overlay)
+					initialize(o_exitconfirm)
+					activate(o_exitconfirm)
+				}
+				else
+				{
+					mail ( nMSG_AUX_OP_A, this ) //see if any mechs are repairing (sets the variable appropriately)
+					if (someMechIsRepairingFlag == 1)
+					{
+						mail( nMSG_ADVANCE_TIME_DLG, @Mechbay_main@o_mainui )
+						@SHELL@lastScreen[@SHELL@lastScreenDepth+1] = MECHBAY_SCREEN
+						@SHELL@lastScreen[@SHELL@lastScreenDepth+2] = BLACK_MARKET
+						@SHELL@lastScreenDepth = @SHELL@lastScreenDepth + 2
+					}
+					else
+					{
+						callback($$ML_CallbackHandler$$, MLExit)
+						callback($$Shell_CallbackHandler$$, ShellClearMechLabScreen)
+
+						@SHELL@lastScreenDepth++
+						@SHELL@lastScreen[@SHELL@lastScreenDepth] = MECHBAY_SCREEN
+						mail (BLACK_MARKET, @MECHBAY@screen) //pass the value of the next screen to load
+						@SHELL@currentScreen = -1  //this is a nothing screen to get it to kill the other script, which in turn will load the next appropriate screen after ending this script
+						unfocus
+					}
+				}
+			}
+
+			if (sender == o_repairbutton)
+			{
+				play btnTriggeredSound,1
+				if ( costToRepairMech >= playerBalance )
+				{
+					o_repair_error					= o_ErrorScreen
+					o_repair_error.error_header		= localize$(IDS_ML_REPAIR_ERROR_MONEY_HEADER)
+					o_repair_error.error_message	= localize$(IDS_ML_REPAIR_ERROR_MONEY)
+					o_repair_error.button_mode		= ONE_BUTTON_MODE
+					o_repair_error.buttonText[0]	= localize$(IDS_GN_OK)
+					initialize(o_repair_error)
+					o_repair_error.mButton[0].id	= 197
+					activate(o_repair_error)
+				}
+				else
+				{
+					string msg
+					// "'Mech repairs will cost 23490C-Bills\nand take 2 cycles. \n\nDo you want to repair this 'mech?"
+					msg = localize$(IDS_ML_MRWC) " " fmtcommanum$( costToRepairMech ) " " localize$( IDS_ML_CBILLS ) "\n"
+					msg = msg localize$(IDS_ML_ANDTAKE) " "
+					if ( mech_status == 1 )
+						msg = msg localize$(IDS_ML_1CYCLE)
+					else
+						msg = msg localize$(IDS_ML_2CYCLES)
+
+					msg = msg ".\n\n" localize$(IDS_ML_WANTTOREPAIR)
+
+					o_repair_confirm					= o_ErrorScreen
+					o_repair_confirm.error_header		= localize$(IDS_ML_CONFIRM_REPAIR)
+					o_repair_confirm.error_message	= msg
+					o_repair_confirm.button_mode		= TWO_BUTTON_MODE
+					o_repair_confirm.buttonText[0] = localize$(IDS_GN_YES)
+					o_repair_confirm.buttonText[1] = localize$(IDS_GN_NO)
+					initialize(o_repair_confirm)
+					o_repair_confirm.mButton[0].id	= 197
+					o_repair_confirm.mButton[1].id	= 198
+					activate(o_repair_confirm)
+				}
+				return
+			}
+			if sender == o_repair_confirm
+			{
+				if getmessage() == 0	// DO REPAIR
+				{
+					tempRepairStatusFlag = true //used so that only saving the mech will set/save the repair flag in the code
+					initialize (o_chassis)
+					o_repairbutton.state = 3
+					just_saved = false //force it to bring up the save verification pop-up
+					//mail( nMSG_ADVANCE_TIME_DLG, this )
+				}
+				return
+			}
+
+			if ( getmessage() == nMSG_ADVANCE_TIME_DLG )
+			{
+				o_advance_time_dialog = advance_time_dialog
+				initialize( o_advance_time_dialog )
+				activate( o_advance_time_dialog )
+			}
+		}
+
+		if (sender == o_savebutton)
+		{
+			play btnTriggeredSound,1
+
+			callback($$ML_CallbackHandler$$, MLDataGetWeaponGroups, grp_typearray[], grp_id_array[], grp_loc_array[], grp_group1_array[], grp_group2_array[], grp_group3_array[], grp_group4_array[], grp_group5_array[], grp_group6_array[], grp_num_weapons, grp_array_size)
+
+			o_restorebutton.state	= 3
+			o_savebutton.state		= 3
+			initialize(o_restorebutton)
+			initialize(o_savebutton)
+
+			if grouped == 0 && grp_num_weapons > 0
+			{
+				o_groupweapons.save_flag = 1
+				activate(o_overlay)
+				initialize(o_groupweapons)
+				activate(o_groupweapons)
+			}
+			else
+			{
+				callback($$ML_CallbackHandler$$, MLSave)
+				just_saved = true
+			}
+
+			return
+		}
+
+		if (sender == o_exitbutton)
+		{
+			play btnTriggeredSound,1
+
+			if mech_exists == 1
+			{
+				if (just_saved == false)
+				{
+					activate(o_overlay)
+					initialize(o_exitconfirm)
+					activate(o_exitconfirm)
+				}
+				else
+				{
+					mail ( nMSG_AUX_OP_A, this ) //see if any mechs are repairing (sets the variable appropriately)
+					if (someMechIsRepairingFlag == 1)
+					{
+						if ($$m_isCampaign$$ == 1)
+						{
+							mail( nMSG_ADVANCE_TIME_DLG, @Mechbay_main@o_mainui )
+						}
+					}
+					else
+					{
+						if exists(@infobox@)
+						{
+							script_end "infobox.script"
+						}
+						callback($$ML_CallbackHandler$$, MLExit)
+						callback($$Shell_CallbackHandler$$, ShellClearMechLabScreen)
+						if exists(@SHELL@)
+						{
+							mail (@SHELL@lastScreen[@SHELL@lastScreenDepth], @MECHBAY@screen) //pass the value of the next screen to load
+							@SHELL@lastScreenDepth--
+							@SHELL@currentScreen = -1  //this is a nothing screen to get it to kill the other script, which in turn will load the next appropriate screen after ending this script
+						}
+						if exists(@NetServer@)
+						{
+							@NetServer@currentScreen = MULTIPLAYER_SCREEN
+						}
+						if exists(@NetClient@)
+						{
+							@NetClient@currentScreen = MULTIPLAYER_SCREEN
+						}
+						unfocus
+					}
+				}
+			}
+			else
+			{
+				mail ( nMSG_AUX_OP_A, this ) //see if any mechs are repairing (sets the variable appropriately)
+				if (someMechIsRepairingFlag == 1)
+				{
+					if ($$m_isCampaign$$ == 1)
+					{
+						mail( nMSG_ADVANCE_TIME_DLG, @Mechbay_main@o_mainui )
+					}
+				}
+				else
+				{
+					if exists(@infobox@)
+					{
+						script_end "infobox.script"
+					}
+
+					callback($$ML_CallbackHandler$$, MLExit)
+					callback($$Shell_CallbackHandler$$, ShellClearMechLabScreen)
+					if exists(@SHELL@)
+					{
+						mail (@SHELL@lastScreen[@SHELL@lastScreenDepth], @MECHBAY@screen) //pass the value of the next screen to load
+						@SHELL@lastScreenDepth--
+						@SHELL@currentScreen = -1  //this is a nothing screen to get it to kill the other script, which in turn will load the next appropriate screen after ending this script
+					}
+					if exists(@NetServer@)
+					{
+						@NetServer@currentScreen = MULTIPLAYER_SCREEN
+					}
+					if exists(@NetClient@)
+					{
+						@NetClient@currentScreen = MULTIPLAYER_SCREEN
+					}
+					unfocus
+				}
+			}
+
+			return
+		}
+
+		if ( getmessage() == 1 )
+		{
+			initialize(this)
+		}
+
+		if ( getmessage() == 2 )
+		{
+			if ( (exists( @netserver@ ) || exists( @netclient@ )) && exists( @chat@ ) )
+			{
+				deactivate(@chat@o_chat_box)
+				deactivate(@chat@o_chat_entry)
+				@chat@namemech_flag = 1
+				@chat@chat_is_on = false
+			}
+		}
+
+		int selected_mech
+		if ( getmessage() == 3 )
+		{
+			callback($$ML_CallbackHandler$$, MLDataSetupMechSelection, o_chassis.o_availmechsdroplist.list_item[], o_chassis.o_availmechsdroplist.mech_status[], selected_mech)
+			initialize(o_chassis)
+		}
+	}
+
+	GUI_DESTROY
+	{
+		unfocus
+	}
+}
+
+
+s_tonnagedisplay
+{
+	GUI_CREATE
+	{
+		string label
+		float value = 0
+		int id = 0
+		int locx = 0
+		int locy = 0
+
+		region = 0, 0 to 0, 0
+
+		framerate = 10
+
+		int label_color = packcolor(255, 255, 255, 255)
+		int num_color = packcolor(255, 255, 255, 255)
+	}
+
+	GUI_INIT
+	{
+		region = locx, locy to locx + 100, locy + 32
+	}
+
+	GUI_MAILBOX
+	{
+		if value > 10
+		{
+			num_color = packcolor(255, 255, 255, 255)
+		}
+		if value < 10 && value > 5
+		{
+			num_color = packcolor(255, 255, 0, 255)
+		}
+		if value <= 5 && value > 0
+		{
+			num_color = packcolor(255, 125, 0, 255)
+		}
+		if value == 0 or value < 0
+		{
+			num_color = packcolor(255, 0, 0, 255)
+		}
+	}
+
+	REGION_ENTERED
+	{
+		If (exists(@infobox@))
+		{
+			mail(id, @infobox@)
+		}
+	}
+
+	REGION_EXITED
+	{
+		If (exists(@infobox@))
+		{
+			mail(-1, @infobox@)
+		}
+	}
+
+	GUI_DRAW
+	{
+		print3d_attributes = microStyle8BoldFont, label_color, 1, 1, 1, 0, 0, just_left//was just_right
+//		print3d_attributes = regfont, label_color, 1, 1, 1, 0, 0, just_left//was just_right
+//		print3d_margins = (getresx() - 10) - getprint3dwidth(label), locy to getresx() - 10, locy + 20
+//		print3d_position = (getresx() - 10) - getprint3dwidth(label), locy
+		print3d_position = locx, locy
+		print3d label
+
+		print3d_attributes = microStyle8BoldExtFont, num_color, 1, 1, 1, 0, 0, just_left//was just_right
+//		print3d_attributes = boldfont, num_color, 1, 1, 1, 0, 0, just_left//was just_right
+//		print3d_margins = (getresx() - 10) - 100, locy + 20 to getresx() - 10, locy + 40
+//		print3d_position = (getresx() - 10) - 100, locy + 20
+		print3d_position = locx, locy + 15
+
+		if (value + 0.0001) < 0.1
+		{
+			print3d "0.00"
+		}
+		else
+		{
+			print3d value
+		}
+	}
+}
+
+s_statlines
+{
+	GUI_CREATE
+	{
+		location = 0, 0, 10
+		region = location.x, location.y to location.x + 100, location.y + 27
+
+		int stat_val = 0
+		int	stat_color = packcolor (0,0,0,255)
+		string label
+
+		int id = 0
+	}
+
+	REGION_ENTERED
+	{
+		if exists(@infobox@))
+		{
+			mail(id, @infobox@)
+		}
+	}
+
+	REGION_EXITED
+	{
+		if exists(@infobox@))
+		{
+			mail(-1, @infobox@)
+		}
+	}
+
+	GUI_MAILBOX
+	{
+		stat_val = getmessage()
+		if (stat_val > 100)
+			stat_val = 100
+
+		if (stat_val >= 0) and (stat_val < 35)
+		{
+			stat_color = packcolor (200,0,0,150)
+		}
+		else
+		if (stat_val >= 35) and (stat_val < 70)
+		{
+			stat_color = packcolor (200,200,0,150)
+		}
+		else
+		if (stat_val >= 70) and (stat_val <= 100)
+		{
+			stat_color = packcolor (0,200,0,150)
+		}
+	}
+
+	GUI_DRAW
+	{
+		print3d_attributes = regfont, 0xffffffff, 1, 1, 1, 0, 0
+		print3d_margins = location.x, location.y to location.x + getprint3dwidth(label), location.y + 30
+		print3d_position = location.x, location.y
+		print3d label
+
+		setpencolor(stat_color)
+		drawrect location.x, location.y + 18 to location.x + stat_val, location.y + 25
+		setpencolor(0xefdeefff)
+		drawline location.x, location.y + 25 to location.x + 100, location.y + 25
+		drawline location.x, location.y + 17 to location.x, location.y + 25
+		drawline location.x + 10, location.y + 20 to location.x + 10, location.y + 25
+		drawline location.x + 20, location.y + 20 to location.x + 20, location.y + 25
+		drawline location.x + 30, location.y + 20 to location.x + 30, location.y + 25
+		drawline location.x + 40, location.y + 20 to location.x + 40, location.y + 25
+		drawline location.x + 50, location.y + 17  to location.x + 50, location.y + 25
+		drawline location.x + 60, location.y + 20 to location.x + 60, location.y + 25
+		drawline location.x + 70, location.y + 20 to location.x + 70, location.y + 25
+		drawline location.x + 80, location.y + 20 to location.x + 80, location.y + 25
+		drawline location.x + 90, location.y + 20 to location.x + 90, location.y + 25
+		drawline location.x + 100, location.y + 17 to location.x + 100, location.y + 25
+	}
+}
+
+tabs
+{
+	GUI_CREATE
+	{
+		int tabsx = 12
+		int tabsy = 17 + 20
+
+		int total_buttons = 3
+		int i
+		object o_radiobutton[3]
+		for(i = 0; i < total_buttons; i++)
+		{
+			o_radiobutton[i]				= s_multistatepanetoggle
+			o_radiobutton[i].location		= 10 + (i * 104), 34, 10
+			o_radiobutton[i].file			= GPATH "4state_tabs.tga"
+			o_radiobutton[i].gFont3d		= FPATH localize$( IDS_MICROSTYLE9BOLD )
+			o_radiobutton[i].total_states	= 4
+		}
+		o_radiobutton[0].text				= localize$(IDS_ML_TAB_CHASSIS)
+		o_radiobutton[0].id					= 157
+		o_radiobutton[1].text				= localize$(IDS_ML_TAB_WEAPONS)
+		o_radiobutton[1].id					= 158
+		o_radiobutton[2].text				= localize$(IDS_ML_TAB_ARMOR)
+		o_radiobutton[2].id					= 159
+
+		for(i = 0; i < total_buttons; i++)
+		{
+			initialize(o_radiobutton[i])
+		}
+
+		mail(2, o_radiobutton[0])
+
+		int on_tab = 0
+	}
+
+	GUI_INIT
+	{
+		for(i = 0; i < total_buttons; i++)
+		{
+			initialize(o_radiobutton[i])
+		}
+	}
+
+	GUI_DRAW
+	{
+		setpencolor(0, 0, 0, 150)
+		drawrect tabsx - 1, tabsy + 28 to tabsx + 307, tabsy + 470
+		drawrect tabsx - 1, tabsy to tabsx + 99, tabsy + 28
+		drawrect tabsx + 103, tabsy to tabsx + 203, tabsy + 28
+		drawrect tabsx + 207, tabsy to tabsx + 307, tabsy + 28
+
+		setpencolor (0xffffffff)
+		drawline tabsx - 2, tabsy - 1 to tabsx - 2, 509
+		drawline 110, 65 to 116, 65
+		drawline 214, 65 to 220, 65
+
+		setpencolor (0xffbbbbcc)
+		drawline tabsx -1, tabsy - 1 to tabsx - 1, 509
+		drawline 318, tabsy - 1 to 318, 509
+		drawline 11, 508 to 319, 508
+		drawline 110, 66 to 116, 66
+		drawline 214, 66 to 220, 66
+
+		setpencolor (0xff777777)
+		drawline 319, tabsy - 1 to 319, 509
+		drawline 10, 509 to 319, 509
+	}
+
+	GUI_MAILBOX
+	{
+		int i
+		for(i = 0; i < total_buttons; i++)
+		{
+			if (sender != o_radioButton[i])
+			{
+				// turn off every button but the one just received
+				mail(1, o_radioButton[i])
+			}
+		}
+
+		// Repair button only shows up for chassis tab
+		if ($$m_isCampaign$$ == 1)
+			deactivate( o_repairbutton )
+
+		if sender == o_radiobutton[0]
+		{
+			activate(o_chassis)
+			deactivate(o_newmech)
+			deactivate(o_weapons)
+			deactivate(o_armor)
+			activate(o_restorebutton)
+			activate(o_FreeMarket_button)
+			// Repair button only shows up for chassis tab
+			if ($$m_isCampaign$$ == 1)
+			{
+				activate( o_repairbutton )
+			}
+			callback($$ML_CallbackHandler$$, MLInitChassisTab)
+			on_tab = 0
+		}
+
+		if sender == o_radiobutton[1]
+		{
+			deactivate(o_chassis)
+			deactivate(o_newmech)
+			activate(o_weapons)
+			deactivate(o_restorebutton)
+			activate(o_FreeMarket_button)
+			if $$m_isCampaign$$ == 1
+			{
+			initialize(o_weapons)
+			}
+
+			deactivate(o_armor)
+			callback($$ML_CallbackHandler$$, MLInitWeaponsTab)
+			on_tab = 1
+		}
+
+		if sender == o_radiobutton[2]
+		{
+			deactivate(o_chassis)
+			deactivate(o_newmech)
+			deactivate(o_weapons)
+			deactivate(o_restorebutton)
+			activate(o_FreeMarket_button)
+			activate(o_armor)
+			callback($$ML_CallbackHandler$$, MLInitArmorTab)
+			on_tab = 2
+		}
+
+		if ( exists ( @Mechbayrepair@ ) )
+		{
+			script_end "Mechbayrepair.script"
+		}
+
+	}
+}
+
+overlay
+{
+	GUI_CREATE
+	{
+		region = 0, 0 to getresx(), getresy()
+
+		int alpha_val
+		int fadeout
+	}
+
+	GUI_INIT
+	{
+		alpha_val = 0
+		fadeout = false
+	}
+
+	GUI_EXECUTE
+	{
+		if fadeout == true
+		{
+			if alpha_val > 0
+			{
+				alpha_val = alpha_val - 5
+				if alpha_val <= 0
+				{
+					alpha_val = 0
+					deactivate(this)
+				}
+			}
+		}
+		else
+		if alpha_val < 150
+		{
+			alpha_val += 5
+			if alpha_val >= 150
+			{
+				alpha_val = 150
+			}
+		}
+	}
+
+	GUI_ACTIVATE
+	{
+	}
+
+	GUI_DEACTIVATE
+	{
+		alpha_val = 0
+		fadeout = false
+	}
+
+	GUI_DRAW
+	{
+		setpencolor(0, 0, 0, alpha_val)
+		drawrect 0, 0 to getresx(), getresy()
+	}
+}
+
+region_block
+{
+	GUI_CREATE
+	{
+		int region_width
+		int region_height
+		int id
+
+		region = 0,0 to 0,0
+	}
+
+	GUI_INIT
+	{
+		region = 0, 0 to region_width,region_height
+	}
+
+	REGION_ENTERED
+	{
+		If (exists(@infobox@))
+		{
+			mail(id, @infobox@)
+		}
+	}
+
+	REGION_EXITED
+	{
+		If (exists(@infobox@))
+		{
+			mail(-1, @infobox@)
+		}
+	}
+}
+
+exitconfirm
+{
+	GUI_CREATE
+	{
+		sound btnTriggeredSound		= APATH "sfx_button5.wav"
+
+		int boxx1 = 225
+		int boxx2 = 575
+		int boxy1 = 175
+		int boxy2 = 425
+
+		object o_Yes		= s_multistatepane
+		o_Yes.file			= WPATH "button_reg_138x23_3state.tga"
+		o_Yes.total_states	= 3
+		o_Yes.text			= localize$(IDS_GN_YES)
+		o_Yes.location		= boxx1 + 30, boxy2 - 55, 155
+		o_Yes.gFont3d		= FPATH localize$(IDS_F_ML_BUTTON)
+		o_Yes.id			= 195
+		initialize(o_Yes)
+
+		object o_No			= s_multistatepane
+		o_No.file			= WPATH "button_reg_138x23_3state.tga"
+		o_No.total_states	= 3
+		o_No.text			= localize$(IDS_GN_NO)
+		o_No.location		= boxx1 + 178, boxy2 - 55, 155
+		o_No.gFont3d		= FPATH localize$(IDS_F_ML_BUTTON)
+		o_No.id				= 196
+		initialize(o_No)
+
+		pane p_dialog = GPATH "dialog_350x250.tga"
+
+		int grp_array_size = 30
+		int grp_typearray[grp_array_size]
+		int grp_id_array[grp_array_size]
+		int grp_loc_array[grp_array_size]
+		int grp_group1_array[grp_array_size]
+		int grp_group2_array[grp_array_size]
+		int grp_group3_array[grp_array_size]
+		int grp_group4_array[grp_array_size]
+		int grp_group5_array[grp_array_size]
+		int grp_group6_array[grp_array_size]
+		int grp_num_weapons
+
+		string title		= localize$(IDS_ML_SAVE_CHANGES)
+		string message		= localize$(IDS_ML_SAVE_CHANGES_DESCRIPTION)
+	}
+
+	GUI_INIT
+	{
+		region = boxx1, boxy1 to boxx2, boxy2
+	}
+
+	GUI_ACTIVATE
+	{
+		activate(o_Yes)
+		activate(o_No)
+	}
+
+	GUI_DEACTIVATE
+	{
+		deactivate(o_Yes)
+		deactivate(o_No)
+	}
+
+	GUI_DRAW
+	{
+		render p_dialog, boxx1, boxy1
+
+		setpencolor(0xaaffffff)
+		drawline boxx1 + 32, boxy2 - 70 to boxx2 - 32, boxy2 - 70
+		drawline boxx1 + 32, boxy2 - 69 to boxx1 + 47, boxy2 - 69
+		drawline boxx1 + 32, boxy2 - 71 to boxx1 + 47, boxy2 - 71
+		drawline boxx2 - 47, boxy2 - 69 to boxx2 - 32, boxy2 - 69
+		drawline boxx2 - 47, boxy2 - 71 to boxx2 - 32, boxy2 - 71
+
+		print3d_attributes = boldfont, 0xffffffff, 1, 1, 1, 0, 0, just_center
+		print3d_margins = boxx1, boxy1 to boxx2, boxy2
+		print3d_position = boxx1, boxy1 + 6
+		print3d title
+
+		print3d_attributes = regfont, 0xffffffff, 1, 1, 1, 0, 0
+		print3d_margins = boxx1 + 32, boxy1 + 50 to boxx2 - 20, boxy2
+		print3d_position = boxx1 + 32, boxy1 + 50
+		print3d message
+	}
+
+	GUI_MAILBOX
+	{
+		int WORKING_MECH = -1
+		if sender == o_No
+		{
+			play btnTriggeredSound,1
+			mail ( nMSG_AUX_OP_A, parent ) //see if any mechs are repairing (sets the variable appropriately)
+			if (parent.someMechIsRepairingFlag == 1)
+			{
+				if ($$m_isCampaign$$ == 1)
+				{
+					deactivate(this)
+					mail( nMSG_ADVANCE_TIME_DLG, @Mechbay_main@o_mainui )
+				}
+			}
+			else
+			{
+				if (parent.tempRepairStatusFlag == true)
+				{
+					spew "flag set to false A"
+					parent.tempRepairStatusFlag = false
+				}
+				spew "NO BUTTON"
+				callback($$ML_CallbackHandler$$, MLRestore)
+				unfocus
+
+
+				if exists(@infobox@)
+				{
+					script_end "infobox.script"
+				}
+
+				callback($$ML_CallbackHandler$$, MLExit)
+				callback($$Shell_CallbackHandler$$, ShellClearMechLabScreen)
+				if exists(@SHELL@)
+				{
+					mail (@SHELL@lastScreen[@SHELL@lastScreenDepth], @MECHBAY@screen) //pass the value of the next screen to load
+					@SHELL@lastScreenDepth--
+					@SHELL@currentScreen = -1  //this is a nothing screen to get it to kill the other script, which in turn will load the next appropriate screen after ending this script
+				}
+				if exists(@NetServer@)
+				{
+					@NetServer@currentScreen = MULTIPLAYER_SCREEN
+				}
+				if exists(@NetClient@)
+				{
+					@NetClient@currentScreen = MULTIPLAYER_SCREEN
+				}
+			}
+		}
+
+		if sender == o_Yes
+		{
+			play btnTriggeredSound,1
+			spew "YES BUTTON A"
+			callback($$ML_CallbackHandler$$, MLDataGetWeaponGroups, grp_typearray[], grp_id_array[], grp_loc_array[], grp_group1_array[], grp_group2_array[], grp_group3_array[], grp_group4_array[], grp_group5_array[], grp_group6_array[], grp_num_weapons, grp_array_size)
+
+			if parent.grouped == 0 && grp_num_weapons > 0
+			{
+				deactivate(this)
+
+				parent.o_groupweapons.close_flag = 1
+				activate(o_overlay)
+				initialize(o_groupweapons)
+				activate(o_groupweapons)
+			}
+			else
+			{
+
+				unfocus
+				if exists(@infobox@)
+				{
+					script_end "infobox.script"
+				}
+
+				if (parent.tempRepairStatusFlag == true)
+				{
+					callback($$RepairMech$$, WORKING_MECH)
+					parent.tempRepairStatusFlag = false
+					spew "flag set to false B"
+				}
+
+				callback($$ML_CallbackHandler$$, MLSave)
+				mail ( nMSG_AUX_OP_A, parent ) //see if any mechs are repairing (sets the variable appropriately)
+
+				if (parent.someMechIsRepairingFlag == 1)
+				{
+					deactivate(this)
+					if ($$m_isCampaign$$ == 1)
+					{
+						mail( nMSG_ADVANCE_TIME_DLG, @Mechbay_main@o_mainui )
+					}
+					callback($$ML_CallbackHandler$$, MLSave)
+				}
+				else
+				{
+					callback($$ML_CallbackHandler$$, MLExit)
+					callback($$Shell_CallbackHandler$$, ShellClearMechLabScreen)
+					if exists(@SHELL@)
+					{
+						mail (@SHELL@lastScreen[@SHELL@lastScreenDepth], @MECHBAY@screen) //pass the value of the next screen to load
+						@SHELL@lastScreenDepth--
+						@SHELL@currentScreen = -1  //this is a nothing screen to get it to kill the other script, which in turn will load the next appropriate screen after ending this script
+					}
+					if exists(@NetServer@)
+					{
+						@NetServer@currentScreen = MULTIPLAYER_SCREEN
+					}
+					if exists(@NetClient@)
+					{
+						@NetClient@currentScreen = MULTIPLAYER_SCREEN
+					}
+				}
+			}
+		}
+	}
+}
+
+
+help_region
+{
+	GUI_CREATE
+	{
+		int rwidth
+		int rheight
+
+		int id		= -1
+	}
+
+	GUI_INIT
+	{
+		region		= 0, 0 to rwidth, rheight
+	}
+
+	REGION_ENTERED
+	{
+		if exists(@infobox@))
+		{
+			mail(id, @infobox@)
+		}
+	}
+
+	REGION_EXITED
+	{
+		if exists(@infobox@))
+		{
+			mail(-1, @infobox@)
+		}
+	}
+}
+
+groupweapons
+{
+	GUI_CREATE
+	{
+		sound btnTriggeredSound = APATH "sfx_button5.wav"
+
+		int boxx1 = 15
+		int boxx2 = boxx1 + 500
+		int boxy1 = 50
+		int boxy2 = boxy1 + 450
+
+		int grp_array_size = 30
+		int grp_typearray[grp_array_size]
+		int grp_id_array[grp_array_size]
+		int grp_loc_array[grp_array_size]
+		int grp_group1_array[grp_array_size]
+		int grp_group2_array[grp_array_size]
+		int grp_group3_array[grp_array_size]
+		int grp_group4_array[grp_array_size]
+		int grp_group5_array[grp_array_size]
+		int grp_group6_array[grp_array_size]
+		int grp_num_weapons
+
+		int set_grp1_array[grp_array_size]
+		int set_grp2_array[grp_array_size]
+		int set_grp3_array[grp_array_size]
+		int set_grp4_array[grp_array_size]
+		int set_grp5_array[grp_array_size]
+		int set_grp6_array[grp_array_size]
+
+		object o_ok				= s_multistatepane
+		o_ok.file				= WPATH "button_reg_138x23_3state.tga"
+		o_ok.total_states		= 3
+		o_ok.text				= localize$(IDS_GN_OK)
+		o_ok.location			= boxx1 + 28, boxy2 - 55, 75
+		o_ok.gFont3d			= FPATH localize$(IDS_F_ML_BUTTON)
+		o_ok.id					= 230
+		initialize(o_ok)
+
+		object o_restore		= s_multistatepane
+		o_restore.file			= WPATH "button_reg_138x23_3state.tga"
+		o_restore.total_states	= 3
+		o_restore.text			= localize$(IDS_GN_RESTORE)
+		o_restore.location		= boxx2 - 171, boxy2 - 55, 75
+		o_restore.gFont3d		= FPATH localize$(IDS_F_ML_BUTTON)
+		o_restore.id			= 231
+		initialize(o_restore)
+
+		// begin multicolumn listbox
+
+		callback($$ML_CallbackHandler$$, MLDataGetWeaponGroups, grp_typearray[], grp_id_array[], grp_loc_array[], grp_group1_array[], grp_group2_array[], grp_group3_array[], grp_group4_array[], grp_group5_array[], grp_group6_array[], grp_num_weapons, grp_array_size)
+
+		object o_weaponlist					= s_mc_listbox
+		o_weaponlist.location				= boxx1 + 30, boxy1 + 120, 75
+
+		o_weaponlist.boxFont3d				= FPATH localize$(IDS_F_ML_LABEL)		//MUST BE INITIALIZED
+		o_weaponlist.itemWidth				= 420												//MUST BE INITIALIZED
+		o_weaponlist.itemHeight				= 1								//This refers to the height of a step (or scroll distance in pixels) defined by you.  NOT the height of all items
+		o_weaponlist.itemHeight_padding		= 3
+		o_weaponlist.num_of_columns			= 8											//MUST BE INITIALIZED
+		o_weaponlist.column_header_height	= 20
+		o_weaponlist.max_displayed			= 260							// max number of itemheight's.  maz_displayed*itemheight = height of listbox //MUST BE INITIALIZED
+		o_weaponlist.uniform_item_height	= 0
+		o_weaponlist.SelectedHighlightColor	= packcolor (0, 0, 0, 0)	//CAN BE INITIALIZED
+
+		o_weaponlist.labelFont3d			= FPATH localize$(IDS_F_ML_LABEL)		//CAN BE INITIALIZED
+		o_weaponlist.offsetLabel			= 0,-18											//CAN BE INITIALIZED offsetLabel of text from button = 0,-25
+		o_weaponlist.buttonwidth			= 16												//CAN BE INITIALIZED
+
+		o_weaponlist.first_delay			= 10								//time delay value n/60; for the buttons
+		o_weaponlist.second_delay			= 3							//time delay value n/60; for the buttons
+
+		o_weaponlist.column[0].location.x	= 5
+		o_weaponlist.column[1].location.x	= 200
+		o_weaponlist.column[2].location.x	= 300
+		o_weaponlist.column[3].location.x	= 320
+		o_weaponlist.column[4].location.x	= 340
+		o_weaponlist.column[5].location.x	= 360
+		o_weaponlist.column[6].location.x	= 380
+		o_weaponlist.column[7].location.x	= 400
+
+		int g
+		for g = 0; g < o_weaponlist.num_of_columns; g++
+		{
+			o_weaponlist.column[g].fontcolor = packcolor(255,255,255,255)
+		}
+
+		o_weaponlist.offsetx[1] = 5
+
+		o_weaponlist.column[0].fontAlignment = just_left
+		o_Weaponlist.column[1].fontAlignment = just_left
+
+		for g = 2; g < o_weaponlist.num_of_columns; g++
+		{
+			o_weaponlist.column[g].checked				= true
+			o_weaponlist.column[g].pic_file				= WPATH "checkbox_15x15_3state.tga"
+			o_weaponlist.column[g].checkbox_num_of_states = 3
+			o_weaponlist.column[g].fontAlignment			= just_left
+		}
+
+		o_weaponlist.checkbox_offsety = 0
+
+		int greatest_x
+		int greatest_y
+
+		int k
+		for k = 0; k < o_weaponlist.list_size; k++
+		{
+		        // setting a pane to "volatile" makes it dynamic -dsilverman
+			o_weaponlist.column[0].list_icon[k] = MB_GPATH "weapon_0.tga",1,volatile
+			alphamode(o_weaponlist.column[0].list_icon[k]) = am_alpha_alphainvalpha
+
+			if exists(o_weaponlist.column[0].list_icon[k])
+			{
+				if getwidth(o_weaponlist.column[0].list_icon[k]) > greatest_x
+					greatest_x = getwidth(o_weaponlist.column[0].list_icon[k])
+
+				if getheight(o_weaponlist.column[0].list_icon[k]) > greatest_y
+					greatest_y = getheight(o_weaponlist.column[0].list_icon[k])
+			}
+
+		}
+
+		if greatest_x > 0 && greatest_y > 0
+			bitmap_create black = greatest_x,greatest_y  //comment out if you don't have any images
+		else
+			bitmap_create black = 20,20  //makes something for now
+
+		initialize(o_weaponlist)
+
+		framerate=10
+
+		pane p_dialog = GPATH "dialog_500x450.tga"
+
+		int save_flag		// flag to see if the save or close buttons were clicked
+		int close_flag
+
+
+		int change_mech		// flag for changing 'mechs
+		int new_mech		// flag for creating new 'mechs
+
+		string displaytext
+	}
+
+	GUI_INIT
+	{
+
+		callback($$ML_CallbackHandler$$, MLDataGetWeaponGroups, grp_typearray[], grp_id_array[], grp_loc_array[], grp_group1_array[], grp_group2_array[], grp_group3_array[], grp_group4_array[], grp_group5_array[], grp_group6_array[], grp_num_weapons, grp_array_size)
+
+		region = boxx1, boxy1 to boxx2, boxy2
+
+		o_weaponlist.list_size = grp_num_weapons
+
+		int g
+		for g = 0; g < o_weaponlist.list_size; g++
+		{
+			o_weaponlist.column[0].list_item[g] = parent.o_weapons.weapon_names[grp_typearray[g]]
+			if (grp_loc_array[g] < 8)
+				o_weaponlist.column[1].list_item[g] = parent.o_weapons.location_label[grp_loc_array[g]]
+			else
+			{
+				if (grp_loc_array[g] == 8)
+					o_weaponlist.column[1].list_item[g] = parent.o_weapons.special1_label[parent.o_weapons.mech_id]
+
+				if (grp_loc_array[g] == 9)
+					o_weaponlist.column[1].list_item[g] = parent.o_weapons.special2_label[parent.o_weapons.mech_id]
+			}
+			o_weaponlist.list_order[g] = g
+		}
+		o_weaponlist.start_of_list = 0
+		initialize(o_weaponlist)
+
+		for g = 0; g < o_weaponlist.list_size; g++
+		{
+			o_weaponlist.column[2].o_checkbox[g].check = grp_group1_array[g]
+			o_weaponlist.column[3].o_checkbox[g].check = grp_group2_array[g]
+			o_weaponlist.column[4].o_checkbox[g].check = grp_group3_array[g]
+			o_weaponlist.column[5].o_checkbox[g].check = grp_group4_array[g]
+			o_weaponlist.column[6].o_checkbox[g].check = grp_group5_array[g]
+			o_weaponlist.column[7].o_checkbox[g].check = grp_group6_array[g]
+		}
+
+		focus(o_weaponlist)
+
+		for int f = 0; f < (o_weaponlist.num_of_columns); f++
+		{
+			o_weaponlist.column[f].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		}
+
+		o_weaponlist.column[0].o_header.s_text = localize$(IDS_ML_WP_WEAPONNAME)
+		o_weaponlist.column[1].o_header.s_text = localize$(IDS_ML_AR_LOCATION)
+		o_weaponlist.column[2].o_header.s_text = "1"
+		o_weaponlist.column[3].o_header.s_text = "2"
+		o_weaponlist.column[4].o_header.s_text = "3"
+		o_weaponlist.column[5].o_header.s_text = "4"
+		o_weaponlist.column[6].o_header.s_text = "5"
+		o_weaponlist.column[7].o_header.s_text = "6"
+
+		if save_flag == 1 or close_flag == 1
+		{
+			displaytext = localize$(IDS_ML_GROUP_DISPLAY1)
+		}
+		else
+		{
+			displaytext = localize$(IDS_ML_GROUP_DISPLAY2)
+		}
+	}
+
+	GUI_ACTIVATE
+	{
+		activate(o_ok)
+		activate(o_restore)
+		activate(o_weaponlist)
+
+		initialize(this)
+	}
+
+	GUI_DEACTIVATE
+	{
+		deactivate(o_ok)
+		deactivate(o_restore)
+		deactivate(o_weaponlist)
+		unfocus(o_weaponlist)
+	}
+
+	GUI_EXECUTE
+	{
+		int i
+		for i = 0; i < o_weaponlist.list_size; i++
+		{
+			set_grp1_array[i]	= o_weaponlist.column[2].o_checkbox[i].check
+			set_grp2_array[i]	= o_weaponlist.column[3].o_checkbox[i].check
+			set_grp3_array[i]	= o_weaponlist.column[4].o_checkbox[i].check
+			set_grp4_array[i]	= o_weaponlist.column[5].o_checkbox[i].check
+			set_grp5_array[i]	= o_weaponlist.column[6].o_checkbox[i].check
+			set_grp6_array[i]	= o_weaponlist.column[7].o_checkbox[i].check
+		}
+	}
+
+	GUI_DRAW
+	{
+		render p_dialog, boxx1, boxy1
+
+		print3d_attributes		= boldfont, 0xffffffff, 1, 1, 1, 0, 0, just_center
+		print3d_margins			= boxx1, boxy1 to boxx2, boxy2
+		print3d_position		= boxx1, boxy1 + 6
+		print3d localize$(IDS_ML_WP_DEFINEGROUPS)
+
+		print3d_attributes		= regfont, 0xffffffff, 1, 1, 1, 0, 0
+		print3d_margins			= boxx1 + 30, boxy1 + 100 to boxx2 - 30, boxy1 + 120
+		print3d_position		= boxx1 + 30, boxy1 + 100
+		print3d localize$(IDS_ML_WP_INSTALLEWEAPONS)
+
+		print3d_attributes		= regfont, 0xffffffff, 1, 1, 1, 0, 0
+		print3d_margins			= boxx1 + 30, boxy1 + 50 to boxx2 - 30, boxy1 + 90
+		print3d_position		= boxx1 + 30, boxy1 + 50
+		print3d displaytext
+	}
+
+	GUI_MAILBOX
+	{
+		int WORKING_MECH = -1
+		if sender == o_ok
+		{
+			play btnTriggeredSound,1
+
+			callback($$ML_CallbackHandler$$, MLSetAllWeaponGroups, set_grp1_array[], set_grp2_array[], set_grp3_array[], set_grp4_array[], set_grp5_array[], set_grp6_array[], grp_num_weapons)
+			parent.grouped = 1		// don't show group weapons dialog upon exit
+
+			parent.o_overlay.fadeout = true
+			deactivate(this)
+
+			if save_flag == 1
+			{
+				save_flag = 0
+
+				callback($$ML_CallbackHandler$$, MLSave)
+				parent.just_saved = true
+			}
+
+			if close_flag == 1
+			{
+				if (parent.tempRepairStatusFlag == true)
+				{
+					callback($$RepairMech$$, WORKING_MECH)
+					parent.tempRepairStatusFlag = false
+					spew "flag set to false B"
+				}
+
+				mail ( nMSG_AUX_OP_A, parent ) //see if any mechs are repairing (sets the variable appropriately)
+				if (parent.someMechIsRepairingFlag == 1)
+				{
+					if ($$m_isCampaign$$ == 1)
+					{
+						mail( nMSG_ADVANCE_TIME_DLG, @Mechbay_main@o_mainui )
+					}
+					callback($$ML_CallbackHandler$$, MLSave)
+				}
+				else
+				{
+					unfocus
+					if exists(@infobox@)
+					{
+						script_end "infobox.script"
+					}
+
+					callback($$ML_CallbackHandler$$, MLSave)
+					callback($$ML_CallbackHandler$$, MLExit)
+					callback($$Shell_CallbackHandler$$, ShellClearMechLabScreen)
+					if exists(@SHELL@)
+					{
+						mail (@SHELL@lastScreen[@SHELL@lastScreenDepth], @MECHBAY@screen) //pass the value of the next screen to load
+						@SHELL@lastScreenDepth--
+						@SHELL@currentScreen = -1  //this is a nothing screen to get it to kill the other script, which in turn will load the next appropriate screen after ending this script
+					}
+					if exists(@NetServer@)
+					{
+						@NetServer@currentScreen = MULTIPLAYER_SCREEN
+					}
+					if exists(@NetClient@)
+					{
+						@NetClient@currentScreen = MULTIPLAYER_SCREEN
+					}
+				}
+			}
+
+			if change_mech == 1
+			{
+				change_mech = 0
+
+				//if (parent.tempRepairStatusFlag == true)
+				//{
+				//	callback($$RepairMech$$)
+				//	parent.tempRepairStatusFlag = false
+				//}
+				callback($$ML_CallbackHandler$$, MLSave)
+				parent.just_saved = true
+
+				initialize(parent.o_chassis)
+				activate(parent.o_chassis)
+				initialize(parent)
+			}
+
+			if new_mech == 1
+			{
+				new_mech = 0
+
+				//if (parent.tempRepairStatusFlag == true)
+				//{
+				//	callback($$RepairMech$$)
+				//	parent.tempRepairStatusFlag = false
+				//}
+				callback($$ML_CallbackHandler$$, MLSave)
+				parent.just_saved = true
+
+				activate(parent.o_chassis.o_overlay)
+				initialize(parent.o_chassis.o_newmech)
+				activate(parent.o_chassis.o_newmech)
+			}
+		}
+
+		if sender == o_restore
+		{
+			play btnTriggeredSound,1
+			activate(this)
+		}
+	}
+}
+
+
+comstar_tabbed_pages
+{
+	GUI_CREATE
+	{
+		// "public"
+		position _origin 	= 0, 0, 0
+		int nOfTabs    				= 2
+		if ( exists( @netserver@ ) || exists( @netclient@ ) )
+		{
+			nOfTabs    				= 3
+		}
+		int _height
+		int _width
+
+		// "private"
+		object o_radiobutton[3]
+		object o_chassisInfo	= chassis_info
+
+		int i
+		for(i = 0; i < nOfTabs; i++)
+		{
+			o_radiobutton[i]		= clickable_label
+			o_radiobutton[i]._width	   	= 95
+			o_radiobutton[i]._justification = just_center
+		}
+
+		string COMSTAR_SELECTED = localize$( IDS_COMLABEL_COMSTAR_SELECTED )
+		string COMSTAR_UNSELECTED = localize$( IDS_COMLABEL_COMSTAR )
+		string CHASSIS_SELECTED = localize$( IDS_COMLABEL_CHASSIS_SELECTED )
+		string CHASSIS_UNSELECTED = localize$( IDS_COMLABEL_CHASSIS )
+		string CHAT_SELECTED = localize$( IDS_COMLABEL_CHAT_SELECTED )
+		string CHAT_UNSELECTED = localize$( IDS_COMLABEL_CHAT )
+
+		o_radiobutton[0].text				= COMSTAR_SELECTED
+		o_radiobutton[1].text				= CHASSIS_UNSELECTED
+		if ( exists( @netserver@ ) || exists( @netclient@ ) )
+		{
+			o_radiobutton[2].text				= CHAT_UNSELECTED
+		}
+	}
+
+	GUI_INIT
+	{
+		for(i = 0; i < nOfTabs; i++)
+		{
+			o_radiobutton[i]._origin  = _origin.x + (i * 104), _origin.y, _origin.z
+			// o_radiobutton[i]._font = microStyle8BoldExt
+			initialize(o_radiobutton[i])
+			activate( o_radiobutton[i] )
+		}
+
+		o_chassisInfo._origin = _origin.x, _origin.y + 10, _origin.z
+		initialize( o_chassisInfo )
+		deactivate( o_chassisInfo )
+	}
+
+	GUI_MAILBOX
+	{
+		o_radiobutton[0].text = COMSTAR_UNSELECTED
+		o_radiobutton[1].text = CHASSIS_UNSELECTED
+
+		if ( exists( @netserver@ ) || exists( @netclient@ ) )
+		{
+			o_radiobutton[2].text = CHAT_UNSELECTED
+			if ( exists( @chat@ ) )
+			{
+				deactivate(@chat@o_chat_box)
+				deactivate(@chat@o_chat_entry)
+				@chat@namemech_flag = 1
+				@chat@chat_is_on = false
+			}
+		}
+
+		@infobox@enabled = false
+		deactivate( o_chassisInfo )
+
+		if sender == o_radiobutton[0]
+		{
+			o_radiobutton[0].text = COMSTAR_SELECTED
+			@infobox@enabled = true
+		}
+
+		if sender == o_radiobutton[1]
+		{
+			o_radiobutton[1].text = CHASSIS_SELECTED
+			activate( o_chassisInfo )
+		}
+
+		if ( exists( @netserver@ ) || exists( @netclient@ ) )
+		{
+			if sender == o_radiobutton[2]
+			{
+				o_radiobutton[2].text = CHAT_SELECTED
+
+				if ( exists( @chat@ ) )
+				{
+					activate(@chat@o_chat_box)
+					activate(@chat@o_chat_entry)
+					@chat@namemech_flag = 0
+					@chat@chat_is_on = true
+				}
+				if exists(@infobox@)
+				{
+					mail(-1, @infobox@)
+				}
+			}
+		}
+
+		for ( i=0 ; i<nOfTabs; i++ )
+		{
+			initialize( o_radiobutton[ i ] )
+		}
+	}
+
+}
+
+
+chassis_info
+{
+	GUI_CREATE
+	{
+		position _origin 	= 0, 0, 0
+		int _height
+		int _width
+		int	_lastMechSelected = -1
+
+		// The static labels
+		object o_techType 	   		= static_label
+		object o_chassisClass 		= static_label
+		object o_acceleration 		= static_label
+		object o_deceleration 		= static_label
+		object o_turnRate			= static_label
+		object o_torsoTwist 		= static_label
+		object o_torsoTwistSpeed	= static_label
+
+		// The values associated with each label
+		object o_value_techType 	   		= static_label
+		object o_value_chassisClass 		= static_label
+		object o_value_acceleration 		= static_label
+		object o_value_deceleration 		= static_label
+		object o_value_turnRate				= static_label
+		object o_value_torsoTwist 			= static_label
+		object o_value_torsoTwistSpeed		= static_label
+	}
+
+	GUI_INIT
+	{
+		int row1y 		= 12
+		int row2y 		= 30
+		int row3y 		= 48
+		int column1x 	= 5
+		int column2x 	= 220
+		int column3x 	= 440
+		// int column4x 	= 610
+		int value_offset = 25
+		int	_labelWidth = 170
+
+		float acceleration  	  	= 0.0
+		float deacceleration      	= 0.0
+		float turn_rate           	= 0.0
+		float torso_twist         	= 0.0
+		float twist_speed         	= 0.0
+		int tech_type           	= 1
+
+		_lastMechSelected = parent.parent.mech_id
+        // bug fix # 4346 - crash when no 'Mech selected
+        if (_lastMechSelected == -1)
+            _lastMechSelected = 0
+
+		callback($$ML_CallbackHandler$$, MLDataSetupGetMechNoEditData, acceleration, deacceleration, turn_rate, torso_twist, twist_speed, tech_type)
+
+
+		o_techType 	   		     	._origin   					= _origin.x + column1x, _origin.y + row1y, _origin.z
+		o_techType 	   		     	._width	   					= _labelWidth
+		o_techType 	   		     	.text	   					= localize$( IDS_TECH )
+		o_techType 	   				._justification  			= just_left
+		o_techType 	   				._textColor 				= COMSTAR_GREEN
+
+
+
+		o_chassisClass 		     	._origin   					= _origin.x + column1x, _origin.y + row2y, _origin.z
+		o_chassisClass 		     	._width	   					= _labelWidth
+		o_chassisClass 		     	.text	   					= localize$( IDS_CLASS )
+		o_chassisClass 	   			._justification 		 	= just_left
+		o_chassisClass 				._textColor 				= COMSTAR_GREEN
+
+
+		o_acceleration 		     	._origin   					= _origin.x + column1x, _origin.y + row3y, _origin.z
+		o_acceleration 		     	._width	   					= _labelWidth
+		o_acceleration 		     	.text	   					= localize$( IDS_ACCELERATION )
+		o_acceleration 	   			._justification 		 	= just_left
+		o_acceleration 				._textColor 				= COMSTAR_GREEN
+
+		o_deceleration 		     	._origin   					= _origin.x + column2x, _origin.y + row1y, _origin.z
+		o_deceleration 		     	._width	   					= _labelWidth
+		o_deceleration 		     	.text	   					= localize$( IDS_DECELERATION )
+		o_deceleration 	   			._justification 		 	= just_left
+		o_deceleration 				._textColor 				= COMSTAR_GREEN
+
+		o_turnRate			     	._origin   					= _origin.x + column2x, _origin.y + row2y, _origin.z
+		o_turnRate			     	._width	   					= _labelWidth
+		o_turnRate			     	.text	   					= localize$( IDS_TURN_RATE )
+		o_turnRate 	   				._justification  			= just_left
+		o_turnRate	 				._textColor 				= COMSTAR_GREEN
+
+		o_torsoTwist 		     	._origin   					= _origin.x + column2x, _origin.y + row3y, _origin.z
+		o_torsoTwist 		     	._width	   					= _labelWidth
+		o_torsoTwist 		     	.text	   					= localize$( IDS_TORSO_TWIST )
+		o_torsoTwist 	   			._justification 		 	= just_left
+		o_torsoTwist 				._textColor 				= COMSTAR_GREEN
+
+		o_torsoTwistSpeed	     	._origin   					= _origin.x + column3x, _origin.y + row1y, _origin.z
+		o_torsoTwistSpeed	     	._width						= _labelWidth
+		o_torsoTwistSpeed	     	.text						= localize$( IDS_TWIST_SPEED )
+		o_torsoTwistSpeed 	   		._justification  			= just_left
+		o_torsoTwistSpeed 			._textColor 				= COMSTAR_GREEN
+
+
+		o_value_techType 	   		._origin				= o_techType._origin
+		o_value_techType 	   		._width					= _labelWidth
+		o_value_techType 	   		.text					= @infobox@chassis_tech[ _lastMechSelected ]
+		o_value_techType 	   		._justification 		= just_right
+		o_value_techType 	   		._textColor 				= COMSTAR_GREEN
+
+		o_value_chassisClass 		._origin  				= o_chassisClass._origin
+		o_value_chassisClass 		._width	  				= _labelWidth
+		o_value_chassisClass 		.text	  				= localize$( mechinfo.mechWeightClassString[ _lastMechSelected ] )
+		o_value_chassisClass 	   	._justification 		= just_right
+		o_value_chassisClass   		._textColor 				= COMSTAR_GREEN
+
+		o_value_acceleration 		._origin				= o_acceleration._origin
+		o_value_acceleration 		._width					= _labelWidth
+		o_value_acceleration 		.fvalue					= acceleration
+		o_value_acceleration 	   	._justification 		= just_right
+		o_value_acceleration 	   	._isNumeric				= true
+		o_value_acceleration 		._textColor 				= COMSTAR_GREEN
+
+		o_value_deceleration 		._origin				= o_deceleration._origin
+		o_value_deceleration 		._width					= _labelWidth
+		o_value_deceleration 		.fvalue					= deacceleration
+		o_value_deceleration 	   	._justification 		= just_right
+		o_value_deceleration 	   	._isNumeric				= true
+		o_value_deceleration		._textColor 				= COMSTAR_GREEN
+
+		o_value_turnRate			._origin				= o_turnRate._origin
+		o_value_turnRate			._width					= _labelWidth
+		o_value_turnRate			.fvalue					= turn_rate
+		o_value_turnRate 	   		._justification 		= just_right
+		o_value_turnRate 	   		._isNumeric				= true
+		o_value_turnRate 	   		._textColor 				= COMSTAR_GREEN
+
+		o_value_torsoTwist 			._origin	  			= o_torsoTwist._origin
+		o_value_torsoTwist 			._width		 			= _labelWidth
+		o_value_torsoTwist 			.fvalue	  				= torso_twist
+		o_value_torsoTwist 	   		._justification 		= just_right
+		o_value_torsoTwist 	   		._isNumeric				= true
+		o_value_torsoTwist 	   		._textColor 				= COMSTAR_GREEN
+
+		o_value_torsoTwistSpeed		._origin				= o_torsoTwistSpeed._origin
+		o_value_torsoTwistSpeed		._width					= _labelWidth
+		o_value_torsoTwistSpeed		.fvalue					= twist_speed
+		o_value_torsoTwistSpeed 	._justification 		= just_right
+		o_value_torsoTwistSpeed 	._isNumeric				= true
+		o_value_torsoTwistSpeed		._textColor 				= COMSTAR_GREEN
+
+		initialize( o_value_techType 	   	)
+		initialize( o_value_chassisClass 	)
+		initialize( o_value_acceleration 	)
+		initialize( o_value_deceleration 	)
+		initialize( o_value_turnRate		)
+		initialize( o_value_torsoTwist 		)
+		initialize( o_value_torsoTwistSpeed	)
+
+		initialize( o_techType 	   	 )
+		initialize( o_chassisClass 	 )
+		initialize( o_acceleration 	 )
+		initialize( o_deceleration 	 )
+		initialize( o_turnRate		 )
+		initialize( o_torsoTwist 	 )
+		initialize( o_torsoTwistSpeed)
+	}
+	GUI_EXECUTE
+	{
+		if ( _lastMechSelected != parent.parent.mech_id && parent.parent.mech_id != -1)
+		{
+			_lastMechSelected = parent.parent.mech_id
+			initialize( this )
+		}
+	}
+
+	GUI_ACTIVATE
+	{
+		activate( o_value_techType 	   	)
+		activate( o_value_chassisClass 	)
+		activate( o_value_acceleration 	)
+		activate( o_value_deceleration 	)
+		activate( o_value_turnRate		)
+		activate( o_value_torsoTwist 		)
+		activate( o_value_torsoTwistSpeed	)
+		activate( o_techType 	   	 )
+		activate( o_chassisClass 	 )
+		activate( o_acceleration 	 )
+		activate( o_deceleration 	 )
+		activate( o_turnRate		 )
+		activate( o_torsoTwist 	 )
+		activate( o_torsoTwistSpeed)
+	}
+	GUI_DEACTIVATE
+	{
+		deactivate( o_value_techType 	   	)
+		deactivate( o_value_chassisClass 	)
+		deactivate( o_value_acceleration 	)
+		deactivate( o_value_deceleration 	)
+		deactivate( o_value_turnRate		)
+		deactivate( o_value_torsoTwist 		)
+		deactivate( o_value_torsoTwistSpeed	)
+		deactivate( o_techType 	   	 )
+		deactivate( o_chassisClass 	 )
+		deactivate( o_acceleration 	 )
+		deactivate( o_deceleration 	 )
+		deactivate( o_turnRate		 )
+		deactivate( o_torsoTwist 	 )
+		deactivate( o_torsoTwistSpeed)
+	}
+}
+
+
+static_label
+{
+	GUI_CREATE
+	{
+		position 	_origin
+		int		_width
+		int		_height			= 20
+		string		text
+		int		_dirty			= true
+		Font3d		_font 			= FPATH localize$( IDS_MICROSTYLE8BOLDEXT )
+//		Font3d		_font 			= FPATH localize$(IDS_F_ML_LABEL)
+		int		_textColor		= packcolor (255,255,255,255)
+		int 		_scale			= 1
+		int 		_wrap			= 1
+		int		_proportional		= 1
+		int		_bold			= false
+		int		_italic			= false
+		int         	_justification		= just_center // just_left, just_center, just_right
+		int		_active			= true
+		float		fvalue			= 0.0
+		int		ivalue			= 0
+		int 		_isNumeric		= false // true prints this.fvalue (or this.ivalue), false prints this.text
+		int		_isFloat		= true // false uses int value this.ivalue
+
+
+
+
+	}
+
+	GUI_INIT
+	{
+		if ( _bold == true )
+			_font = FPATH localize$( IDS_MICROSTYLE9BOLDEXT )
+//			_font = FPATH localize$(IDS_F_ML_DATA)
+		else
+			_font = FPATH localize$( IDS_MICROSTYLE9BOLDEXT )
+//			_font = FPATH localize$(IDS_F_ML_LABEL)
+	}
+	GUI_DRAW
+	{
+		if ( _active == true )
+		{
+	 		print3d_attributes 	= _font, _textColor, _scale, _wrap, _proportional, _bold, _italic, _justification
+			// print3d_attributes = FPATH localize$(IDS_F_ML_LABEL),packcolor (255,255,255,255),1,1,1,0,0,0
+			// print3d_attributes = regfont, 0xffffffff, 1, 1, 1, 0, 0, just_center
+			lprint3d_position 	= _origin
+			_height = getprint3dheight("text") + 2
+			lprint3d_margins 	= _origin to _origin.x + _width, _origin.y + _height, _origin.z
+			if ( _isNumeric )
+			{
+				if ( _isFloat )
+					print3d fvalue
+				else
+					print3d ivalue
+			}
+			else
+			{
+				print3d text
+			}
+		}
+	}
+
+	GUI_DEACTIVATE
+	{
+		_active = false
+	}
+
+	GUI_ACTIVATE
+	{
+		_active = true
+	}
+
+	GUI_MAILBOX
+	{
+	}
+}
+
+clickable_label
+{
+	GUI_CREATE
+	{
+		position 	_origin
+		int		_width
+		int		_height
+		string		text
+		int		_dirty		= true
+		Font3d		_font 		= FPATH localize$( IDS_MICROSTYLE8BOLDEXT )
+//		Font3d		_font 		= FPATH localize$(IDS_F_ML_LABEL)
+		int		_textColor	= packcolor (255,255,255,255)
+		int 		_scale          = 1
+		int 		_wrap           = 1
+		int		_proportional   = 1
+		int		_bold           = false
+		int		_italic         = false
+		int         	_justification  = just_center // just_left, just_center, just_right
+		int 		id
+	}
+
+	GUI_INIT
+	{
+		if ( _bold == true )
+			_font = FPATH localize$( IDS_MICROSTYLE8BOLDEXT )
+//			_font = FPATH localize$(IDS_F_ML_DATA)
+		else
+			_font = FPATH localize$( IDS_MICROSTYLE8BOLDEXT )
+//			_font = FPATH localize$(IDS_F_ML_LABEL)
+
+		region = 0, 0 to _width, getprint3dheight("text")
+		// spew conv$( region.p1.x ) " " conv$( region.p1.y ) " " conv$( region.p2.x ) " " conv$( region.p2.y )
+		location = _origin
+	}
+
+	LBUTTON_UPDATE
+	{
+		if mouse.left == BUTTON_PRESSED
+		{
+			spew "Button pressed "
+			mail( 0, parent )
+		}
+	}
+
+	GUI_DRAW
+	{
+	 	print3d_attributes 	= _font, _textColor, _scale, _wrap, _proportional, _bold, _italic, _justification
+		lprint3d_position 	= 0, 0
+		_height 			= getprint3dheight("text")
+		lprint3d_margins 	= 0, 0 to _width, _height, _origin.z
+		// lprint3d_margins 	= _origin to _origin.x + _width, _origin.y + _height, _origin.z
+		print3d text
+	}
+	GUI_MAILBOX
+	{
+	}
+}
+
+//		float acceleration
+//		float deacceleration
+//		float turn_rate
+//		float torso_twist
+//		float twist_speed
+//		int tech_type
+
+
+//		if parent.mech_exists == true
+//		{
+//			print3d_attributes = regfont, 0xffffffff, 1, 1, 1, 0, 0
+//			print3d_margins = noneditx, nonedity to getresx() - 10, nonedity + 371
+//			print3d_position = noneditx, labely + 135
+//			print3d localize$(IDS_ML_CH_CHASSISTECH)
+//			print3d_position = noneditx, labely + 180
+//			print3d localize$(IDS_ML_CH_CHASSISCLASS)
+//			print3d_position = noneditx, labely + 225
+//			print3d localize$(IDS_ML_CH_ACCELERATION)
+//			print3d_position = noneditx, labely + 270
+//			print3d localize$(IDS_ML_CH_DECELERATION)
+//			print3d_position = noneditx, labely + 315
+//			print3d localize$(IDS_ML_CH_TURNRATE)
+//			print3d_position = noneditx, labely + 360
+//			print3d localize$(IDS_ML_CH_TWISTRANGE)
+//			print3d_position = noneditx, labely + 405
+//			print3d localize$(IDS_ML_CH_TWISTSPEED)
+
+//			print3d_attributes = boldfont, 0xffffffff, 1, 1, 1, 0, 0
+//			print3d_margins = noneditx, nonedity to getresx() - 10, nonedity + 371
+//			print3d_position = noneditx + 20, labely + 155
+//			print3d chassis_tech[parent.mech_id]
+//			print3d_position = noneditx + 20, labely + 200
+//			print3d class[parent.mech_id]
+//			print3d_position = noneditx + 20, labely + 245
+//			print3d acceleration
+//			print3d_position = noneditx + 20, labely + 290
+//			print3d deacceleration
+//			print3d_position = noneditx + 20, labely + 335
+//			print3d turn_rate
+//			print3d_position = noneditx + 20, labely + 380
+//			print3d torso_twist
+//			print3d_position = noneditx + 20, labely + 425
+//			print3d twist_speed
+//		}
+
+
+
+
+
+
+
+item_pointer
+{
+	GUI_CREATE
+	{
+		int 			prev_selected_id	= -1
+		int 			draw				= true
+		int 	   		showMousePointer 	= 1
+		pane 	   		p_pointer			= GPATH "mouse_pointer.tga"
+		int				originListID  // sets what list the pointer cam off of
+
+		alphamode(p_pointer)	= am_alpha_alphainvalpha
+		origin(p_pointer)		= 0, 0
+		framerate				= 5
+	}
+
+	GUI_DRAW
+	{
+		location = mouse.x,mouse.y,70
+		render p_pointer, mouse.x, mouse.y
+	}
+}
+
+
+

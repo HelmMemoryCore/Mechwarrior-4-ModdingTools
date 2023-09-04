@@ -1,0 +1,1538 @@
+// Mechwarrior: Vengeance
+// Copyright © 1999-2000
+// Mechbay_main.script
+// Paolo Malabuyo
+// July 12, 2000
+
+#include "Content\\MercsShellScripts\\stddefs.h"
+#include "Content\\MercsShellScripts\\ShellFunctionHeaders.hpp"
+#include "Content\\MercsShellScripts\\MechLabHeaders_MERCS.h"
+#include "Content\\MercsShellScripts\\ScriptStrings.h"
+#include "Content\\MercsShellScripts\\Mechweight.script"
+
+#define FIRST_LANCEMATE_INFO_ID 650
+#define LAST_LANCEMATE_INFO_ID 699
+
+#define FIRST_MECH_INFO_ID 325
+#define LAST_MECH_INFO_ID 399
+
+#define FIRST_WEAPON_INFO_ID 0
+#define LAST_WEAPON_INFO_ID 150
+
+#define COMSTAR_GREEN	0xFF5AE35A
+
+main
+{
+	GUI_CREATE
+	{
+		setresource("ScriptStrings_MERCS.dll")
+
+		object mechinfo = mech_info
+
+		font3d regfont			= FPATH localize$(IDS_F_ROLLOVER_INFO)
+		font3d boldfont			= FPATH localize$(IDS_F_ML_DATA)
+
+		pane p_pane				= MB_GPATH "infobox.tga"
+		alphamode (p_pane)		= am_alpha_alphainvalpha
+
+		int id					= -1
+		int i
+
+		int showinfo			= true
+		int enabled				= true
+
+		int max_infomessage		= 700
+		string infomessage[max_infomessage]
+		int pilot_stats[4]
+		float damage
+		float range
+		float heat
+		float weapon_recycle
+		float weapon_weight
+		float ton_times_ten
+		int ton_int_times_ten
+		int ton_decimal_times_ten
+
+		// This flag is set to true by the campaign screen to enable printing of
+		// mission statistics in the infobox - should be false at all other times.
+		int displayMissionData = false
+
+		string avatar_description = "The Avatar is patterned after Vulture Omnimechs recovered after the Battle of Luthien in the Draconins Combine. While maintaining a resemblance to its parent design, the Avatar is 10 tons heavier, slower and tends to carry a more diverse mix of weapons than a Clan mech. "
+		string bloodasp_description = "First created by Clan Star Adder as an insult to their enemies, Clan Blood Spirit, the Blood Asp is a capable Omnimech able to mount a large number of heavy weapons such as ER PPC or Gauss. The heavy weapons load and extensive electronics make it a match for any other assault mech in production."
+		string stalker_description = "This battle proven Inner Sphere Battlemech carries a mix of large and medium lasers along with LRM's and SRM's. This heavy weapon load is capable of tearing apart an enemy mech with ease, but all the weapons come with the cost of low heat dissipation. "
+		string warhammer_description = "This mech has been in use for centuries by militaries throughout the Inner Sphere and beyond. Carrying a diverse array of weapons featuring a pair of PPC's, this mech is able to engage enemy mechs at all ranges equally. It is a little slow compared to some newer designs, but it's heavy armor more than makes up for it's lower speed."
+		string marauder_description = "First developed near the end of the First Star League, the Marauder served with distinction through the Succession Wars between the great Houses of the Inner Sphere. Partially redesigned with recovered technology just before the Clan Invasion, this mech mounts multiple direct fire weapons such as PPC's, Lasers and Autocannon."
+		string strider_description = "Another Omnimech created by the Draconis Combine. The Strider is a fast mech that works best countering other fast mechs or performing 'Hit and Run' attacks on slower mechs with its missiles."
+		string urbanmech_description = "Looking like a trash can with legs, this mech is a specialty design intended for urban combat. While slow on the ground, this mech mounts jump jets that give it good mobility and allow it to use it surprisingly heavy weapons to good effect."
+		string urbanmech_iic_description = "The Clan version of the Inner Sphere Urbanmech. The Clan version is faster, but cannot carry as large a weapons load as the mech originated from."
+		string ares_description = "The Ares Class Omnimech is a deadly new Omnimech being fielded by Clan Jade Falcon. The Ares was designed to win trials as well as battles, and so it excels at duels. Strangely enough, the Novacats captured the prototype during a trial of possession, and are currently manufacturing the Ares (called the Lion by Novacat warriors) at their main factory on Irece."
+		string brcticwolf_description = "made by tronix."
+
+		int mailthis[150]
+		mailthis[0] = 0
+		mailthis[1] = 1
+		mailthis[2] = 2
+		mailthis[3] = 3
+		mailthis[4] = 4
+		mailthis[5] = 5
+		mailthis[6] = 6
+		mailthis[7] = 7
+		mailthis[8] = 8
+		mailthis[9] = 9
+		mailthis[10] = 10
+		mailthis[11] = 11
+		mailthis[12] = 12
+		mailthis[13] = 13
+		mailthis[14] = 14
+		mailthis[15] = 15
+		mailthis[16] = 16
+		mailthis[51] = 17
+		mailthis[52] = 18
+		mailthis[53] = 19
+		mailthis[54] = 20
+		mailthis[55] = 21
+		mailthis[56] = 22
+		mailthis[57] = 23
+		mailthis[58] = 24
+		mailthis[59] = 25
+		mailthis[60] = 26
+		mailthis[61] = 27
+		mailthis[62] = 28
+		mailthis[63] = 29
+		mailthis[64] = 30
+		mailthis[65] = 31
+		mailthis[66] = 32
+		mailthis[67] = 33
+		mailthis[68] = 34
+		mailthis[69] = 35
+		mailthis[70] = 36
+		mailthis[71] = 37
+		mailthis[72] = 38
+		mailthis[73] = 39
+		mailthis[74] = 40
+		mailthis[100] = 41
+		mailthis[101] = 42
+		mailthis[102] = 43
+		mailthis[103] = 44
+		mailthis[104] = 45
+		mailthis[105] = 46
+		mailthis[106] = 47
+		mailthis[107] = 48
+		mailthis[108] = 49
+		mailthis[109] = 50
+		mailthis[110] = 51
+		mailthis[111] = 52
+		mailthis[112] = 53
+		mailthis[113] = 54
+		mailthis[114] = 55
+		mailthis[115] = 56
+
+		int max_mech_index = 378	// mektek // change this when adding new mechs!
+		int temp_mech_id[max_mech_index+1]
+
+		if ($$DEMO_MultiPlayer$$ == 1)
+		{
+			temp_mech_id[325]	= 1 //Atlas
+			temp_mech_id[326]	= 3 //BushWacker
+			temp_mech_id[327]	= 11//mad Cat II
+			temp_mech_id[328]	= 23 //ryoken
+			temp_mech_id[329]	= 21 //sunder
+		}
+		else
+		{
+			if ($$DEMO_SinglePlayer$$ == 1)
+			{
+				temp_mech_id[325]	= 15 //Raven
+				temp_mech_id[326]	= 23 //Ryoken
+				temp_mech_id[327]	= 22//Uller
+				temp_mech_id[328]	= 20//Vulture
+			}
+			else
+			{
+            //
+            // this data will be altered below so this is redundant.
+            //
+				//full set of 'Mechs
+				i = 325
+				temp_mech_id[i++]	= M_ArcticWolf	 // Arctic Wolf
+				temp_mech_id[i++]	= M_BrcticWolf	 // Tronix
+				temp_mech_id[i++]	= M_Ares		    // mektek
+				temp_mech_id[i++]	= M_Argus		    // argus
+				temp_mech_id[i++]	= M_Atlas		    // atlas
+				temp_mech_id[i++]	= M_Avatar		// avatar	// mektek
+				temp_mech_id[i++]	= M_Awesome	     // awesome
+				temp_mech_id[i++]	= M_BlackKnight	 // black knight
+				temp_mech_id[i++]	= M_Bloodasp	 // mektek
+				temp_mech_id[i++]	= M_Bushwacker	 // bushwacker
+				temp_mech_id[i++]	= M_Catapult	   	// catapult
+				temp_mech_id[i++]	= M_CauldronBorn	// cauldron-born
+				temp_mech_id[i++]	= M_Chimera	     // chimera
+				temp_mech_id[i++]	= M_Cougar	     // cougar
+				temp_mech_id[i++]	= M_Daishi	     // daishi
+				temp_mech_id[i++]	= M_Dragon	     // dragon
+				temp_mech_id[i++]	= M_Fafnir			// Fafnir
+				temp_mech_id[i++]	= M_Flea		     // flea
+				temp_mech_id[i++]	= M_Gladiator
+				temp_mech_id[i++]	= M_Hauptmann
+				temp_mech_id[i++]	= M_Hellhound	     // Hellhound
+				temp_mech_id[i++]	= M_Hellspawn	     // hellspawn
+				temp_mech_id[i++]	= M_Highlander	 // highlander
+				temp_mech_id[i++]	= M_Hunchback	     // hunchback
+				temp_mech_id[i++]	= M_Kodiak	     // Kodiak
+				temp_mech_id[i++]	= M_Loki		     // loki
+				temp_mech_id[i++]	= M_Longbow
+				temp_mech_id[i++]	= M_Madcat	     // madcat
+				temp_mech_id[i++]	= M_Madcat_MKII	 // madcat2
+				temp_mech_id[i++]	= M_Marauder	     // marauder
+				temp_mech_id[i++]	= M_Masakari	     // masakari
+				temp_mech_id[i++]	= M_Mauler	     // mauler
+				temp_mech_id[i++]	= M_Novacat	     // novacat
+				temp_mech_id[i++]	= M_Osiris	     // osiris
+				temp_mech_id[i++]	= M_Owens
+				temp_mech_id[i++]	= M_Puma
+				temp_mech_id[i++]	= M_Raven		     // raven
+				temp_mech_id[i++]	= M_Ryoken	     // ryoken
+				temp_mech_id[i++]	= M_Shadowcat	     // shadowcat
+				temp_mech_id[i++]	= M_Stalker		// mektek
+				temp_mech_id[i++]	= M_Strider		// strider	// mektek
+				temp_mech_id[i++]	= M_Sunder	     // sunder
+				temp_mech_id[i++]	= M_Templar	     // Templar
+				temp_mech_id[i++]	= M_Thanatos	     // thanatos
+				temp_mech_id[i++]	= M_Thor		     // thor
+				temp_mech_id[i++]	= M_Uller		     // uller
+				temp_mech_id[i++]	= M_UrbanmechIIC		     // mektek
+				temp_mech_id[i++]	= M_Urbanmech		     // mektek
+				temp_mech_id[i++]	= M_Uziel		     // uziel
+				temp_mech_id[i++]	= M_Victor
+				temp_mech_id[i++]	= M_Vulture	     // vulture
+				temp_mech_id[i++]	= M_Warhammer		// warhammer	// mektek
+				temp_mech_id[i++]	= M_Wolfhound	     // wolfhound
+				temp_mech_id[i++]	= M_Zeus		     // zeus
+	    	}
+		}
+
+		string chassis_tech[ LastMechID + 1 ]
+		chassis_tech[0] 	= localize$(DNL_CLAN)		    //Arctic Wolf
+		chassis_tech[1] 	= localize$(DNL_INNERSPHERE)    //argus
+		chassis_tech[2] 	= localize$(DNL_INNERSPHERE)    //atlas
+		chassis_tech[3] 	= localize$(DNL_INNERSPHERE)    //awesome
+		chassis_tech[4]     = localize$(DNL_INNERSPHERE)	//black knight
+		chassis_tech[5] 	= localize$(DNL_INNERSPHERE)    //bushwacker
+		chassis_tech[6] 	= localize$(DNL_INNERSPHERE)    //catapult
+		chassis_tech[7]    	= localize$(DNL_CLAN)           //cauldron-born
+		chassis_tech[8] 	= localize$(DNL_INNERSPHERE)    //chimera
+		chassis_tech[9] 	= localize$(DNL_CLAN)           //cougar
+		chassis_tech[10]	= localize$(DNL_CLAN)           //daishi
+		chassis_tech[11]	= localize$(DNL_INNERSPHERE)	//dragon
+		chassis_tech[12]	= localize$(DNL_INNERSPHERE)	//Fafnir
+		chassis_tech[13]	= localize$(DNL_INNERSPHERE)	//flea
+		chassis_tech[14] 	= localize$(DNL_CLAN)    		//Gladiator
+		chassis_tech[15] 	= localize$(DNL_INNERSPHERE)    //Hauptmann
+		chassis_tech[16]	= localize$(DNL_CLAN)			//Hellhound
+		chassis_tech[17]	= localize$(DNL_INNERSPHERE)    //hellspawn
+		chassis_tech[18]	= localize$(DNL_INNERSPHERE)    //highlander
+		chassis_tech[19]	= localize$(DNL_INNERSPHERE)    //hunchback
+		chassis_tech[20]	= localize$(DNL_CLAN)		    //Kodiak
+		chassis_tech[21]	= localize$(DNL_CLAN)           //loki
+		chassis_tech[22] 	= localize$(DNL_INNERSPHERE)    //Longbow
+		chassis_tech[23]	= localize$(DNL_CLAN)           //madcat
+		chassis_tech[24]	= localize$(DNL_CLAN)           //madcat2
+		chassis_tech[25]	= localize$(DNL_CLAN)	        //masakari
+		chassis_tech[26]	= localize$(DNL_INNERSPHERE)    //mauler
+		chassis_tech[27]	= localize$(DNL_CLAN)           //novacat
+		chassis_tech[28]	= localize$(DNL_INNERSPHERE)    //osiris
+		chassis_tech[29] 	= localize$(DNL_INNERSPHERE)    //Owens
+		chassis_tech[30] 	= localize$(DNL_CLAN)    		//Puma
+		chassis_tech[31]	= localize$(DNL_INNERSPHERE)    //raven
+		chassis_tech[32]	= localize$(DNL_CLAN)		    //ryoken
+		chassis_tech[33]	= localize$(DNL_CLAN)           //shadowcat
+		chassis_tech[34]	= localize$(DNL_INNERSPHERE)    //sunder
+		chassis_tech[35]	= localize$(DNL_INNERSPHERE)	//templar
+		chassis_tech[36]	= localize$(DNL_INNERSPHERE)    //thanatos
+		chassis_tech[37]	= localize$(DNL_CLAN)           //thor
+		chassis_tech[38]	= localize$(DNL_CLAN)		    //uller
+		chassis_tech[39]	= localize$(DNL_INNERSPHERE)    //uziel
+		chassis_tech[40] 	= localize$(DNL_INNERSPHERE)    //Victor
+		chassis_tech[41]	= localize$(DNL_CLAN)           //vulture
+		chassis_tech[42]	= localize$(DNL_INNERSPHERE)    //wolfhound
+		chassis_tech[43]	= localize$(DNL_INNERSPHERE)    //zeus
+		chassis_tech[M_BrcticWolf]	= localize$(DNL_INNERSPHERE)    //Tronix
+		chassis_tech[M_Avatar]	= localize$(DNL_INNERSPHERE)    //avatar	// mektek
+		chassis_tech[M_Warhammer]	= localize$(DNL_INNERSPHERE)    	//warhammer	// mektek
+		chassis_tech[M_Strider]	= localize$(DNL_INNERSPHERE)    //strider	// mektek
+		chassis_tech[M_Marauder]	= localize$(DNL_INNERSPHERE)    //marauder	// mektek
+		chassis_tech[M_Bloodasp]	= localize$(DNL_CLAN)		    // mektek
+		chassis_tech[M_UrbanmechIIC]	= localize$(DNL_CLAN)		    //urban mech	// mektek
+		chassis_tech[M_Stalker]	= localize$(DNL_INNERSPHERE)    	// mektek
+		chassis_tech[M_Ares]	= localize$(DNL_CLAN)    	// mektek
+		chassis_tech[M_Urbanmech]	= localize$(DNL_INNERSPHERE)		    //urban mech	// mektek
+
+		int tonnage[ LastMechID + 1 ]
+		tonnage[0]		   = 40 	// Arctic Wolf
+		tonnage[1]		   = 60 	// Argus
+		tonnage[2]		   = 100	// Atlas
+		tonnage[3]		   = 80 	// Awesome
+		tonnage[4]	 	   = 75		// black KNight
+		tonnage[5]		   = 55 	// Bushwacker
+		tonnage[6]		   = 65 	// Catapult
+		tonnage[7]		   = 65 	// Cauldron-Born
+		tonnage[8]		   = 40 	// Chimera
+		tonnage[9]		   = 35 	// Cougar
+		tonnage[10]		   = 100	// Daishi
+		tonnage[11]		   = 60 	// dragon
+		tonnage[12]		   = 100	// Fafnir
+		tonnage[13]		   = 20 	// flea
+		tonnage[14]		   = 95 	// Gladiator
+		tonnage[15]		   = 95 	// Hauptmann
+		tonnage[16]		   = 50		// Hellhound
+		tonnage[17]		   = 45 	// Hellspawn
+		tonnage[18]		   = 90 	// Highlander
+		tonnage[19]		   = 50 	// Hunchback
+		tonnage[20]		   = 100	// Kodiak
+		tonnage[21]		   = 65 	// Loki
+		tonnage[22]		   = 85 	// Longbow
+		tonnage[23]		   = 75 	// Madcat
+		tonnage[24]		   = 90 	// Madcat_MKII
+		tonnage[25]		   = 85 	// masakari
+		tonnage[26]		   = 90 	// Mauler
+		tonnage[27]		   = 70 	// Novacat
+		tonnage[28]		   = 30 	// Osiris
+		tonnage[29]		   = 35 	// Owens
+		tonnage[30]		   = 35 	// Puma
+		tonnage[31]		   = 35 	// Raven
+		tonnage[32]		   = 55		// ryoken
+		tonnage[33]		   = 45 	// Shadowcat
+		tonnage[34]		   = 90		// sunder
+		tonnage[35]		   = 85		// Templar
+		tonnage[36]		   = 75 	// Thanatos
+		tonnage[37]		   = 70 	// Thor
+		tonnage[38]		   = 30		// uller
+		tonnage[39]		   = 50 	// Uziel
+		tonnage[40]		   = 80 	// Victor
+		tonnage[41]		   = 60 	// Vulture
+		tonnage[42]		   = 35		// wolfhound
+		tonnage[43]		   = 80		// zeus
+		tonnage[M_Avatar]		   = 70		// avatar	// mektek
+		tonnage[M_Warhammer]		   = 70		// warhammer	// mektek
+		tonnage[M_Strider]		   = 40		// strider	// mektek
+		tonnage[M_Marauder]		   = 75		// marauder	// mektek
+		tonnage[M_Bloodasp]		   = 90		// mektek
+		tonnage[M_UrbanmechIIC]		   = 30		// urban mech	// mektek
+		tonnage[M_Stalker]		   = 85		// mektek
+		tonnage[M_Ares]		   = 60		// mektek
+		tonnage[M_Urbanmech]		   = 30		// urban mech	// mektek
+		tonnage[M_BrcticWolf]		   = 100		// Tronix
+
+		int top_speed[ LastMechID + 1 ]
+		top_speed[0]	   	= 121   // Arctic Wolf
+		top_speed[1]	   	= 97    // Argus
+		top_speed[2]	   	= 81    // Atlas
+		top_speed[3]	   	= 95    // Awesome
+		top_speed[4]	   	= 99    // Black Knight
+		top_speed[5]	   	= 106   // Bushwacker
+		top_speed[6]	   	= 104   // Catapult
+		top_speed[7]	   	= 104   // Cauldron-Born
+		top_speed[8]	   	= 117   // Chimera
+		top_speed[9]	   	= 132   // Cougar
+		top_speed[10]	  	= 76    // Daishi
+		top_speed[11]	  	= 115	// Dragon
+		top_speed[12]	  	= 53	// Fafnir
+		top_speed[13]	  	= 150	// Flea
+		top_speed[14]	   	= 67   	// Gladiator
+		top_speed[15]	   	= 58   	// Hauptmann
+		top_speed[16]	  	= 98	// Hellhound
+		top_speed[17]	  	= 118   // Hellspawn
+		top_speed[18]	  	= 87    // Highlander
+		top_speed[19]	  	= 116   // Hunchback
+		top_speed[20]	  	= 88    // Kodiak
+		top_speed[21]	  	= 118   // Loki
+		top_speed[22]	   	= 69   	// Longbow
+		top_speed[23]	  	= 100   // Madcat
+		top_speed[24]	  	= 93    // Madcat_MKII
+		top_speed[25]	  	= 95	// Masakari
+		top_speed[26]	  	= 90    // Mauler
+		top_speed[27]	  	= 108   // Novacat
+		top_speed[28]	  	= 140   // Osiris
+		top_speed[29]	   	= 102  	// Owens
+		top_speed[30]	   	= 83   	// Puma
+		top_speed[31]	  	= 125   // Raven
+		top_speed[32]	  	= 105	// Ryoken
+		top_speed[33]	  	= 117   // Shadowcat
+		top_speed[34]	  	= 89	// Sunder
+		top_speed[35]	  	= 74	// Templar
+		top_speed[36]	  	= 93    // Thanatos
+		top_speed[37]	  	= 109   // Thor
+		top_speed[38]	  	= 141	// Uller
+		top_speed[39]	  	= 113   // Uziel
+		top_speed[40]	   	= 72   	// Victor
+		top_speed[41]	  	= 105   // Vulture
+		top_speed[42]	  	= 120   // Wolfhound
+		top_speed[43]	  	= 90	// Zeus
+		top_speed[M_Avatar]	  	= 104   // Avatar	// mektek
+		top_speed[M_Warhammer]	  	= 105	// Warhammer	// mektek
+		top_speed[M_Strider]	  	= 112	// Strider	// mektek
+		top_speed[M_Marauder]	  	= 95   // mektek
+		top_speed[M_Bloodasp]	  	= 90   // mektek
+		top_speed[M_UrbanmechIIC]	  = 78	// Urban Mech	// mektek
+		top_speed[M_Stalker]	  	= 76	// mektek
+		top_speed[M_Ares]	   	= 124   // 
+		top_speed[M_Urbanmech]	  = 78	// Urban Mech	// mektek
+		top_speed[M_BrcticWolf]	  = 78	// Tronix
+
+
+		// 0 - 150 weapons
+		infomessage[0]  = localize$(DNL_LGLAS) "\n" localize$(IDS_ML_LGLAS_INFO)
+		infomessage[1]  = localize$(DNL_MDLAS) "\n" localize$(IDS_ML_MDLAS_INFO)
+		infomessage[2]  = localize$(DNL_SMLAS) "\n" localize$(IDS_ML_SMLAS_INFO)
+		infomessage[3]  = localize$(DNL_CERLGL) "\n" localize$(IDS_ML_CERLGL_INFO)
+		infomessage[4]  = localize$(DNL_CERMDL) "\n" localize$(IDS_ML_CERMDL_INFO)
+		infomessage[5]  = localize$(DNL_CERSML) "\n" localize$(IDS_ML_CERSML_INFO)
+		infomessage[6]  = localize$(DNL_LGPLS) "\n" localize$(IDS_ML_LGPLS_INFO)
+		infomessage[7]  = localize$(DNL_MDPLS) "\n" localize$(IDS_ML_MDPLS_INFO)
+		infomessage[8]  = localize$(DNL_SMPLS) "\n" localize$(IDS_ML_SMPLS_INFO)
+		infomessage[9]  = localize$(DNL_LGXPLS) "\n" localize$(IDS_ML_LGXPLS_INFO)
+		infomessage[10] = localize$(DNL_MDXPLS) "\n" localize$(IDS_ML_MDXPLS_INFO)
+		infomessage[11] = localize$(DNL_SMXPLS) "\n" localize$(IDS_ML_SMXPLS_INFO)
+		infomessage[12] = localize$(DNL_CLGPLS) "\n" localize$(IDS_ML_CLGPLS_INFO)
+		infomessage[13] = localize$(DNL_CMDPLS) "\n" localize$(IDS_ML_CMDPLS_INFO)
+		infomessage[14] = localize$(DNL_CSMPLS) "\n" localize$(IDS_ML_CSMPLS_INFO)
+		infomessage[15] = localize$(DNL_PPC) "\n" localize$(IDS_ML_PPC_INFO)
+		infomessage[16] = localize$(DNL_CERPPC) "\n" localize$(IDS_ML_CERPPC_INFO)
+		infomessage[17] = localize$(DNL_FLAMER) "\n" localize$(IDS_ML_FLAMER_INFO)
+		infomessage[18] = localize$(DNL_CFLAMER) "\n" localize$(IDS_ML_FLAMER_INFO)
+		infomessage[W_CapPPC] = "PPC with Capacitor" "\n" "Standard PPC with an added energy storage, greater damage than a standard PPC at the expense of greater heat and recycle time."  // Evil
+		infomessage[W_HeavyLargeLaser] = "Heavy Large Laser" "\n" "A recent Clan development, Heavy Lasers trade short range and high heat for heavy damage."  // Evil
+		infomessage[W_HeavyMediumLaser] = "Heavy Medium Laser" "\n" "A recent Clan development, Heavy Lasers trade short range and high heat for heavy damage."  // Evil
+
+		infomessage[51] = localize$(DNL_LRM5) "\n" localize$(IDS_ML_LRM_INFO)
+		infomessage[52] = localize$(DNL_LRM10) "\n" localize$(IDS_ML_LRM_INFO)
+		infomessage[53] = localize$(DNL_LRM15) "\n" localize$(IDS_ML_LRM_INFO)
+		infomessage[54] = localize$(DNL_LRM20) "\n" localize$(IDS_ML_LRM_INFO)
+		infomessage[55] = localize$(DNL_CLRM5) "\n" localize$(IDS_ML_CLRM_INFO)
+		infomessage[56] = localize$(DNL_CLRM10) "\n" localize$(IDS_ML_CLRM_INFO)
+		infomessage[57] = localize$(DNL_CLRM15) "\n" localize$(IDS_ML_CLRM_INFO)
+		infomessage[58] = localize$(DNL_CLRM20) "\n" localize$(IDS_ML_CLRM_INFO)
+		infomessage[59] = localize$(DNL_MRM10) "\n" localize$(IDS_ML_MRM_INFO)
+		infomessage[60] = localize$(DNL_MRM20) "\n" localize$(IDS_ML_MRM_INFO)
+		infomessage[61] = localize$(DNL_MRM30) "\n" localize$(IDS_ML_MRM_INFO)
+		infomessage[62] = localize$(DNL_MRM40) "\n" localize$(IDS_ML_MRM_INFO)
+		infomessage[63] = localize$(DNL_SMRM10) "\n" localize$(IDS_ML_SMRM_INFO)
+		infomessage[64] = localize$(DNL_SMRM20) "\n" localize$(IDS_ML_SMRM_INFO)
+		infomessage[65] = localize$(DNL_SMRM30) "\n" localize$(IDS_ML_SMRM_INFO)
+		infomessage[66] = localize$(DNL_SMRM40) "\n" localize$(IDS_ML_SMRM_INFO)
+		infomessage[67] = localize$(DNL_SRM2) "\n" localize$(IDS_ML_SRM_INFO)
+		infomessage[68] = localize$(DNL_SRM4) "\n" localize$(IDS_ML_SRM_INFO)
+		infomessage[69] = localize$(DNL_SRM6) "\n" localize$(IDS_ML_SRM_INFO)
+		infomessage[70] = localize$(DNL_SSRM2) "\n" localize$(IDS_ML_SSRM_INFO)
+		infomessage[71] = localize$(DNL_SSRM4) "\n" localize$(IDS_ML_SSRM_INFO)
+		infomessage[72] = localize$(DNL_SSRM6) "\n" localize$(IDS_ML_SSRM_INFO)
+		infomessage[73] = localize$(DNL_ARROWCLUSTER) "\n" localize$(IDS_ML_ARROW_INFO)
+		infomessage[74] = localize$(DNL_ARROWHEAVY) "\n" localize$(IDS_ML_ARROWHEAVY_INFO)
+		infomessage[75] = localize$(DNL_NARC) "\n" localize$(IDS_ML_NARC_INFO)
+		infomessage[76] = localize$(DNL_CNARC) "\n" localize$(IDS_ML_CNARC_INFO)
+		infomessage[77] = localize$(DNL_FLARE) "\n" localize$(IDS_ML_FLARE_INFO)
+		infomessage[78] = localize$(DNL_ARTILLERY) "\n" localize$(IDS_ML_ARTILLERY_INFO)
+		infomessage[W_ISRM2] = "Inferno SRM2" "\n" "The Inferno SRM-2 fire missiles carrying napalm warheads that raises the heat level of the target. Inferno SRM-2's are larger than normal SRM-2's as extra protection for the volatile warheads."  // Evil
+		infomessage[W_RL20] = "Rocket Launcher" "\n" "A recent development from the Periphery, Rocket Launchers have become popular in the Inner Sphere. Firing a spread of unguided rockets that can cause a large amount of damage to the target."  // Evil
+		infomessage[W_ATM6M] = "ATM6 Medium" "\n" "ATM's are a new type of Clan missile systems that use advanced technology to improve capabilities and flexibility. ATM's come in two classes, the ATM-6 and the ATM-12 and two ranges, Medium and Extended."
+		infomessage[W_ATM12M] = "ATM12 Medium" "\n" "ATM's are a new type of Clan missile systems that use advanced technology to improve capabilities and flexibility. ATM's come in two classes, the ATM-6 and the ATM-12 and two ranges, Medium and Extended. "
+		infomessage[W_ATM6E] = "ATM6 Extended" "\n" "ATM's are a new type of Clan missile systems that use advanced technology to improve capabilities and flexibility. ATM's come in two classes, the ATM-6 and the ATM-12 and two ranges, Medium and Extended. "
+		infomessage[W_ATM12E] = "ATM12 Extended" "\n" "ATM's are a new type of Clan missile systems that use advanced technology to improve capabilities and flexibility. ATM's come in two classes, the ATM-6 and the ATM-12 and two ranges, Medium and Extended. "
+
+		infomessage[551] = localize$(DNL_LRM5) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[552] = localize$(DNL_LRM10) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[553] = localize$(DNL_LRM15) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[554] = localize$(DNL_LRM20) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[555] = localize$(DNL_CLRM5) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[556] = localize$(DNL_CLRM10) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[557] = localize$(DNL_CLRM15) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[558] = localize$(DNL_CLRM20) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[559] = localize$(DNL_MRM10) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[560] = localize$(DNL_MRM20) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[561] = localize$(DNL_MRM30) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[562] = localize$(DNL_MRM40) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[563] = localize$(DNL_SMRM10) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[564] = localize$(DNL_SMRM20) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[565] = localize$(DNL_SMRM30) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[566] = localize$(DNL_SMRM40) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[567] = localize$(DNL_SRM2) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[568] = localize$(DNL_SRM4) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[569] = localize$(DNL_SRM6) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[570] = localize$(DNL_SSRM2) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[571] = localize$(DNL_SSRM4) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[572] = localize$(DNL_SSRM6) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[573] = localize$(DNL_ARROWCLUSTER) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[574] = localize$(DNL_ARROWHEAVY) " " localize$(IDS_ML_MISSILES) "\n" localize$(IDS_ML_WP_MISSILE_DESCRIPTION)
+		infomessage[575] = localize$(DNL_NARC) "\n" localize$(IDS_WP_BEACON_DESCRIPTION)
+		infomessage[576] = localize$(DNL_CNARC) "\n" localize$(IDS_WP_BEACON_DESCRIPTION)
+		infomessage[577] = localize$(DNL_FLARES) "\n" localize$(IDS_WP_FLARE_DESCRIPTION)
+		infomessage[578] = localize$(DNL_ARTILLERY) "\n" localize$(IDS_WP_BEACON_DESCRIPTION)
+
+		infomessage[W_MiniGauss] = "Clan Mini Gauss Rifle" "\n" "A new Clan development, this weapon is cut down version of the standard Clan Gauss and works the same but does less damage. "  // jeho
+		infomessage[W_Napalm] = "Inferno Automatic Grenade Launcher" "\n" "The Inferno 'Thumper' follow the same trajectory as a Thumper, delivers 4 points of heat to the target but does very little damage."
+		infomessage[W_LongTomTracer] = "LongTom Tracer" "\n" "Tracers look and act like a normal artillery round, but do little damage when they hit. Intended for 'ranging shots' against enemy positions for more accurate artillery fire.  "
+		infomessage[W_ThumperTracer] = "Automatic Grenade Launcher Tracer" "\n" "Tracers look and act like a normal artillery round, but do little damage when they hit. Intended for 'ranging shots' against enemy positions for more accurate artillery fire.  "
+		infomessage[W_Thumper] = "High Explosive Armor Piercing Automatic Grenade Launcher" "\n" "Nicknamed the 'Thumper', these are a lighter version of the Long Tom. These cannon have a shorter range and do less damage, but possess a greater rate of fire than the Long Tom."
+		infomessage[W_ClanLightMGun] = localize$(DNL_CMG) "\n" localize$(IDS_ML_MG_INFO)
+		infomessage[W_LAC5] = "Light AC5" "\n" "Lightened version of the standard AutoCannon5. Same damage but range is slightly reduced with increased load time."  // Evil
+		infomessage[W_HVAC2] = "Hyper Velocity AC2" "\n" "An early attempt by the Inner Sphere to improve the Autocannon. HVAC rounds travel farther and faster than normal autocannon rounds. These weapons are heavier than standard autocannons and generate more heat when fired."  // Evil
+		infomessage[W_HVAC5] = "Hyper Velocity AC5" "\n" "An early attempt by the Inner Sphere to improve the Autocannon. HVAC rounds travel farther and faster than normal autocannon rounds. These weapons are heavier than standard autocannons and generate more heat when fired."  // Evil
+		infomessage[W_HVAC10] = "Hyper Velocity AC10" "\n" "An early attempt by the Inner Sphere to improve the Autocannon. HVAC rounds travel farther and faster than normal autocannon rounds. These weapons are heavier than standard autocannons and generate more heat when fired."  // Evil
+		infomessage[W_HVAC20] = "Hyper Velocity AC20" "\n" "An early attempt by the Inner Sphere to improve the Autocannon. HVAC rounds travel farther and faster than normal autocannon rounds. These weapons are heavier than standard autocannons and generate more heat when fired."  // Evil
+		infomessage[100] = localize$(DNL_AC5) "\n" localize$(IDS_ML_AC_INFO)
+		infomessage[101] = localize$(DNL_AC10) "\n" localize$(IDS_ML_AC_INFO)
+		infomessage[102] = localize$(DNL_AC20) "\n" localize$(IDS_ML_AC_INFO)
+		infomessage[103] = localize$(DNL_LBXAC10) "\n" localize$(IDS_ML_LBXAC_INFO)
+		infomessage[104] = localize$(DNL_LBXAC20) "\n" localize$(IDS_ML_LBXAC_INFO)
+		infomessage[105] = localize$(DNL_CLBXAC10) "\n" localize$(IDS_ML_LBXAC_INFO)
+		infomessage[106] = localize$(DNL_CLBXAC20) "\n" localize$(IDS_ML_LBXAC_INFO)
+		infomessage[107] = localize$(DNL_RTXAC2) "\n" localize$(IDS_ML_RTXAC_INFO)
+		infomessage[108] = localize$(DNL_RTXAC5) "\n" localize$(IDS_ML_RTXAC_INFO)
+		infomessage[109] = localize$(DNL_UAC2) "\n" localize$(IDS_ML_UAC_INFO)
+		infomessage[110] = localize$(DNL_UAC5) "\n" localize$(IDS_ML_UAC_INFO)
+		infomessage[111] = localize$(DNL_UAC10) "\n" localize$(IDS_ML_UAC_INFO)
+		infomessage[112] = localize$(DNL_UAC20) "\n" localize$(IDS_ML_UAC_INFO)
+		infomessage[113] = localize$(DNL_CUAC2) "\n" localize$(IDS_ML_CUAC_INFO)
+		infomessage[114] = localize$(DNL_CUAC5) "\n" localize$(IDS_ML_CUAC_INFO)
+		infomessage[115] = localize$(DNL_CUAC10) "\n" localize$(IDS_ML_CUAC_INFO)
+		infomessage[116] = localize$(DNL_CUAC20) "\n" localize$(IDS_ML_CUAC_INFO)
+		infomessage[117] = localize$(DNL_LGAUSS) "\n" localize$(IDS_ML_LGAUSS_INFO)
+		infomessage[118] = localize$(DNL_GAUSS) "\n" localize$(IDS_ML_GAUSS_INFO)
+		infomessage[119] = localize$(DNL_HGAUSS) "\n" localize$(IDS_ML_HGAUSS_INFO)
+		infomessage[120] = localize$(DNL_CGAUSS) "\n" localize$(IDS_ML_CGAUSS_INFO)
+		infomessage[121] = localize$(DNL_MG) "\n" localize$(IDS_ML_MG_INFO)
+		infomessage[122] = localize$(DNL_CMG) "\n" localize$(IDS_ML_MG_INFO)
+		infomessage[123] = localize$(DNL_LONGTOM) "\n" localize$(IDS_ML_TOM_INFO)
+
+		infomessage[600] = localize$(DNL_AC5) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[601] = localize$(DNL_AC10) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[602] = localize$(DNL_AC20) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[603] = localize$(DNL_LBXAC10) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[604] = localize$(DNL_LBXAC20) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[605] = localize$(DNL_CLBXAC10) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[606] = localize$(DNL_CLBXAC20) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[607] = localize$(DNL_RTXAC2) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[608] = localize$(DNL_RTXAC5) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[609] = localize$(DNL_UAC2) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[610] = localize$(DNL_UAC5) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[611] = localize$(DNL_UAC10) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[612] = localize$(DNL_UAC20) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[613] = localize$(DNL_CUAC2) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[614] = localize$(DNL_CUAC5) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[615] = localize$(DNL_CUAC10) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[616] = localize$(DNL_CUAC20) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[617] = localize$(DNL_LGAUSS) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[618] = localize$(DNL_GAUSS) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[619] = localize$(DNL_HGAUSS) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[620] = localize$(DNL_CGAUSS) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[621] = localize$(DNL_MG) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[622] = localize$(DNL_CMG) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+		infomessage[623] = localize$(DNL_LONGTOM) " " localize$(IDS_ML_AMMO_INFO) "\n" localize$(IDS_ML_WP_AMMO_DESCRIPTION)
+
+
+		// 151 - 200 general mechlab
+		infomessage[151] = localize$(IDS_ML_RESTORE_INFO)
+		infomessage[152] = localize$(IDS_ML_CLOSE_INFO)
+		infomessage[153] = localize$(IDS_ML_FIREPOWER_INFO)
+		infomessage[154] = localize$(IDS_ML_ARMOR_INFO)
+		infomessage[155] = localize$(IDS_ML_SPEED_INFO)
+		infomessage[156] = localize$(IDS_ML_HEAT_INFO)
+		infomessage[157] = localize$(IDS_ML_CHASSIS_INFO)
+		infomessage[158] = localize$(IDS_ML_WEAPONS_INFO)
+		infomessage[159] = localize$(IDS_ML_ARMORTAB_INFO)
+		infomessage[160] = localize$(IDS_ML_SAVE_INFO)
+		infomessage[161] = localize$(IDS_ML_MAXTON_INFO)
+		infomessage[162] = localize$(IDS_ML_CURRENTTON_INFO)
+		infomessage[163] = localize$(IDS_ML_AVAILTON_INFO)
+		infomessage[164] = localize$(IDS_ML_TABBLOCK_INFO)
+		infomessage[165] = localize$(IDS_ML_CHASSISBLOCK_INFO)
+		infomessage[166] = localize$(IDS_ML_NOMECH_INFO)
+		infomessage[167] = localize$(IDS_ML_MECHNAME_INFO)
+		infomessage[168] = localize$(IDS_ML_CANCELSAVE_INFO)
+		infomessage[169] = localize$(IDS_ML_SAVEDONE_INFO)
+		infomessage[170] = localize$(IDS_ML_BLACKMARKET_INFO)
+		infomessage[171] = localize$(IDS_ML_PERSONNEL_TAB_INFO)
+		infomessage[172] = localize$(IDS_ML_REPAIR_HELP)
+
+		infomessage[193] = localize$(IDS_ML_TO_BM_SAVECONFIRM_YES)
+		infomessage[194] = localize$(IDS_ML_TO_BM_SAVECONFIRM_NO)
+		infomessage[195] = localize$(IDS_ML_SAVECONFIRM_YES)
+		infomessage[196] = localize$(IDS_ML_SAVECONFIRM_NO)
+		infomessage[197] = localize$(IDS_ML_CONTINUE)
+		infomessage[198] = localize$(IDS_ML_REMOVEYES_INFO)
+		infomessage[199] = localize$(IDS_ML_REMOVENO_INFO)
+		infomessage[200] = localize$(IDS_ML_CREATE_LIMIT_INFO)
+
+		// 201 - 225 chassis tab
+		infomessage[201] = localize$(IDS_ML_CH_SELECTCHASSIS_INFO)
+		infomessage[202] = localize$(IDS_ML_CH_MECHNAMELIST_INFO)
+		infomessage[203] = localize$(IDS_ML_CH_CREATENEW_INFO)
+		infomessage[204] = localize$(IDS_ML_CH_DELETEMECH_INFO)
+		infomessage[205] = localize$(IDS_ML_CH_CAMO_INFO)
+		infomessage[206] = localize$(IDS_ML_CH_ENGINERATING_INFO)
+		infomessage[207] = localize$(IDS_ML_CH_HEATSINKS_INFO)
+		infomessage[208] = localize$(IDS_ML_CH_NEWCHASSISTYPE_INFO)
+		infomessage[209] = localize$(IDS_ML_CH_NEWMECHNAME_INFO)
+		infomessage[210] = localize$(IDS_ML_CH_CANCELCREATE_INFO)
+		infomessage[211] = localize$(IDS_ML_CH_NEWMECHCREATE_INFO)
+		infomessage[212] = localize$(DNL_JUMPJETS) "\n" localize$(IDS_ML_JUMPJETS_INFO)
+		infomessage[213] = localize$(DNL_ECM) "\n" localize$(IDS_ML_ECM_INFO)
+		infomessage[214] = localize$(DNL_BAP) "\n" localize$(IDS_ML_BEAGLE_INFO)
+		infomessage[215] = localize$(DNL_LA) "\n" localize$(IDS_ML_LIGHT_INFO)
+		infomessage[216] = localize$(DNL_AMS) "\n" localize$(IDS_ML_AMS_INFO)
+		infomessage[217] = localize$(DNL_LAMS) "\n" localize$(IDS_ML_LAMS_INFO)
+		infomessage[218] = localize$(DNL_ENHANCED_OPTICS) "\n" localize$(IDS_ML_ENHANCED_OPTICS_INFO)
+		infomessage[219] = localize$(DNL_IFF_JAMMER) "\n" localize$(IDS_ML_IFF_JAMMER_INFO)
+		infomessage[220] = localize$(DNL_ADVANCED_GYRO) "\n" localize$(IDS_ML_ADVANCED_GYRO_INFO)
+		infomessage[221] = localize$(IDS_ML_CH_SAVE_YES)  //220??? -- moved these up so that advanced gyro could be 220
+		infomessage[222] = localize$(IDS_ML_CH_SAVE_NO)
+		infomessage[223] = localize$(IDS_ML_CH_RENAME_INFO)
+		infomessage[224] = localize$(IDS_ML_CH_CANCELRENAME)
+
+
+		// 226 - 275 weapons tab
+		infomessage[226] = localize$(IDS_ML_WP_FILTER_INFO)
+		infomessage[227] = localize$(IDS_ML_WP_GROUP_INFO)
+		infomessage[228] = localize$(IDS_ML_WP_STRIPALL_INFO)
+		infomessage[230] = localize$(IDS_ML_WP_GROUPACCEPT_INFO)
+		infomessage[231] = localize$(IDS_ML_WP_GROUPRESTORE_INFO)
+		infomessage[240] = localize$(IDS_ML_WP_EMPTYMISSILE_INFO)
+		infomessage[241] = localize$(IDS_ML_WP_EMPTYBALLISTIC_INFO)
+		infomessage[242] = localize$(IDS_ML_WP_EMPTYBEAM_INFO)
+		infomessage[243] = localize$(IDS_ML_WP_EMPTYOMNI_INFO)
+		infomessage[244] = localize$(IDS_ML_WP_AVAILABLEWEAPONS_INFO)
+
+		// 276 - 300 armor tab
+		infomessage[276] = localize$(IDS_ML_AR_ARMORTYPE_INFO)
+		infomessage[278] = localize$(IDS_ML_AR_HEADSPIN_INFO)
+		infomessage[279] = localize$(IDS_ML_AR_HEADSLIDER_INFO)
+		infomessage[280] = localize$(IDS_ML_AR_LARMSPIN_INFO)
+		infomessage[281] = localize$(IDS_ML_AR_LARMSLIDER_INFO)
+		infomessage[282] = localize$(IDS_ML_AR_RARMSPIN_INFO)
+		infomessage[283] = localize$(IDS_ML_AR_RARMSLIDER_INFO)
+		infomessage[284] = localize$(IDS_ML_AR_LTORSOSPIN_INFO)
+		infomessage[285] = localize$(IDS_ML_AR_LTORSOSLIDER_INFO)
+		infomessage[286] = localize$(IDS_ML_AR_CTORSOSPIN_INFO)
+		infomessage[287] = localize$(IDS_ML_AR_CTORSOSLIDER_INFO)
+		infomessage[288] = localize$(IDS_ML_AR_RTORSOSPIN_INFO)
+		infomessage[289] = localize$(IDS_ML_AR_RTORSOSLIDER_INFO)
+		infomessage[290] = localize$(IDS_ML_AR_BTORSOSPIN_INFO)
+		infomessage[291] = localize$(IDS_ML_AR_BTORSOSLIDER_INFO)
+		infomessage[292] = localize$(IDS_ML_AR_LLEGSPIN_INFO)
+		infomessage[293] = localize$(IDS_ML_AR_LLEGSLIDER_INFO)
+		infomessage[294] = localize$(IDS_ML_AR_RLEGSPIN_INFO)
+		infomessage[295] = localize$(IDS_ML_AR_RLEGSLIDER_INFO)
+		infomessage[296] = localize$(IDS_ML_AR_AUTODISTRIBUTE_INFO)
+		infomessage[297] = localize$(DNL_FERROFIB) "\n" localize$(IDS_ML_AR_FERROFIB_INFO)
+		infomessage[298] = localize$(IDS_ML_AR_REACTIVE)"\n" localize$(IDS_ML_AR_REACTIVE_INFO)					// NEED LOCALIZATION DECISION
+		infomessage[299] = localize$(IDS_ML_AR_REFLECTIVE) "\n" localize$(IDS_ML_AR_REFLECTIVE_INFO) 			// NEED LOCALIZATION DECISION
+		infomessage[300] = localize$(IDS_ML_AR_POINTS_INFO)
+		infomessage[301] = localize$(IDS_ML_AR_MAX_ARMOR_INFO)
+
+		//301 - 324  Free Market
+		infomessage[302] = localize$(IDS_FM_HELP_CLOSE)
+		infomessage[303] = localize$(IDS_COMCEN_HELP_STAR_SYSTEM)
+		infomessage[304] = localize$(IDS_SS_HELP_CURRENT_REGION)
+		infomessage[305] = localize$(IDS_FM_PLAYER_PERSONNEL_INFO)
+		infomessage[306] = localize$(IDS_FM_PLAYER_CHASSIS_INFO)
+		infomessage[307] = localize$(IDS_FM_PLAYER_WEAPON_INFO)
+		infomessage[308] = localize$(IDS_FM_MARKET_PERSONNEL_INFO)
+		infomessage[309] = localize$(IDS_FM_MARKET_CHASSIS_INFO)
+		infomessage[310] = localize$(IDS_FM_MARKET_WEAPONS)
+		infomessage[311] = localize$(IDS_FM_BUY_BUTTON)
+		infomessage[312] = localize$(IDS_FM_SELL_BUTTON)
+		infomessage[313] = localize$(IDS_FM_CLEAR_BUTTON)
+
+		// Orbital View
+		infomessage[315] = localize$(IDS_OV_MAINMENU_BTN)
+		infomessage[316] = localize$(IDS_OV_COMMANDCENTER_BTN)
+		infomessage[317] = localize$(IDS_OV_STARSYSTEM_BTN)
+		infomessage[318] = localize$(IDS_NEWS_HELP_FORWARD)
+		infomessage[319] = localize$(IDS_NEWS_HELP_BACK)
+
+
+		// Personnel 650-700
+		infomessage[650] = localize$( IDS_AISATHASTUS_CMSTR )     "\n"  localize$( IDS_AISATHASTUS_INFO )
+		infomessage[651] = localize$( IDS_JAMESBRACKED_CMSTR )    "\n"  localize$( IDS_JAMESBRACKED_INFO )
+		infomessage[652] = localize$( IDS_MIRIASSIKESSLER_CMSTR ) "\n"  localize$( IDS_MIRIASSIKESSLER_INFO )
+		infomessage[653] = localize$( IDS_JACOBSILVERMAN_CMSTR )  "\n"  localize$( IDS_JACOBSILVERMAN_INFO )
+		infomessage[654] = localize$( IDS_RUDYREYNOLDS_CMSTR )    "\n"  localize$( IDS_RUDYREYNOLDS_INFO )
+		infomessage[655] = localize$( IDS_SARAHMAGLIONI_CMSTR )   "\n"  localize$( IDS_SARAHMAGLIONI_INFO )
+		infomessage[656] = localize$( IDS_DANIEL_BURKE_CMSTR )    "\n"  localize$( IDS_DANIEL_BURKE_INFO )
+		infomessage[657] = localize$( IDS_ANDREW_MASON_CMSTR )    "\n"  localize$( IDS_ANDREW_MASON_INFO )
+		infomessage[658] = localize$( IDS_SHEILA_DEVENS_CMSTR )   "\n"  localize$( IDS_SHEILA_DEVENS_INFO )
+		infomessage[659] = localize$( IDS_MICHAEL_OBANNON_CMSTR ) "\n"  localize$( IDS_MICHAEL_OBANNON_INFO )
+		infomessage[660] = localize$( IDS_EMILY_MCCORMICK_CMSTR ) "\n"  localize$( IDS_EMILY_MCCORMICK_INFO )
+		infomessage[661] = localize$( IDS_SETH_ANDERS_CMSTR )     "\n"  localize$( IDS_SETH_ANDERS_INFO )
+		infomessage[662] = localize$( IDS_ROBERT_ROMERO_CMSTR )   "\n"  localize$( IDS_ROBERT_ROMERO_INFO )
+		infomessage[663] = localize$( IDS_JAKE_CAMERON_CMSTR )    "\n"  localize$( IDS_JAKE_CAMERON_INFO )
+		infomessage[664] = localize$( IDS_CHARLES_HARDING_CMSTR ) "\n"  localize$( IDS_CHARLES_HARDING_INFO )
+		infomessage[665] = localize$( IDS_CYNTHIA_ROBINSON_CMSTR )"\n"  localize$( IDS_CYNTHIA_ROBINSON_INFO )
+		infomessage[666] = localize$( IDS_KENT_BARLOW_CMSTR )     "\n"  localize$( IDS_KENT_BARLOW_INFO )
+		infomessage[667] = localize$( IDS_DERRICK_MASTERSON_CMSTR )"\n" localize$( IDS_DERRICK_MASTERSON_INFO )
+		infomessage[668] = localize$( IDS_JOHNNY_JONES_CMSTR )    "\n"  localize$( IDS_JOHNNY_JONES_INFO )
+		infomessage[669] = localize$( IDS_ERIK_MACMARTIN_CMSTR )  "\n"  localize$( IDS_ERIK_MACMARTIN_INFO )
+		infomessage[670] = localize$( IDS_AMBER_WORTHY_CMSTR )    "\n"  localize$( IDS_AMBER_WORTHY_INFO )
+		infomessage[671] = localize$( IDS_STEVEN_EDWARDS_CMSTR )  "\n"  localize$( IDS_STEVEN_EDWARDS_INFO )
+
+	///////////Mechs
+	//Demo has 4 'Mechs
+		if ($$DEMO_MultiPlayer$$ == 1)
+		{
+			infomessage[325] = localize$(DNL_ATLAS) "\n" localize$(IDS_ML_ATLAS_INFO)
+			infomessage[326] = localize$(DNL_BUSHWACKER) "\n" localize$(IDS_ML_BUSHWACKER_INFO)
+			infomessage[327] = localize$(DNL_MADCAT2) "\n" localize$(IDS_ML_MADCATMK2_INFO)
+			infomessage[328] = localize$(DNL_RYOKEN) "\n" localize$(IDS_ML_RYOKEN_INFO)
+			infomessage[329] = localize$(DNL_SUNDER) "\n" localize$(IDS_ML_SUNDER_INFO)
+		}
+		else
+		{
+			if ($$DEMO_SinglePlayer$$ == 1)
+			{
+				infomessage[325] = localize$(DNL_RAVEN) "\n" localize$(IDS_ML_RAVEN_INFO)//raven
+				infomessage[326] = localize$(DNL_RYOKEN) "\n" localize$(IDS_ML_RYOKEN_INFO)//Ryoken
+				infomessage[327] = localize$(DNL_ULLER) "\n" localize$(IDS_ML_ULLER_INFO)//Uller
+				infomessage[328] = localize$(DNL_VULTURE) "\n" localize$(IDS_ML_VULTURE_INFO)//Vulture
+			}
+			else
+			{
+
+				// 325 - Show Mech Info based on the Mech Pak installed
+				int useClanPak = callback($$ShellCheckClanPak$$)
+				int useISPak = callback($$ShellCheckISPak$$)
+				int inBlackMarket = exists(@Freemarket@)
+
+
+				if ((useClanPak) && (useISPak) && (!inBlackMarket))
+				{
+					// note: as of 9/5/02 this block and the "if (inBlackMarket)" block below are identical
+					i = 325
+				    temp_mech_id[i++]	= M_ArcticWolf	 // Arctic Wolf
+				    temp_mech_id[i++]	= M_BrcticWolf	 // Tronix	
+				    temp_mech_id[i++]	= M_Ares		     // argus
+				    temp_mech_id[i++]	= M_Argus		     // argus
+				    temp_mech_id[i++]	= M_Atlas		     // atlas
+				    temp_mech_id[i++]	= M_Avatar		     // avatar // mektek
+				    temp_mech_id[i++]	= M_Awesome	     // awesome
+				    temp_mech_id[i++]	= M_BlackKnight	 // black knight
+				    temp_mech_id[i++]	= M_Bloodasp	 // mektek
+				    temp_mech_id[i++]	= M_Bushwacker	 // bushwacker
+				    temp_mech_id[i++]	= M_Catapult	   	 // catapult
+				    temp_mech_id[i++]	= M_CauldronBorn	 // cauldron-born
+				    temp_mech_id[i++]	= M_Chimera	     // chimera
+				    temp_mech_id[i++]	= M_Cougar	     // cougar
+				    temp_mech_id[i++]	= M_Daishi	     // daishi
+				    temp_mech_id[i++]	= M_Dragon	     // dragon
+				    temp_mech_id[i++]	= M_Fafnir			// Fafnir
+				    temp_mech_id[i++]	= M_Flea		     // flea
+				    temp_mech_id[i++]	= M_Gladiator    // Gladiator
+				    temp_mech_id[i++]	= M_Hauptmann    // Hauptmann
+				    temp_mech_id[i++]	= M_Hellhound	     // Hellhound
+				    temp_mech_id[i++]	= M_Hellspawn	     // hellspawn
+				    temp_mech_id[i++]	= M_Highlander	 // highlander
+				    temp_mech_id[i++]	= M_Hunchback	     // hunchback
+				    temp_mech_id[i++]	= M_Kodiak	     // Kodiak
+				    temp_mech_id[i++]	= M_Loki		     // loki
+				    temp_mech_id[i++]	= M_Longbow      // Longbow
+				    temp_mech_id[i++]	= M_Madcat	     // madcat
+				    temp_mech_id[i++]	= M_Madcat_MKII	 // madcat2
+				    temp_mech_id[i++]	= M_Marauder	     // marauder
+				    temp_mech_id[i++]	= M_Masakari	     // masakari
+				    temp_mech_id[i++]	= M_Mauler	     // mauler
+				    temp_mech_id[i++]	= M_Novacat	     // novacat
+				    temp_mech_id[i++]	= M_Osiris	     // osiris
+				    temp_mech_id[i++]	= M_Owens        // Owens
+				    temp_mech_id[i++]	= M_Puma         // Puma
+				    temp_mech_id[i++]	= M_Raven		     // raven
+				    temp_mech_id[i++]	= M_Ryoken	     // ryoken
+				    temp_mech_id[i++]	= M_Shadowcat	     // shadowcat
+				    temp_mech_id[i++]	= M_Stalker		    // mektek
+				    temp_mech_id[i++]	= M_Strider		     // strider // mektek
+				    temp_mech_id[i++]	= M_Sunder	     // sunder
+				    temp_mech_id[i++]	= M_Templar	     // Templar
+				    temp_mech_id[i++]	= M_Thanatos	     // thanatos
+				    temp_mech_id[i++]	= M_Thor		     // thor
+				    temp_mech_id[i++]	= M_Uller		     // uller
+				    temp_mech_id[i++]	= M_UrbanmechIIC		     // urbie	// mektek
+				    temp_mech_id[i++]	= M_Urbanmech		     // urbie	// mektek
+				    temp_mech_id[i++]	= M_Uziel		     // uziel
+				    temp_mech_id[i++]	= M_Victor       // Victor
+				    temp_mech_id[i++]	= M_Vulture	     // vulture
+				    temp_mech_id[i++]	= M_Warhammer		     // warhammer // mektek
+				    temp_mech_id[i++]	= M_Wolfhound	     // wolfhound
+				    temp_mech_id[i++]	= M_Zeus		     // zeus
+	
+					i = 325
+				    infomessage[i++]  = localize$(DNL_ARCTICWOLF) "\n" localize$(IDS_ML_ARCTICWOLF_INFO)
+				    infomessage[i++]  = "Ares" "\n"ares_description	// mektek
+				    infomessage[i++]  = localize$(DNL_ARGUS) "\n" localize$(IDS_ML_ARGUS_INFO)
+				    infomessage[i++]  = localize$(DNL_ATLAS) "\n" localize$(IDS_ML_ATLAS_INFO)
+				    infomessage[i++]  = "Avatar" "\n" avatar_description 	// mektek
+				    infomessage[i++]  = "BrcticWolf" "\n" brcticwolf_description 	// Tronix	
+				    infomessage[i++]  = localize$(DNL_AWESOME) "\n" localize$(IDS_ML_AWESOME_INFO)
+				    infomessage[i++]  = localize$(DNL_BLACKKNIGHT) "\n" localize$(IDS_ML_BLACKKNIGHT_INFO)
+				    infomessage[i++]  = "Blood Asp" "\n" bloodasp_description	// mektek
+				    infomessage[i++]  = localize$(DNL_BUSHWACKER) "\n" localize$(IDS_ML_BUSHWACKER_INFO)
+				    infomessage[i++]  = localize$(DNL_CATAPULT) "\n" localize$(IDS_ML_CATAPULT_INFO)
+				    infomessage[i++]  = localize$(DNL_CAULDRONBORN) "\n" localize$(IDS_ML_CAULDRONBORN_INFO)
+				    infomessage[i++]  = localize$(DNL_CHIMERA) "\n" localize$(IDS_ML_CHIMERA_INFO)
+				    infomessage[i++]  = localize$(DNL_COUGAR) "\n" localize$(IDS_ML_COUGAR_INFO)
+				    infomessage[i++]  = localize$(DNL_DAISHI) "\n" localize$(IDS_ML_DAISHI_INFO)
+				    infomessage[i++]  = localize$(DNL_DRAGON) "\n" localize$(IDS_ML_DRAGON_INFO)
+				    infomessage[i++]  = localize$(DNL_FAFNIR) "\n" localize$(IDS_ML_FAFNIR_INFO)
+				    infomessage[i++]  = localize$(DNL_FLEA) "\n" localize$(IDS_ML_FLEA_INFO)
+				    infomessage[i++]  = localize$(DNL_GLADIATOR) "\n" localize$(IDS_ML_GLADIATOR_INFO)
+				    infomessage[i++]  = localize$(DNL_HAUPTMANN) "\n" localize$(IDS_ML_HAUPTMANN_INFO)
+				    infomessage[i++]  = localize$(DNL_HELLHOUND) "\n" localize$(IDS_ML_HELLHOUND_INFO)
+				    infomessage[i++]  = localize$(DNL_HELLSPAWN) "\n" localize$(IDS_ML_HELLSPAWN_INFO)
+				    infomessage[i++]  = localize$(DNL_HIGHLANDER) "\n" localize$(IDS_ML_HIGHLANDER_INFO)
+				    infomessage[i++]  = localize$(DNL_HUNCHBACK) "\n" localize$(IDS_ML_HUNCHBACK_INFO)
+				    infomessage[i++]  = localize$(DNL_KODIAK) "\n" localize$(IDS_ML_KODIAK_INFO)
+				    infomessage[i++]  = localize$(DNL_LOKI) "\n" localize$(IDS_ML_LOKI_INFO)
+				    infomessage[i++]  = localize$(DNL_LONGBOW) "\n" localize$(IDS_ML_LONGBOW_INFO)
+				    infomessage[i++]  = localize$(DNL_MADCAT) "\n" localize$(IDS_ML_MADCAT_INFO)
+				    infomessage[i++]  = localize$(DNL_MADCAT2) "\n" localize$(IDS_ML_MADCATMK2_INFO)
+				    infomessage[i++]  = "Marauder" "\n" marauder_description	// mektek
+				    infomessage[i++]  = localize$(DNL_MASAKARI) "\n" localize$(IDS_ML_MASAKARI_INFO)
+				    infomessage[i++]  = localize$(DNL_MAULER) "\n" localize$(IDS_ML_MAULER_INFO)
+				    infomessage[i++]  = localize$(DNL_NOVACAT) "\n" localize$(IDS_ML_NOVACAT_INFO)
+				    infomessage[i++]  = localize$(DNL_OSIRIS) "\n" localize$(IDS_ML_OSIRIS_INFO)
+				    infomessage[i++]  = localize$(DNL_OWENS) "\n" localize$(IDS_ML_OWENS_INFO)
+				    infomessage[i++]  = localize$(DNL_PUMA) "\n" localize$(IDS_ML_PUMA_INFO)
+				    infomessage[i++]  = localize$(DNL_RAVEN) "\n" localize$(IDS_ML_RAVEN_INFO)
+				    infomessage[i++]  = localize$(DNL_RYOKEN) "\n" localize$(IDS_ML_RYOKEN_INFO)
+				    infomessage[i++]  = localize$(DNL_SHADOWCAT) "\n" localize$(IDS_ML_SHADOWCAT_INFO)
+				    infomessage[i++]  = "Stalker" "\n" stalker_description	// mektek
+				    infomessage[i++]  = "Strider" "\n" strider_description	// mektek
+				    infomessage[i++]  = localize$(DNL_SUNDER) "\n" localize$(IDS_ML_SUNDER_INFO)
+				    infomessage[i++]  = localize$(DNL_TEMPLAR) "\n" localize$(IDS_ML_TEMPLAR_INFO)
+				    infomessage[i++]  = localize$(DNL_THANATOS) "\n" localize$(IDS_ML_THANATOS_INFO)
+				    infomessage[i++]  = localize$(DNL_THOR) "\n" localize$(IDS_ML_THOR_INFO)
+				    infomessage[i++]  = localize$(DNL_ULLER) "\n" localize$(IDS_ML_ULLER_INFO)
+				    infomessage[i++]  = "Clan Urban Mech" "\n" urbanmech_iic_description	// mektek
+				    infomessage[i++]  = "IS Urban Mech" "\n" urbanmech_description	// mektek
+				    infomessage[i++]  = localize$(DNL_UZIEL) "\n" localize$(IDS_ML_UZIEL_INFO)
+				    infomessage[i++]  = localize$(DNL_VICTOR) "\n" localize$(IDS_ML_VICTOR_INFO)
+				    infomessage[i++]  = localize$(DNL_VULTURE) "\n" localize$(IDS_ML_VULTURE_INFO)
+				    infomessage[i++]  = "Warhammer" "\n" warhammer_description 	// mektek
+				    infomessage[i++]  = localize$(DNL_WOLFHOUND) "\n" localize$(IDS_ML_WOLFHOUND_INFO)
+				    infomessage[i++]  = localize$(DNL_ZEUS) "\n" localize$(IDS_ML_ZEUS_INFO)
+                }
+				else
+				if ((useClanPak) && (!useISPak) && (!inBlackMarket))
+				{
+					i = 325
+				    temp_mech_id[i++]	= M_ArcticWolf	 // Arctic Wolf
+				    temp_mech_id[i++]	= M_BrcticWolf	 // Tronix
+				    temp_mech_id[i++]	= M_Ares		     // mektek
+				    temp_mech_id[i++]	= M_Argus		     // argus
+				    temp_mech_id[i++]	= M_Atlas		     // atlas
+				    temp_mech_id[i++]	= M_Avatar	     // Avatar	// mektek
+				    temp_mech_id[i++]	= M_Awesome	     // awesome
+				    temp_mech_id[i++]	= M_BlackKnight	 // black knight
+				    temp_mech_id[i++]	= M_Bloodasp	 // mektek
+				    temp_mech_id[i++]	= M_Bushwacker	 // bushwacker
+				    temp_mech_id[i++]	= M_Catapult	   	 // catapult
+				    temp_mech_id[i++]	= M_CauldronBorn	 // cauldron-born
+				    temp_mech_id[i++]	= M_Chimera	     // chimera
+				    temp_mech_id[i++]	= M_Cougar	     // cougar
+				    temp_mech_id[i++]	= M_Daishi	     // daishi
+				    temp_mech_id[i++]	= M_Fafnir			// Fafnir
+				    temp_mech_id[i++]	= M_Flea		     // flea
+				    temp_mech_id[i++]	= M_Gladiator // Gladiator
+				    temp_mech_id[i++]	= M_Hauptmann // Hauptmann
+				    temp_mech_id[i++]	= M_Hellhound	     // Hellhound
+				    temp_mech_id[i++]	= M_Hellspawn	     // hellspawn
+				    temp_mech_id[i++]	= M_Kodiak	     // Kodiak
+				    temp_mech_id[i++]	= M_Loki		     // loki
+				    temp_mech_id[i++]	= M_Longbow   // Longbow
+				    temp_mech_id[i++]	= M_Madcat	     // madcat
+				    temp_mech_id[i++]	= M_Madcat_MKII	 // madcat2
+				    temp_mech_id[i++]	= M_Marauder	     // maraude	// mektek
+				    temp_mech_id[i++]	= M_Masakari	     // masakari
+				    temp_mech_id[i++]	= M_Mauler	     // mauler
+				    temp_mech_id[i++]	= M_Novacat	     // novacat
+				    temp_mech_id[i++]	= M_Osiris	     // osiris
+				    temp_mech_id[i++]	= M_Owens     // Owens
+				    temp_mech_id[i++]	= M_Puma      // Puma
+				    temp_mech_id[i++]	= M_Raven		     // raven
+				    temp_mech_id[i++]	= M_Ryoken	     // ryoken
+				    temp_mech_id[i++]	= M_Shadowcat	     // shadowcat
+				    temp_mech_id[i++]	= M_Stalker	     // mektek
+				    temp_mech_id[i++]	= M_Strider	     // Strider	// mektek
+				    temp_mech_id[i++]	= M_Sunder	     // sunder
+				    temp_mech_id[i++]	= M_Templar	     // Templar
+				    temp_mech_id[i++]	= M_Thanatos	     // thanatos
+				    temp_mech_id[i++]	= M_Thor		     // thor
+				    temp_mech_id[i++]	= M_Uller		     // uller
+				    temp_mech_id[i++]	= M_UrbanmechIIC		     // urbie	// mektek
+				    temp_mech_id[i++]	= M_Urbanmech		     // urbie	// mektek
+				    temp_mech_id[i++]	= M_Uziel		     // uziel
+				    temp_mech_id[i++]	= M_Victor    // Victor
+				    temp_mech_id[i++]	= M_Vulture	     // vulture
+				    temp_mech_id[i++]	= M_Warhammer	     // Warhammer	// mektek
+				    temp_mech_id[i++]	= M_Wolfhound	     // wolfhound
+
+					i = 325
+				    infomessage[i++]  = localize$(DNL_ARCTICWOLF) "\n" localize$(IDS_ML_ARCTICWOLF_INFO)
+				    infomessage[i++]  = "Ares" "\n"ares_description	// mektek
+				    infomessage[i++]  = "BrcticWolf" "\n" brcticwolf_description	// Tronix
+				    infomessage[i++]  = localize$(DNL_ARGUS) "\n" localize$(IDS_ML_ARGUS_INFO)
+				    infomessage[i++]  = localize$(DNL_ATLAS) "\n" localize$(IDS_ML_ATLAS_INFO)
+				    infomessage[i++]  = "Avatar" "\n" avatar_description 	// mektek
+				    infomessage[i++]  = localize$(DNL_AWESOME) "\n" localize$(IDS_ML_AWESOME_INFO)
+				    infomessage[i++]  = localize$(DNL_BLACKKNIGHT) "\n" localize$(IDS_ML_BLACKKNIGHT_INFO)
+				    infomessage[i++]  = "Blood Asp" "\n" bloodasp_description	// mektek
+				    infomessage[i++]  = localize$(DNL_BUSHWACKER) "\n" localize$(IDS_ML_BUSHWACKER_INFO)
+				    infomessage[i++]  = localize$(DNL_CATAPULT) "\n" localize$(IDS_ML_CATAPULT_INFO)
+				    infomessage[i++]  = localize$(DNL_CAULDRONBORN) "\n" localize$(IDS_ML_CAULDRONBORN_INFO)
+				    infomessage[i++]  = localize$(DNL_CHIMERA) "\n" localize$(IDS_ML_CHIMERA_INFO)
+				    infomessage[i++]  = localize$(DNL_COUGAR) "\n" localize$(IDS_ML_COUGAR_INFO)
+				    infomessage[i++]  = localize$(DNL_DAISHI) "\n" localize$(IDS_ML_DAISHI_INFO)
+				    infomessage[i++]  = localize$(DNL_FAFNIR) "\n" localize$(IDS_ML_FAFNIR_INFO)
+				    infomessage[i++]  = localize$(DNL_FLEA) "\n" localize$(IDS_ML_FLEA_INFO)
+				    infomessage[i++]  = localize$(DNL_GLADIATOR) "\n" localize$(IDS_ML_GLADIATOR_INFO)
+				    infomessage[i++]  = localize$(DNL_HAUPTMANN) "\n" localize$(IDS_ML_HAUPTMANN_INFO)
+				    infomessage[i++]  = localize$(DNL_HELLHOUND) "\n" localize$(IDS_ML_HELLHOUND_INFO)
+				    infomessage[i++]  = localize$(DNL_HELLSPAWN) "\n" localize$(IDS_ML_HELLSPAWN_INFO)
+				    infomessage[i++]  = localize$(DNL_KODIAK) "\n" localize$(IDS_ML_KODIAK_INFO)
+				    infomessage[i++]  = localize$(DNL_LOKI) "\n" localize$(IDS_ML_LOKI_INFO)
+				    infomessage[i++]  = localize$(DNL_LONGBOW) "\n" localize$(IDS_ML_LONGBOW_INFO)
+				    infomessage[i++]  = localize$(DNL_MADCAT) "\n" localize$(IDS_ML_MADCAT_INFO)
+				    infomessage[i++]  = localize$(DNL_MADCAT2) "\n" localize$(IDS_ML_MADCATMK2_INFO)
+				    infomessage[i++]  = "Marauder" "\n" marauder_description	// mektek
+				    infomessage[i++]  = localize$(DNL_MASAKARI) "\n" localize$(IDS_ML_MASAKARI_INFO)
+				    infomessage[i++]  = localize$(DNL_MAULER) "\n" localize$(IDS_ML_MAULER_INFO)
+				    infomessage[i++]  = localize$(DNL_NOVACAT) "\n" localize$(IDS_ML_NOVACAT_INFO)
+				    infomessage[i++]  = localize$(DNL_OSIRIS) "\n" localize$(IDS_ML_OSIRIS_INFO)
+				    infomessage[i++]  = localize$(DNL_OWENS) "\n" localize$(IDS_ML_OWENS_INFO)
+				    infomessage[i++]  = localize$(DNL_PUMA) "\n" localize$(IDS_ML_PUMA_INFO)
+				    infomessage[i++]  = localize$(DNL_RAVEN) "\n" localize$(IDS_ML_RAVEN_INFO)
+				    infomessage[i++]  = localize$(DNL_RYOKEN) "\n" localize$(IDS_ML_RYOKEN_INFO)
+				    infomessage[i++]  = localize$(DNL_SHADOWCAT) "\n" localize$(IDS_ML_SHADOWCAT_INFO)
+				    infomessage[i++]  = "Stalker" "\n" stalker_description	// mektek
+				    infomessage[i++]  = "Strider" "\n" strider_description	// mektek
+				    infomessage[i++]  = localize$(DNL_SUNDER) "\n" localize$(IDS_ML_SUNDER_INFO)
+				    infomessage[i++]  = localize$(DNL_TEMPLAR) "\n" localize$(IDS_ML_TEMPLAR_INFO)
+				    infomessage[i++]  = localize$(DNL_THANATOS) "\n" localize$(IDS_ML_THANATOS_INFO)
+				    infomessage[i++]  = localize$(DNL_THOR) "\n" localize$(IDS_ML_THOR_INFO)
+				    infomessage[i++]  = localize$(DNL_ULLER) "\n" localize$(IDS_ML_ULLER_INFO)
+				    infomessage[i++]  = "Clan Urban Mech" "\n" urbanmech_iic_description	// mektek
+				    infomessage[i++]  = "IS Urban Mech" "\n" urbanmech_description	// mektek
+				    infomessage[i++]  = localize$(DNL_UZIEL) "\n" localize$(IDS_ML_UZIEL_INFO)
+				    infomessage[i++]  = localize$(DNL_VICTOR) "\n" localize$(IDS_ML_VICTOR_INFO)
+				    infomessage[i++]  = localize$(DNL_VULTURE) "\n" localize$(IDS_ML_VULTURE_INFO)
+				    infomessage[i++]  = "Warhammer" "\n" warhammer_description 	// mektek
+				    infomessage[i++]  = localize$(DNL_WOLFHOUND) "\n" localize$(IDS_ML_WOLFHOUND_INFO)
+                }
+				else
+				if ((!useClanPak) && (useISPak) && (!inBlackMarket))
+				{
+					i = 325
+				    temp_mech_id[i++]	= M_Ares		     // mektek
+				    temp_mech_id[i++]	= M_BrcticWolf		     // Tronix
+				    temp_mech_id[i++]	= M_Argus		     // argus
+				    temp_mech_id[i++]	= M_Atlas		     // atlas
+				    temp_mech_id[i++]	= M_Avatar		     // avatar	// mektek
+				    temp_mech_id[i++]	= M_Awesome	     // awesome
+				    temp_mech_id[i++]	= M_BlackKnight	 // black knight
+				    temp_mech_id[i++]	= M_Bloodasp	 // mektek
+				    temp_mech_id[i++]	= M_Bushwacker	 // bushwacker
+				    temp_mech_id[i++]	= M_Catapult	   	 // catapult
+				    temp_mech_id[i++]	= M_Chimera	     // chimera
+				    temp_mech_id[i++]	= M_Cougar	     // cougar
+				    temp_mech_id[i++]	= M_Daishi	     // daishi
+				    temp_mech_id[i++]	= M_Dragon	     // dragon
+				    temp_mech_id[i++]	= M_Fafnir			// Fafnir
+				    temp_mech_id[i++]	= M_Flea		     // flea
+				    temp_mech_id[i++]	= M_Gladiator    // Gladiator
+				    temp_mech_id[i++]	= M_Hauptmann    // Hauptmann
+				    temp_mech_id[i++]	= M_Hellhound	     // Hellhound
+				    temp_mech_id[i++]	= M_Hellspawn	     // hellspawn
+				    temp_mech_id[i++]	= M_Highlander	 // highlander
+				    temp_mech_id[i++]	= M_Hunchback	     // hunchback
+				    temp_mech_id[i++]	= M_Loki		     // loki
+				    temp_mech_id[i++]	= M_Longbow      // Longbow
+				    temp_mech_id[i++]	= M_Madcat	     // madcat
+				    temp_mech_id[i++]	= M_Madcat_MKII	 // madcat2
+				    temp_mech_id[i++]	= M_Marauder	     // marauder	// mektek
+				    temp_mech_id[i++]	= M_Mauler	     // mauler
+				    temp_mech_id[i++]	= M_Novacat	     // novacat
+				    temp_mech_id[i++]	= M_Osiris	     // osiris
+				    temp_mech_id[i++]	= M_Owens        // Owens
+				    temp_mech_id[i++]	= M_Puma         // Puma
+				    temp_mech_id[i++]	= M_Raven		     // raven
+				    temp_mech_id[i++]	= M_Ryoken	     // ryoken
+				    temp_mech_id[i++]	= M_Shadowcat	     // shadowcat
+				    temp_mech_id[i++]	= M_Stalker		   // mektek
+				    temp_mech_id[i++]	= M_Strider		     // strider	// mektek
+				    temp_mech_id[i++]	= M_Sunder	     // sunder
+				    temp_mech_id[i++]	= M_Templar	     // Templar
+				    temp_mech_id[i++]	= M_Thanatos	     // thanatos
+				    temp_mech_id[i++]	= M_Thor		     // thor
+				    temp_mech_id[i++]	= M_Uller		     // uller
+				    temp_mech_id[i++]	= M_Uller		     // uller
+				    temp_mech_id[i++]	= M_UrbanmechIIC		     // urbie	// mektek
+				    temp_mech_id[i++]	= M_Urbanmech		     // urbie	// mektek
+				    temp_mech_id[i++]	= M_Victor       // Victor
+				    temp_mech_id[i++]	= M_Vulture	     // vulture
+				    temp_mech_id[i++]	= M_Warhammer		     // warhammer	// mektek
+				    temp_mech_id[i++]	= M_Wolfhound	     // wolfhound
+				    temp_mech_id[i++]	= M_Zeus		     // zeus
+
+					i = 325
+				    infomessage[i++]  = "Ares" "\n"ares_description	// mektek
+				    infomessage[i++]  = "BrcticWolf" "\n" brcticwolf_description	// mektek
+				    infomessage[i++]  = localize$(DNL_ARGUS) "\n" localize$(IDS_ML_ARGUS_INFO)
+				    infomessage[i++]  = localize$(DNL_ATLAS) "\n" localize$(IDS_ML_ATLAS_INFO)
+				    infomessage[i++]  = "Avatar" "\n" avatar_description 	// Avatar	// mektek
+				    infomessage[i++]  = localize$(DNL_AWESOME) "\n" localize$(IDS_ML_AWESOME_INFO)
+				    infomessage[i++]  = localize$(DNL_BLACKKNIGHT) "\n" localize$(IDS_ML_BLACKKNIGHT_INFO)
+				    infomessage[i++]  = "Blood Asp" "\n" bloodasp_description	// mektek	// mektek
+				    infomessage[i++]  = localize$(DNL_BUSHWACKER) "\n" localize$(IDS_ML_BUSHWACKER_INFO)
+				    infomessage[i++]  = localize$(DNL_CATAPULT) "\n" localize$(IDS_ML_CATAPULT_INFO)
+				    infomessage[i++]  = localize$(DNL_CHIMERA) "\n" localize$(IDS_ML_CHIMERA_INFO)
+				    infomessage[i++]  = localize$(DNL_COUGAR) "\n" localize$(IDS_ML_COUGAR_INFO)
+				    infomessage[i++]  = localize$(DNL_DAISHI) "\n" localize$(IDS_ML_DAISHI_INFO)
+				    infomessage[i++]  = localize$(DNL_DRAGON) "\n" localize$(IDS_ML_DRAGON_INFO)
+				    infomessage[i++]  = localize$(DNL_FAFNIR) "\n" localize$(IDS_ML_FAFNIR_INFO)
+				    infomessage[i++]  = localize$(DNL_FLEA) "\n" localize$(IDS_ML_FLEA_INFO)
+				    infomessage[i++]  = localize$(DNL_GLADIATOR) "\n" localize$(IDS_ML_GLADIATOR_INFO)
+				    infomessage[i++]  = localize$(DNL_HAUPTMANN) "\n" localize$(IDS_ML_HAUPTMANN_INFO)
+				    infomessage[i++]  = localize$(DNL_HELLHOUND) "\n" localize$(IDS_ML_HELLHOUND_INFO)
+				    infomessage[i++]  = localize$(DNL_HELLSPAWN) "\n" localize$(IDS_ML_HELLSPAWN_INFO)
+				    infomessage[i++]  = localize$(DNL_HIGHLANDER) "\n" localize$(IDS_ML_HIGHLANDER_INFO)
+				    infomessage[i++]  = localize$(DNL_HUNCHBACK) "\n" localize$(IDS_ML_HUNCHBACK_INFO)
+				    infomessage[i++]  = localize$(DNL_LOKI) "\n" localize$(IDS_ML_LOKI_INFO)
+				    infomessage[i++]  = localize$(DNL_LONGBOW) "\n" localize$(IDS_ML_LONGBOW_INFO)
+				    infomessage[i++]  = localize$(DNL_MADCAT) "\n" localize$(IDS_ML_MADCAT_INFO)
+				    infomessage[i++]  = localize$(DNL_MADCAT2) "\n" localize$(IDS_ML_MADCATMK2_INFO)
+				    infomessage[i++]  = "Marauder" "\n" marauder_description	// Marauder	// mektek
+				    infomessage[i++]  = localize$(DNL_MAULER) "\n" localize$(IDS_ML_MAULER_INFO)
+				    infomessage[i++]  = localize$(DNL_NOVACAT) "\n" localize$(IDS_ML_NOVACAT_INFO)
+				    infomessage[i++]  = localize$(DNL_OSIRIS) "\n" localize$(IDS_ML_OSIRIS_INFO)
+				    infomessage[i++]  = localize$(DNL_OWENS) "\n" localize$(IDS_ML_OWENS_INFO)
+				    infomessage[i++]  = localize$(DNL_PUMA) "\n" localize$(IDS_ML_PUMA_INFO)
+				    infomessage[i++]  = localize$(DNL_RAVEN) "\n" localize$(IDS_ML_RAVEN_INFO)
+				    infomessage[i++]  = localize$(DNL_RYOKEN) "\n" localize$(IDS_ML_RYOKEN_INFO)
+				    infomessage[i++]  = localize$(DNL_SHADOWCAT) "\n" localize$(IDS_ML_SHADOWCAT_INFO)
+				    infomessage[i++]  = "Stalker" "\n" stalker_description	// Strider	// mektek
+				    infomessage[i++]  = "Strider" "\n" strider_description	// Strider	// mektek
+				    infomessage[i++]  = localize$(DNL_SUNDER) "\n" localize$(IDS_ML_SUNDER_INFO)
+				    infomessage[i++]  = localize$(DNL_TEMPLAR) "\n" localize$(IDS_ML_TEMPLAR_INFO)
+				    infomessage[i++]  = localize$(DNL_THANATOS) "\n" localize$(IDS_ML_THANATOS_INFO)
+				    infomessage[i++]  = localize$(DNL_THOR) "\n" localize$(IDS_ML_THOR_INFO)
+				    infomessage[i++]  = localize$(DNL_ULLER) "\n" localize$(IDS_ML_ULLER_INFO)
+				    infomessage[i++]  = "Clan Urban Mech" "\n" urbanmech_iic_description	// mektek
+				    infomessage[i++]  = "IS Urban Mech" "\n" urbanmech_description	// mektek
+				    infomessage[i++]  = localize$(DNL_UZIEL) "\n" localize$(IDS_ML_UZIEL_INFO)
+				    infomessage[i++]  = localize$(DNL_VICTOR) "\n" localize$(IDS_ML_VICTOR_INFO)
+				    infomessage[i++]  = localize$(DNL_VULTURE) "\n" localize$(IDS_ML_VULTURE_INFO)
+				    infomessage[i++]  = "Warhammer" "\n" warhammer_description 	// Avatar	// mektek
+				    infomessage[i++]  = localize$(DNL_WOLFHOUND) "\n" localize$(IDS_ML_WOLFHOUND_INFO)
+				    infomessage[i++]  = localize$(DNL_ZEUS) "\n" localize$(IDS_ML_ZEUS_INFO)
+                }
+				else
+				if (inBlackMarket)
+				{
+					i = 325
+				    temp_mech_id[i++]	= M_ArcticWolf	 // Arctic Wolf
+				    //temp_mech_id[i++]	= M_Ares		     // mektek
+				    temp_mech_id[i++]	= M_Argus		     // argus
+				    temp_mech_id[i++]	= M_Atlas		     // atlas
+				    //temp_mech_id[i++]	= M_Avatar		     // avatar	// mektek
+				    temp_mech_id[i++]	= M_Awesome	     // awesome
+				    temp_mech_id[i++]	= M_BlackKnight	 // black knight
+				    //temp_mech_id[i++]	= M_Bloodasp	 // mektek
+				    temp_mech_id[i++]	= M_Bushwacker	 // bushwacker
+				    temp_mech_id[i++]	= M_Catapult	   	 // catapult
+				    temp_mech_id[i++]	= M_CauldronBorn	 // cauldron-born
+				    temp_mech_id[i++]	= M_Chimera	     // chimera
+				    temp_mech_id[i++]	= M_Cougar	     // cougar
+				    temp_mech_id[i++]	= M_Daishi	     // daishi
+				    temp_mech_id[i++]	= M_Dragon	     // dragon
+				    temp_mech_id[i++]	= M_Fafnir			// Fafnir
+				    temp_mech_id[i++]	= M_Flea		     // flea
+				    temp_mech_id[i++]	= M_Gladiator  	// Gladiator
+				    temp_mech_id[i++]	= M_Hauptmann   // Hauptmann
+				    temp_mech_id[i++]	= M_Hellhound	     // Hellhound
+				    temp_mech_id[i++]	= M_Hellspawn	     // hellspawn
+				    temp_mech_id[i++]	= M_Highlander	 // highlander
+				    temp_mech_id[i++]	= M_Hunchback	     // hunchback
+				    temp_mech_id[i++]	= M_Kodiak	     // Kodiak
+				    temp_mech_id[i++]	= M_Loki		     // loki
+				    temp_mech_id[i++]	= M_Longbow     // Longbow
+				    temp_mech_id[i++]	= M_Madcat	     // madcat
+				    temp_mech_id[i++]	= M_Madcat_MKII	 // madcat2
+				    //temp_mech_id[i++]	= M_Marauder	     // marauder	// mektek
+				    temp_mech_id[i++]	= M_Masakari	     // masakari
+				    temp_mech_id[i++]	= M_Mauler	     // mauler
+				    temp_mech_id[i++]	= M_Novacat	     // novacat
+				    temp_mech_id[i++]	= M_Osiris	     // osiris
+				    temp_mech_id[i++]	= M_Owens       // Owens
+				    temp_mech_id[i++]	= M_Puma        // Puma
+				    temp_mech_id[i++]	= M_Raven		     // raven
+				    temp_mech_id[i++]	= M_Ryoken	     // ryoken
+				    temp_mech_id[i++]	= M_Shadowcat	     // shadowcat
+				    //temp_mech_id[i++]	= M_Stalker		// mektek
+				    //temp_mech_id[i++]	= M_Strider		     // strider	// mektek
+				    temp_mech_id[i++]	= M_Sunder	     // sunder
+				    temp_mech_id[i++]	= M_Templar	     // Templar
+				    temp_mech_id[i++]	= M_Thanatos	     // thanatos
+				    temp_mech_id[i++]	= M_Thor		     // thor
+				    temp_mech_id[i++]	= M_Uller		     // uller
+				    //temp_mech_id[i++]	= M_UrbanmechIIC		     // urbie	//mektek
+				    //temp_mech_id[i++]	= M_Urbanmech		     // urbie	//mektek
+				    temp_mech_id[i++]	= M_Uziel		     // uziel
+				    temp_mech_id[i++]	= M_Victor      // Victor
+				    temp_mech_id[i++]	= M_Vulture	     // vulture
+				    //temp_mech_id[i++]	= M_Warhammer		     // warhammer	// mektek
+				    temp_mech_id[i++]	= M_Wolfhound	     // wolfhound
+				    temp_mech_id[i++]	= M_Zeus		     // zeus
+
+					i = 325
+				    infomessage[i++]  = localize$(DNL_ARCTICWOLF) "\n" localize$(IDS_ML_ARCTICWOLF_INFO)
+				    //infomessage[i++]  = "Ares" "\n"ares_description	// mektek
+				    infomessage[i++]  = localize$(DNL_ARGUS) "\n" localize$(IDS_ML_ARGUS_INFO)
+				    infomessage[i++]  = localize$(DNL_ATLAS) "\n" localize$(IDS_ML_ATLAS_INFO)
+				    //infomessage[i++]  = "Avatar" "\n" avatar_description 	// mektek
+				    infomessage[i++]  = localize$(DNL_AWESOME) "\n" localize$(IDS_ML_AWESOME_INFO)
+				    infomessage[i++]  = localize$(DNL_BLACKKNIGHT) "\n" localize$(IDS_ML_BLACKKNIGHT_INFO)
+				    //infomessage[i++]  = "Blood Asp" "\n" bloodasp_description	// mektek
+				    infomessage[i++]  = localize$(DNL_BUSHWACKER) "\n" localize$(IDS_ML_BUSHWACKER_INFO)
+				    infomessage[i++]  = localize$(DNL_CATAPULT) "\n" localize$(IDS_ML_CATAPULT_INFO)
+				    infomessage[i++]  = localize$(DNL_CAULDRONBORN) "\n" localize$(IDS_ML_CAULDRONBORN_INFO)
+				    infomessage[i++]  = localize$(DNL_CHIMERA) "\n" localize$(IDS_ML_CHIMERA_INFO)
+				    infomessage[i++]  = localize$(DNL_COUGAR) "\n" localize$(IDS_ML_COUGAR_INFO)
+				    infomessage[i++]  = localize$(DNL_DAISHI) "\n" localize$(IDS_ML_DAISHI_INFO)
+				    infomessage[i++]  = localize$(DNL_DRAGON) "\n" localize$(IDS_ML_DRAGON_INFO)
+				    infomessage[i++]  = localize$(DNL_FAFNIR) "\n" localize$(IDS_ML_FAFNIR_INFO)
+				    infomessage[i++]  = localize$(DNL_FLEA) "\n" localize$(IDS_ML_FLEA_INFO)
+				    infomessage[i++]  = localize$(DNL_GLADIATOR) "\n" localize$(IDS_ML_GLADIATOR_INFO)
+				    infomessage[i++]  = localize$(DNL_HAUPTMANN) "\n" localize$(IDS_ML_HAUPTMANN_INFO)
+				    infomessage[i++]  = localize$(DNL_HELLHOUND) "\n" localize$(IDS_ML_HELLHOUND_INFO)
+				    infomessage[i++]  = localize$(DNL_HELLSPAWN) "\n" localize$(IDS_ML_HELLSPAWN_INFO)
+				    infomessage[i++]  = localize$(DNL_HIGHLANDER) "\n" localize$(IDS_ML_HIGHLANDER_INFO)
+				    infomessage[i++]  = localize$(DNL_HUNCHBACK) "\n" localize$(IDS_ML_HUNCHBACK_INFO)
+				    infomessage[i++]  = localize$(DNL_KODIAK) "\n" localize$(IDS_ML_KODIAK_INFO)
+				    infomessage[i++]  = localize$(DNL_LOKI) "\n" localize$(IDS_ML_LOKI_INFO)
+				    infomessage[i++]  = localize$(DNL_LONGBOW) "\n" localize$(IDS_ML_LONGBOW_INFO)
+				    infomessage[i++]  = localize$(DNL_MADCAT) "\n" localize$(IDS_ML_MADCAT_INFO)
+				    infomessage[i++]  = localize$(DNL_MADCAT2) "\n" localize$(IDS_ML_MADCATMK2_INFO)
+				    //infomessage[i++]  = "Marauder" "\n" marauder_description	// mektek
+				    infomessage[i++]  = localize$(DNL_MASAKARI) "\n" localize$(IDS_ML_MASAKARI_INFO)
+				    infomessage[i++]  = localize$(DNL_MAULER) "\n" localize$(IDS_ML_MAULER_INFO)
+				    infomessage[i++]  = localize$(DNL_NOVACAT) "\n" localize$(IDS_ML_NOVACAT_INFO)
+				    infomessage[i++]  = localize$(DNL_OSIRIS) "\n" localize$(IDS_ML_OSIRIS_INFO)
+				    infomessage[i++]  = localize$(DNL_OWENS) "\n" localize$(IDS_ML_OWENS_INFO)
+				    infomessage[i++]  = localize$(DNL_PUMA) "\n" localize$(IDS_ML_PUMA_INFO)
+				    infomessage[i++]  = localize$(DNL_RAVEN) "\n" localize$(IDS_ML_RAVEN_INFO)
+				    infomessage[i++]  = localize$(DNL_RYOKEN) "\n" localize$(IDS_ML_RYOKEN_INFO)
+				    infomessage[i++]  = localize$(DNL_SHADOWCAT) "\n" localize$(IDS_ML_SHADOWCAT_INFO)
+				    //infomessage[i++]  = "Stalker" "\n" stalker_description	// mektek
+				    //infomessage[i++]  = "Strider" "\n" strider_description	// mektek
+				    infomessage[i++]  = localize$(DNL_SUNDER) "\n" localize$(IDS_ML_SUNDER_INFO)
+				    infomessage[i++]  = localize$(DNL_TEMPLAR) "\n" localize$(IDS_ML_TEMPLAR_INFO)
+				    infomessage[i++]  = localize$(DNL_THANATOS) "\n" localize$(IDS_ML_THANATOS_INFO)
+				    infomessage[i++]  = localize$(DNL_THOR) "\n" localize$(IDS_ML_THOR_INFO)
+				    infomessage[i++]  = localize$(DNL_ULLER) "\n" localize$(IDS_ML_ULLER_INFO)
+				    //infomessage[i++]  = "Clan Urban Mech" "\n" urbanmech_iic_description	// mektek
+				    //infomessage[i++]  = "IS Urban Mech" "\n" urbanmech_description	// mektek
+				    infomessage[i++]  = localize$(DNL_UZIEL) "\n" localize$(IDS_ML_UZIEL_INFO)
+				    infomessage[i++]  = localize$(DNL_VICTOR) "\n" localize$(IDS_ML_VICTOR_INFO)
+				    infomessage[i++]  = localize$(DNL_VULTURE) "\n" localize$(IDS_ML_VULTURE_INFO)
+				    //infomessage[i++]  = "Warhammer" "\n" warhammer_description 	// mektek
+				    infomessage[i++]  = localize$(DNL_WOLFHOUND) "\n" localize$(IDS_ML_WOLFHOUND_INFO)
+				    infomessage[i++]  = localize$(DNL_ZEUS) "\n" localize$(IDS_ML_ZEUS_INFO)
+				}
+				else // no pack
+				{
+					i = 325
+				    temp_mech_id[i++]	= M_Ares		     // mektek
+				    temp_mech_id[i++]	= M_BrcticWolf		     // Tronix
+				    temp_mech_id[i++]	= M_Argus		     // argus
+				    temp_mech_id[i++]	= M_Atlas		     // atlas
+				    temp_mech_id[i++]	= M_Avatar	     // avatar	// mektek
+				    temp_mech_id[i++]	= M_Awesome	     // awesome
+				    temp_mech_id[i++]	= M_BlackKnight	 // black knight
+				    temp_mech_id[i++]	= M_Bloodasp	 // mektek
+				    temp_mech_id[i++]	= M_Bushwacker	 // bushwacker
+				    temp_mech_id[i++]	= M_Catapult	   	 // catapult
+				    temp_mech_id[i++]	= M_Chimera	     // chimera
+				    temp_mech_id[i++]	= M_Cougar	     // cougar
+				    temp_mech_id[i++]	= M_Daishi	     // daishi
+				    temp_mech_id[i++]	= M_Fafnir			// Fafnir
+				    temp_mech_id[i++]	= M_Flea		     // flea
+				    temp_mech_id[i++]	= M_Gladiator  	// Gladiator
+				    temp_mech_id[i++]	= M_Hauptmann   // Hauptmann
+				    temp_mech_id[i++]	= M_Hellhound	     // Hellhound
+				    temp_mech_id[i++]	= M_Hellspawn	     // hellspawn
+				    temp_mech_id[i++]	= M_Loki		     // loki
+				    temp_mech_id[i++]	= M_Longbow     // Longbow
+				    temp_mech_id[i++]	= M_Madcat	     // madcat
+				    temp_mech_id[i++]	= M_Madcat_MKII	 // madcat2
+				    temp_mech_id[i++]	= M_Marauder	     // marauder	// mektek
+				    temp_mech_id[i++]	= M_Mauler	     // mauler
+				    temp_mech_id[i++]	= M_Novacat	     // novacat
+				    temp_mech_id[i++]	= M_Osiris	     // osiris
+				    temp_mech_id[i++]	= M_Owens       // Owens
+				    temp_mech_id[i++]	= M_Puma        // Puma
+				    temp_mech_id[i++]	= M_Raven		     // raven
+				    temp_mech_id[i++]	= M_Ryoken	     // ryoken
+				    temp_mech_id[i++]	= M_Shadowcat	     // shadowcat
+				    temp_mech_id[i++]	= M_Stalker	     // mektek
+				    temp_mech_id[i++]	= M_Strider	     // strider	// mektek
+				    temp_mech_id[i++]	= M_Sunder	     // sunder
+				    temp_mech_id[i++]	= M_Templar	     // Templar
+				    temp_mech_id[i++]	= M_Thanatos	     // thanatos
+				    temp_mech_id[i++]	= M_Thor		     // thor
+				    temp_mech_id[i++]	= M_Uller		     // uller
+				    temp_mech_id[i++]	= M_UrbanmechIIC		     // urbie	// mektek
+				    temp_mech_id[i++]	= M_Urbanmech		     // urbie	// mektek
+				    temp_mech_id[i++]	= M_Uziel		     // uziel
+				    temp_mech_id[i++]	= M_Victor      // Victor
+				    temp_mech_id[i++]	= M_Vulture	     // vulture
+				    temp_mech_id[i++]	= M_Warhammer	     // warhammer	// mektek
+				    temp_mech_id[i++]	= M_Wolfhound	     // wolfhound
+
+					i = 325
+				    infomessage[i++]  = "Ares" "\n"ares_description	// mektek
+				    infomessage[i++]  = "BrcticWolf" "\n" brcticwolf_description	// Tronix
+				    infomessage[i++]  = localize$(DNL_ARGUS) "\n" localize$(IDS_ML_ARGUS_INFO)
+				    infomessage[i++]  = localize$(DNL_ATLAS) "\n" localize$(IDS_ML_ATLAS_INFO)
+				    infomessage[i++]  = "Avatar" "\n" avatar_description 	// mektek
+				    infomessage[i++]  = localize$(DNL_AWESOME) "\n" localize$(IDS_ML_AWESOME_INFO)
+				    infomessage[i++]  = localize$(DNL_BLACKKNIGHT) "\n" localize$(IDS_ML_BLACKKNIGHT_INFO)
+				    infomessage[i++]  = "Blood Asp" "\n" bloodasp_description	// mektek
+				    infomessage[i++]  = localize$(DNL_BUSHWACKER) "\n" localize$(IDS_ML_BUSHWACKER_INFO)
+				    infomessage[i++]  = localize$(DNL_CATAPULT) "\n" localize$(IDS_ML_CATAPULT_INFO)
+				    infomessage[i++]  = localize$(DNL_CHIMERA) "\n" localize$(IDS_ML_CHIMERA_INFO)
+				    infomessage[i++]  = localize$(DNL_COUGAR) "\n" localize$(IDS_ML_COUGAR_INFO)
+				    infomessage[i++]  = localize$(DNL_DAISHI) "\n" localize$(IDS_ML_DAISHI_INFO)
+				    infomessage[i++]  = localize$(DNL_FAFNIR) "\n" localize$(IDS_ML_FAFNIR_INFO)
+				    infomessage[i++]  = localize$(DNL_FLEA) "\n" localize$(IDS_ML_FLEA_INFO)
+				    infomessage[i++]  = localize$(DNL_GLADIATOR) "\n" localize$(IDS_ML_GLADIATOR_INFO)
+				    infomessage[i++]  = localize$(DNL_HAUPTMANN) "\n" localize$(IDS_ML_HAUPTMANN_INFO)
+				    infomessage[i++]  = localize$(DNL_HELLHOUND) "\n" localize$(IDS_ML_HELLHOUND_INFO)
+				    infomessage[i++]  = localize$(DNL_HELLSPAWN) "\n" localize$(IDS_ML_HELLSPAWN_INFO)
+				    infomessage[i++]  = localize$(DNL_LOKI) "\n" localize$(IDS_ML_LOKI_INFO)
+				    infomessage[i++]  = localize$(DNL_LONGBOW) "\n" localize$(IDS_ML_LONGBOW_INFO)
+				    infomessage[i++]  = localize$(DNL_MADCAT) "\n" localize$(IDS_ML_MADCAT_INFO)
+				    infomessage[i++]  = localize$(DNL_MADCAT2) "\n" localize$(IDS_ML_MADCATMK2_INFO)
+				    infomessage[i++]  = "Marauder" "\n" marauder_description	// mektek
+				    infomessage[i++]  = localize$(DNL_MAULER) "\n" localize$(IDS_ML_MAULER_INFO)
+				    infomessage[i++]  = localize$(DNL_NOVACAT) "\n" localize$(IDS_ML_NOVACAT_INFO)
+				    infomessage[i++]  = localize$(DNL_OSIRIS) "\n" localize$(IDS_ML_OSIRIS_INFO)
+				    infomessage[i++]  = localize$(DNL_OWENS) "\n" localize$(IDS_ML_OWENS_INFO)
+				    infomessage[i++]  = localize$(DNL_PUMA) "\n" localize$(IDS_ML_PUMA_INFO)
+				    infomessage[i++]  = localize$(DNL_RAVEN) "\n" localize$(IDS_ML_RAVEN_INFO)
+				    infomessage[i++]  = localize$(DNL_RYOKEN) "\n" localize$(IDS_ML_RYOKEN_INFO)
+				    infomessage[i++]  = localize$(DNL_SHADOWCAT) "\n" localize$(IDS_ML_SHADOWCAT_INFO)
+				    infomessage[i++]  = "Stalker" "\n" stalker_description	// mektek
+				    infomessage[i++]  = "Strider" "\n" strider_description	// mektek
+				    infomessage[i++]  = localize$(DNL_SUNDER) "\n" localize$(IDS_ML_SUNDER_INFO)
+				    infomessage[i++]  = localize$(DNL_TEMPLAR) "\n" localize$(IDS_ML_TEMPLAR_INFO)
+				    infomessage[i++]  = localize$(DNL_THANATOS) "\n" localize$(IDS_ML_THANATOS_INFO)
+				    infomessage[i++]  = localize$(DNL_THOR) "\n" localize$(IDS_ML_THOR_INFO)
+				    infomessage[i++]  = localize$(DNL_ULLER) "\n" localize$(IDS_ML_ULLER_INFO)
+				    infomessage[i++]  = "Clan Urban Mech" "\n" urbanmech_iic_description	// mektek
+				    infomessage[i++]  = "IS Urban Mech" "\n" urbanmech_description	// mektek
+				    infomessage[i++]  = localize$(DNL_UZIEL) "\n" localize$(IDS_ML_UZIEL_INFO)
+				    infomessage[i++]  = localize$(DNL_VICTOR) "\n" localize$(IDS_ML_VICTOR_INFO)
+				    infomessage[i++]  = localize$(DNL_VULTURE) "\n" localize$(IDS_ML_VULTURE_INFO)
+				    infomessage[i++]  = "Warhammer" "\n" warhammer_description 	// mektek
+				    infomessage[i++]  = localize$(DNL_WOLFHOUND) "\n" localize$(IDS_ML_WOLFHOUND_INFO)
+				}
+   			}
+		}
+
+		// 400 and 401 Mech Paks
+		infomessage[400] = localize$(IDS_MPK_ML_TO_ML_INFO)
+		infomessage[401] = localize$(IDS_MPK_ML_TO_CREATE_INFO)
+		region = 10, 525 to 640, 590
+	}
+
+	REGION_ENTERED
+	{
+		id = -1
+		if exists (@Mechbay_main@)
+		{
+			@Mechbay_main@o_mainui.o_weapons.showinfo = false
+		}
+		if exists (@FreeMarket@)
+		{
+			@FreeMarket@o_mainui.showinfo = false
+		}
+	}
+
+	GUI_INIT
+	{
+		displayMissionData = false
+	}
+
+	GUI_DRAW
+	{
+		if ( showinfo == true && enabled==true )
+		{
+			// boundaries refer to temp_mech_id upper and lower bounds
+			if (displayMissionData == true && id > 0 )
+			{
+				int iDmy
+				string szDmy
+				string szTitle
+				string szEmployer
+				string szAlignment
+				string szPayment
+				string szMissionType
+				int heatSinkEfficiency
+				int missionBtnState
+				region = 10, 525 to 570, 590
+
+				if ( callback($$GetMissionParameters$$, id, szEmployer, szAlignment, szPayment, heatSinkEfficiency, szMissionType ) )
+				{
+					callback($$Shell_CallbackHandler$$,ShellCampaignGetMissionRegionDATA, id,iDmy,iDmy,iDmy, iDmy,missionBtnState,iDmy,szDmy,szTitle,szDmy)
+					if ( missionBtnState == 1 )
+					{
+						setpencolor(0xaaffffff)
+						drawline 200, 505 to 200, 580
+
+						print3d_attributes	= regfont, COMSTAR_GREEN, 1, 1, 1, 0, 0, just_right
+						print3d_margins		= 80, 500 to 195, 595
+						print3d_position	= 80, 505
+						print3d szMissionType
+						print3d_position	= 80, 520
+						print3d szEmployer
+						print3d_position	= 80, 535
+						print3d szAlignment
+						print3d_position	= 80, 550
+						print3d szPayment
+						print3d_position	= 80, 565
+						print3d conv$( heatSinkEfficiency ) "%"
+
+						print3d_attributes	= regfont, COMSTAR_GREEN, 1, 1, 1, 0, 0
+						print3d_margins		= 15, 500 to 195, 595
+						print3d_position	= 15, 505
+						print3d localize$( IDS_MISSIONTYPE )
+						print3d_position	= 15, 520
+						print3d localize$( IDS_EMPLOYER )
+						print3d_position	= 15, 535
+						print3d localize$( IDS_ALIGNMENT )
+						print3d_position	= 15, 550
+						print3d localize$( IDS_PAYMENT )
+						print3d_position	= 15, 565
+						print3d localize$( IDS_HSEFFICIENCY )
+
+						print3d_attributes = regfont, COMSTAR_GREEN, 1, 1, 1, 0, 0
+						print3d_margins = 208, 505 to 570, 600
+						print3d_position = 208, 505
+						print3d szTitle
+					}
+				}
+				else
+				{
+					if (id < max_infomessage)
+					{
+						print3d_attributes = regfont, COMSTAR_GREEN, 1, 1, 1, 0, 0
+						print3d_margins = 15, 505 to 570, 600
+						print3d_position = 15, 505
+						print3d infomessage[id]
+					}
+				}
+				return
+			}
+
+			if ((id > -1) && (id <= 146)) OR ((id > 550) && (id <= 580)) OR ((id > 599) && (id <= 622)) OR (id >=325 && id <= 399) OR (id >=FIRST_LANCEMATE_INFO_ID && id <= LAST_LANCEMATE_INFO_ID)
+			{
+
+				if (id > -1) && (id <= 146) OR ((id > 550) && (id <= 580)) OR ((id > 599) && (id <= 622))
+				{
+					print3d_attributes = regfont, COMSTAR_GREEN, 1, 1, 1, 0, 0
+					print3d_margins = 15, 540 to 640, 595
+					print3d_position = 15, 540
+				}
+
+				// boundaries refer to temp_mech_id upper and lower bounds
+				if (id >=FIRST_LANCEMATE_INFO_ID && id <= LAST_LANCEMATE_INFO_ID)
+				{
+					setpencolor(0xaaffffff)
+					drawline 175, 535 to 175, 590
+					// Get pilot stats
+					int costPerCycle
+					int newid = id-FIRST_LANCEMATE_INFO_ID
+					callback($$GetPersonnelStats$$, newid, pilot_stats[], costPerCycle )
+					print3d_attributes = regfont, COMSTAR_GREEN, 1, 1, 1, 0, 0, just_right
+					print3d_margins = 50, 526 to 170, 595
+					print3d_position = 50, 536
+					print3d conv$( pilot_stats[0] )
+					print3d_position = 50, 550
+					print3d conv$( pilot_stats[1] )
+					print3d_position = 50, 564
+					print3d conv$( pilot_stats[2] )
+					print3d_position = 50, 578
+					print3d conv$( pilot_stats[3] )
+					print3d_attributes = regfont, COMSTAR_GREEN, 1, 1, 1, 0, 0
+
+					print3d_margins = 15, 524 to 150, 595
+					print3d_position = 15, 536
+					print3d localize$( IDS_CMW_GSKILL_TITLE )
+					print3d_position = 15, 550
+					print3d localize$( IDS_CMW_PSKILL_TITLE )
+					print3d_position = 15, 564
+					print3d localize$( IDS_CMW_SSKILL_TITLE )
+					print3d_position = 15, 578
+					print3d localize$( IDS_CMW_BSKILL_TITLE )
+
+					print3d_attributes = regfont, COMSTAR_GREEN, 1, 0, 1, 0, 0, just_right
+					print3d_margins = 400, 515 to 630, 560
+					print3d_position = 400, 534
+					print3d localize$( IDS_FM_WEEKLYSALARY ) "   " fmtcommanum$( costPerCycle )
+
+					print3d_attributes = regfont, COMSTAR_GREEN, 1, 1, 1, 0, 0
+					print3d_margins = 182, 530 to 640, 595
+					print3d_position = 182, 534
+				}
+				// boundaries refer to temp_mech_id upper and lower bounds
+				// if (id >=FIRST_MECH_INFO_ID && id <= LAST_MECH_INFO_ID)
+				if (id >=325 && id <= max_mech_index)
+				{
+					setpencolor(0xaaffffff)
+					drawline 175, 535 to 175, 590
+
+					print3d_attributes = regfont, COMSTAR_GREEN, 1, 1, 1, 0, 0, just_right
+					print3d_margins = 50, 526 to 170, 595
+					print3d_position = 50, 536
+					print3d localize$( mechinfo.mechWeightClassString[temp_mech_id[id]] )
+					print3d_position = 50, 550
+					print3d tonnage[temp_mech_id[id]]
+					print3d_position = 50, 564
+					print3d top_speed[temp_mech_id[id]]
+					print3d_position = 50, 578
+					print3d chassis_tech[temp_mech_id[id]]
+					print3d_attributes = regfont, COMSTAR_GREEN, 1, 1, 1, 0, 0
+
+					print3d_margins = 15, 524 to 150, 595
+					print3d_position = 15, 536
+					print3d localize$(IDS_ML_NEW_CLASS)
+					print3d_position = 15, 550
+					print3d localize$(IDS_ML_NEW_TONNAGE)
+					print3d_position = 15, 564
+					print3d localize$(IDS_ML_NEW_TOPSPEED)
+					print3d_position = 15, 578
+					print3d localize$(IDS_ML_NEW_TECH)
+
+					// Get extra stats
+					int costPerCycle
+					callback($$GetMechExtraStats$$, temp_mech_id[id], costPerCycle )
+					print3d_attributes = regfont, COMSTAR_GREEN, 1, 0, 1, 0, 0, just_right
+					print3d_margins = 400, 515 to 630, 560
+					print3d_position = 400, 534
+					print3d localize$( IDS_FM_PERCYCLECOST ) "   " fmtcommanum$( costPerCycle )
+
+					print3d_attributes = regfont, COMSTAR_GREEN, 1, 1, 1, 0, 0
+					print3d_margins = 182, 530 to 640, 595
+					print3d_position = 182, 534
+				}
+
+				// boundaries refer to temp_mech_id upper and lower bounds
+				if (id >=FIRST_WEAPON_INFO_ID && id <= LAST_WEAPON_INFO_ID)
+				{
+					setpencolor(0xaaffffff)
+					drawline 175, 535 to 175, 590
+
+					callback($$GetWeaponStats$$, id, damage, range, heat, weapon_recycle, weapon_weight )
+					//damage = 0
+					//range = 0
+					//heat = 0
+					//weapon_recycle = 0
+
+					print3d_attributes	= regfont, COMSTAR_GREEN, 1, 1, 1, 0, 0, just_right
+					print3d_margins		= 100, 526 to 170, 595
+					print3d_position	= 100, 536
+					print3d range
+					print3d_position	= 100, 550
+					print3d damage
+					print3d_position	= 100, 564
+					print3d heat
+					print3d_position	= 100, 578
+					print3d weapon_recycle
+					print3d_attributes	= regfont, COMSTAR_GREEN, 1, 1, 1, 0, 0
+					print3d_margins		= 15, 524 to 150, 595
+					print3d_position	= 15, 536
+					print3d localize$(IDS_ML_WEAPONRANGE_INFO)
+					print3d_position	= 15, 550
+					print3d localize$(IDS_ML_WEAPONDAMAGE_INFO)
+					print3d_position	= 15, 564
+					print3d localize$(IDS_ML_WEAPONHEAT_INFO)
+					print3d_position	= 15, 578
+					print3d localize$(IDS_ML_WEAPONRECYCLE_INFO)
+
+					print3d_attributes = regfont, COMSTAR_GREEN, 1, 0, 1, 0, 0, just_right
+					print3d_margins = 400, 515 to 630, 560
+					print3d_position = 400, 534
+					ton_times_ten = weapon_weight * 10.0f
+					ton_int_times_ten = weapon_weight * 10
+					ton_decimal_times_ten = ton_times_ten - ton_int_times_ten
+					print3d localize$( IDS_FM_WEAPONWEIGHT ) "   " conv$(weapon_weight) "." conv$(ton_decimal_times_ten)
+
+					print3d_attributes = regfont, COMSTAR_GREEN, 1, 1, 1, 0, 0
+					print3d_margins = 182, 530 to 640, 595
+					print3d_position = 182, 534
+				}
+			}
+			else
+			{
+				print3d_attributes = regfont, COMSTAR_GREEN, 1, 1, 1, 0, 0
+				print3d_margins = 15, 530 to 640, 595
+				print3d_position = 15, 538
+			}
+
+			if id < max_infomessage
+			{
+				if id > -1
+				{
+					print3d infomessage[id]
+				}
+				else
+				{
+					if exists (@Mechbay_main@)
+					{
+						print3d localize$(IDS_ML_WELCOME_INFO)
+					}
+					if exists (@FreeMarket@)
+					{
+						print3d localize$(IDS_ML_BM_MARKET_WELCOME)
+					}
+				}
+			}
+		}
+	}
+
+	GUI_MAILBOX
+	{
+		if getmessage() > 146
+		{
+			if exists (@Mechbay_main@)
+			{
+				@Mechbay_main@o_mainui.o_weapons.showinfo = false
+			}
+			if exists (@FreeMarket@)
+			{
+				@FreeMarket@o_mainui.showinfo = false
+			}
+		}
+
+		showinfo	= true
+		id			= getmessage()
+	}
+
+	LBUTTON_UPDATE
+	{
+		// This is to allow button release messages to filter down to freemarket to fix bug#4839. It should
+		// be safe to take out the "if exists (@FreeMarket@)" part and make it work uniformly for all dialogs
+		if exists (@FreeMarket@)
+		{
+			pass_on
+		}
+	}
+}
+

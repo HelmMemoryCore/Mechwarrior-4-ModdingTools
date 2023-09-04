@@ -1,0 +1,527 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head>
+
+
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta name="Author" content="Phoenix Creation">
+<meta name="Keywords" content="BattleTech, NBT, NBT-HardCore, NetBattleTech, Mercenaries, Mechwarrior, Mechwarrior 4, League, Mech, BattleMech"><title>Fireslave's Modeling Tutorial</title>
+
+    <meta http-equiv="Page-Enter" content="blendTrans(Duration=0.5)">
+    <meta http-equiv="Page-Exit" content="blendTrans(Duration=0.5)">
+<meta name="KEYWORDS" content="coolmaps.com metatagger,edit include.txt,in the,preview,directory to change this file,newbattlefields,netbattletech,battlefields,solardesert2,instructions,installation,installtion,multiplayer,maxthrottle,battlefront,ridgerunner,recommended,conversions,voicecomms,recommends,warfortune,directions,additional,downloaded,conversion,technology,installing,fileplanet,utilities,depending,suggested,riverside,mannedorf,tetsuhara,arrowhead,crossover,installer,directory,converted,expansion,stability,balancing,addresses,installed,teamspeak,mercstorm,vengeance,microsoft,questions,following,downloads,safecast,programs,seperate,actually,krakatau,cerberus,badlands,asteroid,connects,stomping,missions,coldfire,vegeance,textures,original,includes,released,software,terrains,installs,problems,tutorial,included,download,required,running,connect,details,problem,correct,section,smaller,divided,manager,grounds,studios,warzone,orbital,halthon,include,present,already,created,exactly,weapons,release">
+<style type="text/css">BODY {
+SCROLLBAR-FACE-COLOR: #0000000; 
+SCROLLBAR-HIGHLIGHT-COLOR: #660000; 
+SCROLLBAR-SHADOW-COLOR: #0000000; 
+SCROLLBAR-3DLIGHT-COLOR: #660000; 
+SCROLLBAR-ARROW-COLOR: #FFFF00; 
+SCROLLBAR-TRACK-COLOR: #333333; 
+SCROLLBAR-DARKSHADOW-COLOR: #660000; 
+SCROLLBAR-BASE-COLOR: #000000
+}</style>
+<link rel="stylesheet" type="text/css" href="model_tutorial_files/style.css">
+<link rel="stylesheet" type="text/css" href="model_tutorial_files/site.css">
+<style>
+</style></head><body nof="(MB=(ZeroMargins, 0, 0, 0, 0), L=(DownloadsLayout, 820, 2070))" style="background-color: rgb(0, 0, 0); background-image: none;" topmargin="0" leftmargin="0" marginheight="0" marginwidth="0">
+
+  
+<table valign="top" cellpadding="0" cellspacing="0" height="100%" width="95%">
+  <tbody><tr> 
+    <td align="left"> 
+      <center>
+        <img src="model_tutorial_files/Title.jpg" height="229" width="772"> 
+      </center>
+      <h3>Table of Contents</h3>
+      <ul>
+        <li>Introduction 
+          <ul>
+            <li>The Basics</li>
+            <li>The Tools</li>
+          </ul>
+        </li>
+        <li>The Process 
+          <ol>
+            <li>Making the Model</li>
+            <li>Adding Details and Rendering</li>
+            <li>UV Mapping</li>
+            <li>Ditch Those Ugly Edges</li>
+            <li>Using Your Grayscale Image To Make The Alpha Channel</li>
+            <li>Rust &amp; Other Fun Stuff</li>
+            <li>Combining The Rust With The Shadows</li>
+            <li>Adding Materials, Paint, Windows, etc.</li>
+            <li>Merging The Layers</li>
+            <li>Final details</li>
+          </ol>
+        </li>
+        <li>Conclusion</li>
+      </ul>
+      <div align="center"><img src="model_tutorial_files/styleline.gif" height="9" width="400"> </div>
+      <h4>Introduction</h4>
+      <p>Ok, for those that do not know, I am a member of the Clash of Steel modeling 
+        team. I have gotten a lot of tips from everyone at the project. I think 
+        I have come a long way in less than 3 months - From zero experience to 
+        having a 'Mech in game. My goal in writing this is not to tell you exactly 
+        how to make a 'Mech for HC nor is it to teach you how to use a 3D program. 
+        My goal is to help people learn the unique things that are required for 
+        a MW4:Mercs 'Mech.<br>
+      </p>
+      <h5>The Basics</h5>
+      <p>What do you technically need?<br>
+        <br>
+        Before you can make a 'Mech for the game you obviously need some guidelines. 
+        Here they are:<br>
+      </p>
+      <ul>
+        <li>A 3000 polygon limit. This means 3000 triangles or less. This is not 
+          a hard limit. For example, 3030 will be fine. The goal should never 
+          be to use all the polys you can. If you can do it with 2000, go right 
+          ahead.</li>
+        <br>
+        <br>
+        <li>Poseable Model. This means that the arms have to be able to swing 
+          and the legs have to be able to move without hitting some other part 
+          of the 'Mech.</li>
+        <br>
+        <br>
+        <li>Workable joints. Where the leg meets the foot, you should see some 
+          sort of joint. Same goes for knees, arms, etc. Just play Mercs and look 
+          at how the 'Mechs move.</li>
+        <br>
+        <br>
+        <li>512x512 Texture with an alpha channel. The alpha should allow the 
+          game skins to show through. <br>
+          <br>
+        </li>
+        <li><strong>Dev Team Note: </strong>Separate the 'Mech into several pieces. 
+          Below is a standard list of pieces the 'Mech should be separated into. 
+          Also note that each of these pieces (meshes) can only have 256 points. 
+          Try to optimize your low-poly model (i.e., tubes should be octagonal).<br>
+          <br>
+          A 'Mech is composed by: <br>
+          <br>
+          <ul>
+            <li>Torso</li>
+            <li>Hip</li>
+            <li>Left Upper Arm</li>
+            <li>Left Gun</li>
+            <li>Right Upper Arm</li>
+            <li>Right Gun</li>
+            <li>Left Upper Leg</li>
+            <li>Left Lower Leg</li>
+            <li>Left Foot</li>
+            <li>Left Toes (Ranges from 1 to 4)</li>
+            <li>Right Upper Leg</li>
+            <li>Right Lower Leg</li>
+            <li>Right Foot</li>
+            <li>Right Toes (Ranges from 1 to 4)</li>
+          </ul>
+          <p>Some 'Mechs can have a third leg (i.e., Argus/Thanatos/Novacat): 
+            <br>
+            <br>
+          </p><ul>
+            <li>Left Middle Leg</li>
+            <li>Right Middle Leg 
+              <p></p>
+            </li>
+          </ul>
+          <p>Some 'Mechs can have one or two special sections linked to any of 
+            the 'Mech sections. The special section can be protection-based, such 
+            as the Black Knight's arm shield, or a weapons section, like the TimberWolf's 
+            missile launchers. <br>
+            <br>
+          </p><ul>
+            <li>Specialone</li>
+            <li>Specialtwo 
+              <p></p>
+            </li>
+          </ul>
+          <p>Each piece must have a functional joint and they also must move in 
+            any direction so they must have a spherical joint. <br>
+            <br>
+          </p><ul>
+            <li>The torso must have a little degree to move in any direction from 
+              the hip.</li>
+            <li>Upper arms must float a little in a front-back direction with 
+              Torso and Guns. 
+              <p></p>
+            </li>
+          </ul>
+      </li></ul>
+      <h5>The Process: The Way I Make 'Em</h5>
+      <p>All the tools I use are freeware or something we all have: </p>
+      <ul>
+        <li>Wings 3D. I do all my modeling in wings.</li>
+        <li>Blender &amp; Yaf-Ray. I use these to render. (Yaf-Ray is a Blender 
+          plugin)</li>
+        <li>UV mapper. May be useful for UV'ing a 'Mech. Wings can UV too, though. 
+          Both have strong points and weak points.</li>
+        <li>The Gimp. Excellent free image software. For those who do not want 
+          to buy Photoshop or another professional graphic editing program. 
+        </li><li>TGATool2. Simple but useful tool. Lets you edit the alpha texture 
+          of a TGA separately from the main RGB channels.</li>
+        <li>MS Paint.</li>
+      </ul>
+      <div align="center"><img src="model_tutorial_files/styleline.gif" height="9" width="400"> </div>
+      <h4>Step 1: Making the model</h4>
+      <p>I use Wings 3D. I create a low poly first and then create a high poly. 
+        So make your low poly now. Keep it under or around 3000 polys please. 
+        Get a good TRO picture to work off of. Ask Gohan if you can not find them. 
+        There are plenty of guides for using Wings 3D so all you have to do is 
+        look around. Remember, you are an artist now, therefore you are allowed 
+        to fix "ugly" parts of the 'Mech. I took quite a bit of liberty on the 
+        head of the Stiletto, for example. I even added fins to the arms to tie 
+        the model together better. Also, try to keep Mercs' "style". Long pointy 
+        fingers are not going to fit in with the other 'Mechs.<br>
+        <br>
+        I am just going to show you the pictures now:<br>
+        <br>
+      </p>
+	  <center>
+      TRO ART<br>
+      <br>
+      <img src="model_tutorial_files/001.jpg" height="223" width="250"> <br>
+      <br>
+
+        My Low Poly Version<br>
+        <br>
+        <img src="model_tutorial_files/003.jpg" height="548" width="832"> 
+      </center>
+      <br>
+      <div align="center"><img src="model_tutorial_files/styleline.gif" height="9" width="400"> </div>
+      <h4>Step 2: Adding Details &amp; Rendering</h4>
+      <p>Ok, after you like your low poly, try and make sure to have others critique 
+        it. Once you hammer out things that you may have missed start adding details. 
+        This is your high ploy. Render these for use on the texture. Take these 
+        renders and touch them up as needed.<br>
+        <br>
+        Here is an example - the shoulder gun on the Pack Hunter:<br>
+        <br>
+      </p>
+      <center>
+        <img src="model_tutorial_files/004.jpg" height="186" width="832"> 
+      </center>
+      <p><br>
+        <br>
+        You are going have to make a lot of these. Make sure to render them at 
+        an excessive size. They will look better when shrunken down. Toy with 
+        the settings on your rendering program until you get something that you 
+        think will look nice as a texture. I actually make two renders and combine 
+        them. One is used to simulate daylight lighting from above and the other 
+        has no lights but is set to show off details better. That is how I got 
+        the nice inset looking shading in the smaller details on the above image. 
+        <br>
+        <br>
+        After you get a bunch made, scale them down and place them in a 512x512 
+        texture. It is good practice to place the pieces from the upper 'Mech 
+        on top because many game textures have different colors from top to bottom 
+        (i.e., Most OPS. Skins). Also, try to keep the pieces upright as this 
+        will ensure textures with directional lines (like Deep Woods) look right.<br>
+        <br>
+        Here is a picture for you all. It was actually rendered at twice this 
+        size with Anti-Aliasing off. I shrunk it so it would fit on this page:<br>
+        <br>
+      </p>
+      <center>
+        <img src="model_tutorial_files/005.jpg" height="512" width="512"> 
+      </center>
+      <p><br>
+        <br>
+        Notice the green arrows. Those things are not from any renders. Things 
+        like that can be useful for certain 'Mech parts (Wires, places you can 
+        not render, some joints, etc.). </p>
+      <div align="center"><img src="model_tutorial_files/styleline.gif" height="9" width="400"> </div>
+      <h4>Step 3: UV Mapping</h4>
+      <p>I am not going to go into detail here because there are plenty of guides. 
+        I am just going give you an overview of the Fireslave way.<br>
+        <br>
+        Do each part separately. Make the leg be one file and the arm another. 
+        You can stick them together later on. It is easier anyways to just do 
+        one leg then flip it.<br>
+        <br>
+        I recommend starting with UV Mapper. It can map from the axis so do just 
+        that. It will not be perfect but we can tweak it in Wings3D.<br>
+        <br>
+        Start Wings3D and you will see when you try an move the UV onto the texture 
+        that UV Mapper did not do exactly what you wanted. Find the faces that 
+        are messed up and select them with the face tool. Then, hit UV Mapping. 
+        I am not going to explain the process here since there are Wings3D guides 
+        for that.<br>
+        <br>
+        Anyways, eventually you will have placed all the UV pieces on top of all 
+        the correct pieces of texture. Your 'Mech should look like this only it 
+        better not be a Pack Hunter. ;-)<br>
+        <br>
+      </p>
+      <center>
+        <img src="model_tutorial_files/006.jpg" height="629" width="505"> 
+      </center>
+      <p><br>
+        <br>
+        Notice all the <b>black edges</b> on the model? Notice the "zipper" on 
+        the head (lol)? If you did it right, you will have just little bits of 
+        black on the edges. That mean you lined it up nicely and you can give 
+        yourself a "Good job!" sticker. </p>
+      <div align="center"><img src="model_tutorial_files/styleline.gif" height="9" width="400"> </div>
+      <h4>Step 4: Ditch Those Ugly Edges</h4>
+      <p>This is where MS Paint comes in handy. Use a boring Pixely paintbrush 
+        to paint over the edges. You are confused, I see. Make it look like this:<br>
+        <br>
+      </p>
+      <center>
+        <img src="model_tutorial_files/007.jpg" height="512" width="512"> 
+      </center>
+      <p><br>
+        <br>
+        As you can see, most of the borders have been covered up. Now start up 
+        Wings3D. You will see that most of the edges are gone. In some places 
+        you can not paint over the edges (Look at the legs. The edges are on the 
+        render, not between the render and the black BG). The only choice here 
+        is to use Wings3D to edit the UV map just a bit. Move the affected areas 
+        inward a bit away from the edges (we do not want black edges everywhere). 
+        Here is the edgeless version:<br>
+        <br>
+      </p>
+      <center>
+        <img src="model_tutorial_files/008.jpg" height="629" width="625"> 
+      </center>
+      <br>
+      <div align="center"><img src="model_tutorial_files/styleline.gif" height="9" width="400"> </div>
+      <h4>Step 5: Using Your Grayscale Image To Make The Alpha Channel</h4>
+      <p>Ok, what you want to do now is make that grayscale map into a transparency 
+        map. You can do that in your paint package as well but here is how I did 
+        it: </p>
+      <ul>
+        <li>I took the grayscale image and inverted (colors, I did not flip it 
+          over) it in MS Paint. This is necessary because white is solid and black 
+          is see through. We do not want a black 'Mech with white shadows...</li>
+        <li>After you have it inverted, you want to save it as a .bmp.</li>
+        <li>Now open it up with TGA Tool 2. You actually have to click open because 
+          TGA Tool 2 will not let you just double click it in explorer.</li>
+        <li>In TGA Tool 2, you will see an option called "Create Alpha Template." 
+          Click it and you will see it appear in the upper right of the screen. 
+          You now have an alpha channel.</li>
+        <li>Double click on the main image and it will open itself up in MS Paint. 
+          Just paint the whole thing black and hit save.</li>
+        <li>Now you got your rendered map all made up so all you have to do is 
+          save it. I saved mine as "Shadow_Layer.tga." You might as well name 
+          yours the same way so you see what I am talking about later on in the 
+          tutorial.</li>
+      </ul>
+      <p>Lets see if you did this right. Open up your .tga with the Gimp, Photoshop 
+        or the photo editing software of your choice. It should be transparent 
+        but with shading and dark lines. If you are using the Gimp, it will look 
+        something like this: <br>
+        <br>
+      </p>
+      <center>
+        <img src="model_tutorial_files/009.jpg" height="661" width="559"> 
+      </center>
+      <br>
+      <div align="center"><img src="model_tutorial_files/styleline.gif" height="9" width="400"> </div>
+      <h4>Step 6: Rust &amp; Other Fun Stuff</h4>
+      <p>More than likely, you did not find steps 2 through 5 extremely exciting. 
+        Now you get a chance to flex your artistic muscles. You are going to want 
+        to paint all the rust on the 'Mech. So, open up the layer named "Shadow_Layer.tga" 
+        and save it as "Rust_Layer.tga" Make sure to uncheck the button that says 
+        "RLE Compression" or else TGA Tool 2 will not be able to open it. Now 
+        open up "Rust_Layer.tga" with TGA Tool 2 and double click on the alpha 
+        channel image in the upper corner. You want to save this image to the 
+        desktop and then just close MS Paint. <br>
+        <br>
+        Open up the one on the desktop with the Gimp and invert the colors. Then, 
+        turn the brightness up so you can barely make out the edges. The image 
+        should be white but you still want to be able to see it. Save it. <br>
+        <br>
+        Next, open it with MS Paint and copy it to the clipboard. All you have 
+        to do now is paste it into the alpha channel of "Rust_Layer.tga." <br>
+        <br>
+        Once you have done that, open it up with the Gimp. You should have a hard 
+        time seeing the image. Turn off those annoying checkerboards by going 
+        to Preferences&gt;Display&gt;Transparency&gt;White Only. Now use your art skills 
+        and paint away! <br>
+        <br>
+        Once you are done, and you made sure that RLE compression is off, save 
+        the file. You want to take the alpha channel and remove what is left of 
+        the template. To do this, you are going to have to go to Image&gt;Colors&gt;Curves 
+        and flatten/cut off the bottom end. The goal is to have the alpha texture 
+        all black except for the rusty areas: <br>
+        <br>
+      </p>
+      <center>
+        <img src="model_tutorial_files/010.jpg" height="512" width="512"> 
+      </center>
+      <p><br>
+        <br>
+        <b>Note:</b> Photoshop users can skip many of the above steps by displaying 
+        the shadow layer as a layer below the rust layer and then deleting it 
+        when its served its purpose as a template. I do not use Photoshop so I 
+        can not get too specific, though. <br>
+        <br>
+        However you do it, the goal is to end up with something like this (white 
+        = transparent on this image): <br>
+        <br>
+      </p>
+      <center>
+        <img src="model_tutorial_files/011.jpg" height="611" width="559"> 
+      </center>
+      <br>
+      <div align="center"><img src="model_tutorial_files/styleline.gif" height="9" width="400"> </div>
+      <h4>Step 7: Combining The Rust With The Shadows</h4>
+      <p>This is so easy it does not even deserve a whole step but what the heck... 
+        Basically, you want to stick your rust layer BENEATH your shadow layer. 
+        If you have the transparencies correct then you should be able to just 
+        open both up and paste the one over the other. Save it as "Shadow+Rust.tga" 
+        If all goes well, you will end up with something like this: <br>
+        <br>
+      </p>
+      <center>
+        <img src="model_tutorial_files/012.jpg" height="514" width="514"> 
+      </center>
+      <br>
+      <div align="center"><img src="model_tutorial_files/styleline.gif" height="9" width="400"> </div>
+      <h4>Step 8: Adding Materials, Paint, Windows, etc.</h4>
+      <p>This step is rather simple. Use the grayscale image as a template to 
+        place the materials on your 'Mech. Anything that you want to be a color, 
+        paint it a color. Make sure that two touching panels are not the same 
+        color and paint everything else black. Now save it as "Material guide.bmp." 
+        <br>
+        <br>
+        Next, find anything you want to be a solid color and paint it white. If 
+        you want some to have a red tint, but not be solid red, paint it grey. 
+        Darker is fewer tints while lighter are closer to solid. Save this as 
+        "Material alpha.bmp." <br>
+        <br>
+        Now open "Material guide.bmp" and start painting the pieces the colors 
+        you want them to be in game. You can use any method you want such as brushes, 
+        textures, solid fill, etc. <br>
+        <br>
+        All that is left is to combine the colored piece with the alpha channel 
+        in TGA Tool 2. Once you are done, you might have something like this: 
+        <br>
+        <br>
+      </p>
+      <center>
+        <img src="model_tutorial_files/013.jpg" height="611" width="559"> 
+      </center>
+      <p><br>
+        <br>
+        Notice the grey areas with the checks showing through. Those areas have 
+        a dark grey tint but not solid grey paint. The dark brown area in the 
+        upper right is the cockpit. On mine, its color is 38, 19, 2 (RGB). I find 
+        it works nicely. </p>
+      <div align="center"><img src="model_tutorial_files/styleline.gif" height="9" width="400"> </div>
+      <h4>Step 9: Merging The Layers</h4>
+      <p>What you want to do now is place "Shadow+Rust.tga" on top of your material 
+        image. You should get something like this: <br>
+        <br>
+      </p>
+      <center>
+        <img src="model_tutorial_files/014.jpg" height="609" width="557"> 
+      </center>
+      <p><br>
+        <br>
+        If you do not like it, there are several things you can do: </p>
+      <ul>
+        <li>Make the shadows more or less visible by lightening or darkening the 
+          alpha channel of the shadow + rust layer.</li>
+        <br>
+        <br>
+        <li>Change the colors on the material layer (I tried 8 different combos 
+          before I decided).</li>
+        <br>
+        <br>
+        <li>Add or remove rust and other details then recombine the rust and shadow 
+          layers.</li>
+      </ul>
+      <div align="center"><img src="model_tutorial_files/styleline.gif" height="9" width="400"> </div>
+      <h4>Step 10: Final Details</h4>
+      <p>Just open it up and tweak it if you want. Use a brush and touch up any 
+        part that needs it. Then post it, have it reviewed, and be ready to re-do 
+        lots of things. I bet I threw out 80% of the work I did on the Stiletto... 
+        <br>
+        <br>
+        You will most likely have to change a few things on the model and texture. 
+        The good thing is that your image is a combo of several simpler images 
+        so it should be fairly easy to fix. I am just going to show you the final 
+        texture you guys are all shooting to obtain in game: <br>
+        <br>
+      </p>
+      <center>
+        <img src="model_tutorial_files/015.jpg" height="514" width="514"> 
+      </center>
+      <br>
+      <br>
+      <center>
+        <img src="model_tutorial_files/016.jpg" height="512" width="512"> 
+      </center>
+      <br>
+      <br>
+      <h4>Conclusion</h4>
+      <p>Well, there you have it - The Fireslavish Guide To Modeling. It is by 
+        no means the only way and it is unlikely that it is the best way. No two 
+        modelers do it exactly the same and you will probably develop a style 
+        of your own. Hopefully, this will help you understand the process enough 
+        that you will be able to make a 'Mech regardless of the exact steps you 
+        follow. Perhaps you can even write down your method for the other newcomers. 
+        That is what I did. I figured a noob could explain it to other noobs and 
+        keep it fairly understandable. <br>
+        <br>
+        I hope that other modelers will discover their talents and I hope that 
+        our other skilled modelers will not be shy to contribute to this guide 
+        or their own guide. Even better, you can now call yourself an "artist," 
+        something I would have found incredibly amusing not too long ago considering 
+        my pen &amp; paper stick </p>
+      <div align="center"><img src="model_tutorial_files/styleline.gif" height="9" width="400"></div>
+	   <p style="text-align: center;">
+      <table nof="te" border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tbody><tr> 
+          <td align="center"> 
+            <table id="Table5" border="0" cellpadding="5" cellspacing="0" width="97%">
+              <tbody><tr> 
+                <td colspan="2"> 
+                  <h4 style="text-align: center;"><b><span style="color: rgb(255, 255, 0);">Proud 
+                    sponsors of the NetBattleTech League System<br>
+                    <a href="http://www.netbattletech.com/nbt-hc" target="_parent"><font size="2">Return 
+                    to NBT-HC HomePage</font></a></span></b></h4>
+                </td>
+              </tr>
+              <tr> 
+                <td height="16" width="51%"> 
+                  <p style="text-align: center;"><b><span style="color: rgb(255, 255, 0);"><a href="http://www.phoenixcreation.com/nbt.html" target="newwindow"><img id="Picture25" src="model_tutorial_files/phoenix5.gif" align="top" border="0" height="100" hspace="0" vspace="0" width="397"></a></span></b></p>
+                </td>
+                <td width="48%"> 
+                  <p style="text-align: center;"><b><span style="color: rgb(255, 255, 0);"><a href="http://www.gigave.com/" target="newwindow"><img id="Picture26" src="model_tutorial_files/gigave5.jpg" align="top" border="0" height="100" hspace="0" vspace="0" width="400"></a></span></b></p>
+                </td>
+              </tr>
+<tr>
+<td colspan="2"> 
+<div align="center">
+<script type="text/javascript"><!--
+google_ad_client = "pub-3978786253917003";
+google_ad_width = 728;
+google_ad_height = 90;
+google_ad_format = "728x90_as";
+google_ad_type = "text_image";
+//2007-01-25: NBT-HC
+google_ad_channel = "1217062658";
+google_color_border = "000000";
+google_color_bg = "000000";
+google_color_link = "FFFFFF";
+google_color_text = "CCCCCC";
+google_color_url = "999999";
+//--></script>
+<script type="text/javascript" src="model_tutorial_files/show_ads.js">
+</script>
+</div>
+</td>
+</tr>
+            </tbody></table>
+          </td>
+        </tr>
+      </tbody></table>
+      </p><div align="center"><b><span style="color: rgb(255, 255, 0);"><img id="SiteStyleLine11" src="model_tutorial_files/styleline.gif" align="top" border="0" height="9" hspace="0" vspace="0" width="550"></span></b> 
+      </div>
+    </td>
+  </tr>
+</tbody></table>
+</body></html>

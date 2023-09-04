@@ -1,0 +1,718 @@
+#include "Content\\MercsShellScripts\\ScriptStrings.h"
+#include "Content\\MercsShellScripts\\stddefs.h"
+#include "Content\\MercsShellScripts\\ShellFunctionHeaders.hpp"
+#define scriptpath "content\\MercsShellScripts\\Multiplayer\\"
+#include "Content\\MercsShellScripts\\NetParams.h"
+#include "Content\\GameTypes.h"
+
+#include "Content\\MercsShellScripts\\listboxes.script"
+#include "Content\\MercsShellScripts\\mc_listboxes.script"
+#define MAP_PATH "Content\\MercsShellScripts\\Graphics\\Multiplayer\\LobbyMaps\\"
+
+
+#include "Content\\MercsShellScripts\\buttons.script"
+#include "Content\\MercsShellScripts\\WeaponNames.h"
+
+main
+{
+	GUI_CREATE
+	{
+		location.z = 15	
+
+		int hosting = exists(@netserver@)
+
+		int MAX_ITEMS = 40
+		int MAX_MCCB_ITEMS = 200			//MAXIMUM NUMBER OF ITEMS LISTED
+		int MAX_MCCB_COLUMNS = 2
+
+		int i = 0
+		int k = 0
+
+	//	pane temp = GPATH "multiplayer\\lobbyhost.jpg"
+	//	alphamode (temp) = am_alpha_oneone
+
+		object o_server_name = s_print_text
+		o_server_name.location = 484,83,20
+		o_server_name.text_font = FPATH localize$(IDS_F_MP_LABEL)
+		o_server_name.text_color = packcolor(255,255,255,255)
+		o_server_name.text = localize$(IDS_MP_HLS_SERVERNAME)
+	
+		object o_server_name_value = s_print_text
+		o_server_name_value.location = 494,103,20
+		o_server_name_value.text_font = FPATH localize$(IDS_F_MP_LABEL)
+		o_server_name_value.limit_the_width = 750 - 494
+		o_server_name_value.text_color = packcolor(255,255,255,255)
+
+		object o_server_IP_value = s_print_text
+		o_server_IP_value.location = 494,126,20
+		o_server_IP_value.text_font = FPATH localize$(IDS_F_MP_LABEL)
+		o_server_IP_value.text_color = packcolor(255,255,255,255)	
+
+
+//---------------------------------------------------
+		object o_player = s_mc_listbox
+		o_player.location = 484,170,10
+
+		o_player.boxFont3d = FPATH localize$(IDS_F_CAMPAIGN)		//MUST BE INITIALIZED 
+	//	o_player.boxFont3d = "arial.ttf"
+		o_player.itemWidth = 733-484												//MUST BE INITIALIZED 
+		o_player.itemHeight = 1	  //This refers to the height of a step (or scroll distance in pixels) defined by you.  NOT the height of all items 
+		o_player.itemHeight_padding = 4//10
+		o_player.list_size = 20
+		o_player.NUM_OF_COLUMNS = 2
+		o_player.column_header_height = 20											//MUST BE INITIALIZED
+		o_player.max_displayed = 127//30  // max number of itemheight's.  maz_displayed*itemheight = height of listbox //MUST BE INITIALIZED
+		o_player.uniform_item_height = 0
+
+		o_player.SelectedHighlightColor = packcolor(0, 0, 0, 0)
+		o_player.borderColor = packcolor (255,255,255,255)							//CAN BE INITIALIZED
+
+
+		o_player.label = localize$(IDS_MP_HLS_SERVERSET)												//CAN BE INITIALIZED
+		o_player.labelFont3d = FPATH localize$(IDS_F_MP_LABEL)		//CAN BE INITIALIZED
+		o_player.offsetLabel = 0,-18											//CAN BE INITIALIZED offsetLabel of text from button = 0,-25
+		o_player.buttonwidth = 16												//CAN BE INITIALIZED
+
+		o_player.first_delay = 10								//time delay value n/60; for the buttons
+		o_player.second_delay = 1								//time delay value n/60; for the buttons
+
+		o_player.column[0].location.x = 5
+		o_player.column[1].location.x = 130
+
+		o_player.column[0].fontcolor = packcolor (255,255,255,255)
+		o_player.column[1].fontcolor = packcolor (255,255,255,255)
+
+		o_player.column[0].fontAlignment = just_left
+		o_player.column[1].fontAlignment = just_center
+
+		for int setup_mc = 0;setup_mc < MAX_MCCB_ITEMS; setup_mc++
+		{
+			o_player.list_order[setup_mc] = setup_mc
+		}
+
+
+		int parameter = TEAM_PARAMETER
+		int team = 0
+		int subparam = TEAM_MAX_PLAYERS
+		int value
+
+		o_player.column[0].list_item[0] = localize$(IDS_MP_HLS_MAXPLAYERS)
+		o_player.column[0].list_item[1] = localize$(IDS_MP_HLS_MOTD)
+		o_player.column[0].list_item[2] = localize$(IDS_MP_HLS_REPORTSTATS)
+		o_player.column[0].list_item[3] = localize$(IDS_MP_HLS_RECYCLE)
+		o_player.column[0].list_item[4] = localize$(IDS_MP_HLS_JOININP)
+		o_player.column[0].list_item[5] = localize$(IDS_MP_HLS_JOININPCUT)
+		o_player.column[0].list_item[6] = localize$(IDS_MP_HLS_JOININPT)
+		o_player.column[0].list_item[7] = localize$(IDS_MP_HLS_DECALX)
+		o_player.column[0].list_item[8] = localize$(IDS_MP_HG_DEDICATED)
+		o_player.column[0].list_item[9] = localize$(IDS_MP_HG_MAP_CYCLE)
+		o_player.column[0].list_item[10] = localize$(IDS_MP_HG_RESPAWN)
+		o_player.column[0].list_item[11] = localize$(IDS_MP_HLS_UNLIMAMMO)
+		o_player.column[0].list_item[12] = localize$(IDS_MP_HG_HEAT_MGT)
+		o_player.column[0].list_item[13] = localize$(IDS_MP_HG_FRIENDLY)
+		o_player.column[0].list_item[14] = localize$(IDS_MP_HG_SPLASH)
+		o_player.column[0].list_item[15] = localize$(IDS_MP_HLS_DEADTALK)
+		o_player.column[0].list_item[16] = localize$(IDS_MP_HLS_DEADSEE)
+		o_player.column[0].list_item[17] = localize$(IDS_MP_HLS_FORCEFIRST)
+		o_player.column[0].list_item[18] = localize$(IDS_MP_HLS_MIN_TONNAGE)
+		o_player.column[0].list_item[19] = localize$(IDS_MP_HLS_MAX_TONNAGE)
+
+		int greatest_x
+		int greatest_y	
+		for k = 0; k < o_player.list_size; k++
+		{
+		//	o_player.column[0].list_icon[k] = "assets\\graphics\\listpic" conv$(k) ".jpg",1,volatile
+		//	alphamode(o_player.column[0].list_icon[k]) = am_alpha_alphainvalpha
+
+			if exists(o_player.column[0].list_icon[k])
+			{
+				if getwidth(o_player.column[0].list_icon[k]) > greatest_x
+					greatest_x = getwidth(o_player.column[0].list_icon[k])
+
+				if getheight(o_player.column[0].list_icon[k]) > greatest_y
+					greatest_y = getheight(o_player.column[0].list_icon[k])
+			}
+		}
+		if greatest_x > 0 && greatest_y > 0	
+			bitmap_create black = greatest_x,greatest_y  //comment out if you don't have any images
+
+	//  if you load bitmaps into the arrows and thumslider, the listbox will atuomatically take the width and height of the arrows and use all the images automatically
+	//	o_player.o_uparrow.p_arrow = "assets\\graphics\\commoncontrols\\DropList_arrowup.tga"
+	//	o_player.o_downarrow.p_arrow = "assets\\graphics\\commoncontrols\\DropList_arrowdownb.tga"
+	//	o_player.o_thumbslider.p_thumbslider = "assets\\graphics\\commoncontrols\\thumbslider.tga"
+
+		initialize (o_player)
+
+		o_player.column[0].o_header.f_font = FPATH localize$(IDS_F_MP_LABEL)
+		o_player.column[1].o_header.f_font = FPATH localize$(IDS_F_MP_LABEL)
+
+		o_player.column[0].o_header.s_text = localize$(IDS_MP_HLS_SETTING)
+		o_player.column[1].o_header.s_text = localize$(IDS_MP_HLS_VALUE)
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//---------------------------------------------------
+		object o_restriction = s_mc_listbox
+		o_restriction.location = 484,323,10
+
+		o_restriction.boxFont3d = FPATH localize$(IDS_F_CAMPAIGN)		//MUST BE INITIALIZED 
+		o_restriction.itemWidth = 733-484												//MUST BE INITIALIZED 
+		o_restriction.itemHeight = 1	  //This refers to the height of a step (or scroll distance in pixels) defined by you.  NOT the height of all items 
+		o_restriction.itemHeight_padding = 4//10
+		o_restriction.NUM_OF_COLUMNS = 1
+		o_restriction.column_header_height = 20											//MUST BE INITIALIZED
+		o_restriction.max_displayed = 105//30  // max number of itemheight's.  maz_displayed*itemheight = height of listbox //MUST BE INITIALIZED
+		o_restriction.uniform_item_height = 0
+
+
+		o_restriction.SelectedHighlightColor = packcolor(0, 0, 0, 0)
+		o_restriction.borderColor = packcolor (255,255,255,255)							//CAN BE INITIALIZED
+
+
+		o_restriction.label = localize$(IDS_MP_HLS_RESTRICTIONS)												//CAN BE INITIALIZED
+		o_restriction.labelFont3d = FPATH localize$(IDS_F_MP_LABEL)		//CAN BE INITIALIZED
+		o_restriction.offsetLabel = 0,-18											//CAN BE INITIALIZED offsetLabel of text from button = 0,-25
+		o_restriction.buttonwidth = 16												//CAN BE INITIALIZED
+
+		o_restriction.first_delay = 10								//time delay value n/60; for the buttons
+		o_restriction.second_delay = 1								//time delay value n/60; for the buttons
+
+		o_restriction.column[0].location.x = 5
+
+		o_restriction.column[0].fontcolor = packcolor (255,255,255,255)
+
+		o_restriction.column[0].fontAlignment = just_left
+
+		for setup_mc = 0;setup_mc < MAX_MCCB_ITEMS; setup_mc++
+		{
+			o_restriction.list_order[setup_mc] = setup_mc
+		}
+		o_restriction.list_size = 0
+		initialize (o_restriction)
+
+		int restriction_size = 0
+
+		//set value for mechs
+		string szChassis[LastMechID + 1]
+		for (i = 0; i < LastMSMechID + 1; i++)	// mektek added (-1) (see below)
+		{
+			szChassis[i]	= localize$(DNL_ARCTICWOLF + i)
+		}
+
+		szChassis[M_Avatar] 	= "Avatar"	// mektek
+		szChassis[M_Warhammer] 	= "Warhammer"	// mektek
+		szChassis[M_Strider] 	= "Strider"	// mektek
+		szChassis[M_Marauder] 	= "Marauder"	// mektek
+		szChassis[M_Bloodasp] 	= "Blood Asp"	// mektek
+		szChassis[M_UrbanmechIIC] 	= "Urban Mech Clan"	// mektek
+		szChassis[M_Stalker] 	= "Stalker"	// mektek
+		szChassis[M_Ares] 	= "Ares"	// mektek
+		szChassis[M_Urbanmech] 	= "Urban Mech IS"	// mektek
+		szChassis[M_BrcticWolf]       	= "Arctic Wolf II"	// Mechstorm
+
+		object o_build_weapon_names = build_weapon_names
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		object o_cover_list = genericbutton
+		o_cover_list.location = 484,193,15 
+		o_cover_list.region = 0,0 to 733-484,230
+
+		framerate = 5
+
+		Font3d gFont3d = FPATH localize$(IDS_F_MP_LABEL)
+		int got_restriction = false
+	}
+
+	GUI_DRAW
+	{
+		if (o_restriction.list_size == 0)
+		{
+		 	print3d_attributes	= gFont3d,0xffffffff,1,0,1,1,0,just_left
+			print3d_margins		= 550,376 to 800, 450
+			print3d_position	= 550,376
+			print3d localize$(IDS_MP_HLS_NO_RESTRICTIONS)
+		}
+	}
+
+	GUI_EXECUTE
+	{
+		if (!got_restriction)
+		{
+			int param_num = 0
+
+			int param_id = ALLOWED_MECH_PARAMETER
+			for (k = 0; k < (LastMechID - FirstMechID + 1); k++)
+			{		
+				param_num = k + FirstMechID
+				if hosting
+					value = callback($$GetLocalNetworkMissionParamater$$,param_id,param_num)
+				else
+					value = callback($$GetServerNetworkMissionParamater$$,param_id,param_num)
+
+
+				if value == 0
+				{
+					o_restriction.column[0].list_item[restriction_size] = szChassis[k]
+					restriction_size++
+				}
+			}
+
+			param_id = ALLOWED_BEAM_WEAPON_PARAMETER
+			for (k = 0; k < (LastBeamID - FirstBeamID + 1); k++)
+			{
+				param_num = k + FirstBeamID
+				if hosting
+					value = callback($$GetLocalNetworkMissionParamater$$,param_id,param_num)
+				else
+					value = callback($$GetServerNetworkMissionParamater$$,param_id,param_num)
+
+				if value == 0
+				{
+					o_restriction.column[0].list_item[restriction_size] = o_build_weapon_names.weapon_names[param_num]
+					restriction_size++
+				}
+			}
+	
+			param_id = ALLOWED_MISSILE_WEAPON_PARAMETER
+			for (k = 0; k < (LastMissileID - FirstMissileID + 1); k++)
+			{			
+				param_num = k + FirstMissileID
+				if hosting
+					value = callback($$GetLocalNetworkMissionParamater$$,param_id,param_num)
+				else
+					value = callback($$GetServerNetworkMissionParamater$$,param_id,param_num)	
+
+				if value == 0
+				{
+					o_restriction.column[0].list_item[restriction_size] = o_build_weapon_names.weapon_names[param_num]
+					restriction_size++
+				}
+			}
+
+
+			param_id = ALLOWED_PROJECTILE_WEAPON_PARAMETER
+			for (k = 0; k < (LastProjectileID - FirstProjectileID + 1); k++)
+			{
+				param_num = k + FirstProjectileID
+				if hosting
+					value = callback($$GetLocalNetworkMissionParamater$$,param_id,param_num)
+				else
+					value = callback($$GetServerNetworkMissionParamater$$,param_id,param_num)
+
+				if value == 0
+				{
+					o_restriction.column[0].list_item[restriction_size] = o_build_weapon_names.weapon_names[param_num]
+					restriction_size++
+				}
+			}
+
+
+			param_id = ALLOWED_GENERIC_SUBSYSTEM_PARAMETER
+			for (k = 0; k < (LastGenericSubsystemID - FirstGenericSubsystemID + 1); k++)
+			{
+				param_num = k + FirstGenericSubsystemID
+				if hosting
+					value = callback($$GetLocalNetworkMissionParamater$$,param_id,param_num)
+				else
+					value = callback($$GetServerNetworkMissionParamater$$,param_id,param_num)
+
+				if value == 0
+				{
+					o_restriction.column[0].list_item[restriction_size] = o_build_weapon_names.weapon_names[param_num]
+					restriction_size++
+				}
+			}
+			o_restriction.list_size = restriction_size
+			initialize (o_restriction)
+
+			o_restriction.column[0].o_header.f_font = FPATH localize$(IDS_F_MP_LABEL)
+
+			o_restriction.column[0].o_header.s_text = localize$(IDS_MP_HLS_RESTRICTED)
+			
+			got_restriction = true
+		}
+
+		// display server name
+		parameter = SERVER_NAME_PARAMETER
+		if (hosting)
+		{
+			callback($$GetLocalNetworkMissionParamater$$, parameter)
+		}
+		else
+		{
+			callback($$GetServerNetworkMissionParamater$$, parameter)
+		}
+		o_server_name_value.text = $$m_serverName$$
+
+		// display server ip
+		parameter = SERVER_IP_PARAMETER
+		if (hosting)
+		{
+			callback($$GetLocalNetworkMissionParamater$$, parameter)
+		}
+		else
+		{
+			callback($$GetServerNetworkMissionParamater$$, parameter)
+		}
+		o_server_IP_value.text = $$m_serverIP$$ 
+
+		o_player.column[0].list_item[0] = localize$(IDS_MP_HLS_MAXPLAYERS)
+		parameter = MAX_PLAYERS_PARAMETER
+		if hosting
+		{
+			o_player.column[1].list_item[0] = conv$(callback($$GetLocalNetworkMissionParamater$$, parameter))
+		}
+		else
+		{
+			o_player.column[1].list_item[0] = conv$(callback($$GetServerNetworkMissionParamater$$, parameter))
+		}
+
+		// display MOTD
+		o_player.column[0].list_item[1] = localize$(IDS_MP_HLS_MOTD)
+		o_player.column[1].list_item[1] = localize$(IDS_GN_YES_LC)
+	//	o_player.column[1].list_item[1] = conv$($$kldi05$$)
+
+		// report stats
+		o_player.column[0].list_item[2] = localize$(IDS_MP_HLS_REPORTSTATS)
+		parameter = REPORTSTATS_PARAMETER
+		if hosting
+		{
+			value = callback($$GetLocalNetworkMissionParamater$$, parameter)
+		}
+		else
+		{
+			value = callback($$GetServerNetworkMissionParamater$$, parameter)
+		}
+		if value == 1
+			o_player.column[1].list_item[2] = localize$(IDS_GN_YES_LC)
+		else
+			o_player.column[1].list_item[2] = localize$(IDS_GN_NO_LC)
+
+		// recycle delay
+		o_player.column[0].list_item[3] = localize$(IDS_MP_HLS_RECYCLE)
+		parameter = RECYCLE_DELAY_PARAMETER
+		if hosting
+		{
+			value = callback($$GetLocalNetworkMissionParamater$$, parameter)
+		}
+		else
+		{
+			value = callback($$GetServerNetworkMissionParamater$$, parameter)
+		}
+		if value == 1
+			o_player.column[1].list_item[3] = localize$(IDS_GN_YES_LC)
+		else
+			o_player.column[1].list_item[3] = localize$(IDS_GN_NO_LC)
+
+		o_player.column[0].list_item[4] = localize$(IDS_MP_HLS_JOININP)
+		if hosting
+		{
+			parameter = JOIN_IN_PROGRESS_PARAMETER
+			value = callback($$GetLocalNetworkMissionParamater$$, parameter)
+		}
+		else
+		{
+			parameter = JOIN_IN_PROGRESS_PARAMETER
+			value = callback($$GetServerNetworkMissionParamater$$, parameter)
+		}
+
+		o_player.column[0].list_item[5] = localize$(IDS_MP_HLS_JOININPCUT)
+		o_player.column[0].list_item[6] = localize$(IDS_MP_HLS_JOININPT)
+		if value == 1
+		{
+			o_player.column[1].list_item[4] = localize$(IDS_GN_YES_LC)
+		if hosting
+		{
+			parameter = JOIN_IN_PROGRESS_CUTOFF_PARAMETER
+			value = callback($$GetLocalNetworkMissionParamater$$, parameter)
+		}
+		else
+		{
+			parameter = JOIN_IN_PROGRESS_CUTOFF_PARAMETER
+			value = callback($$GetServerNetworkMissionParamater$$, parameter)
+		}
+		if value == 1
+			{
+			o_player.column[1].list_item[5] = localize$(IDS_GN_YES_LC)
+
+		// Join In Progress
+		o_player.column[0].list_item[6] = localize$(IDS_MP_HLS_JOININPT)
+			if hosting
+			{
+				parameter = JOIN_IN_PROGRESS_CUTOFF_TIME_PARAMETER
+				o_player.column[1].list_item[6] = conv$(callback($$GetLocalNetworkMissionParamater$$, parameter)) " "localize$(IDS_MP_HG_MIN)
+			}
+			else
+			{
+				parameter = JOIN_IN_PROGRESS_CUTOFF_TIME_PARAMETER
+				o_player.column[1].list_item[6] = conv$(callback($$GetServerNetworkMissionParamater$$, parameter)) " "localize$(IDS_MP_HG_MIN)
+			}
+			}
+			else
+			{
+				o_player.column[1].list_item[5] = localize$(IDS_GN_NO_LC)
+				o_player.column[1].list_item[6] = localize$(IDS_IA_UNLIMITED)
+			}
+		}
+		else
+		{
+			o_player.column[1].list_item[4] = localize$(IDS_GN_NO_LC)
+			o_player.column[1].list_item[5] = localize$(IDS_GN_NO_LC)
+			o_player.column[1].list_item[6] = "0"" "localize$(IDS_MP_HG_MIN)
+		}
+
+		// Allow Decal Transfer
+		o_player.column[0].list_item[7] =  localize$(IDS_MP_HLS_DECALX)
+		parameter = ALLOW_DECAL_TRANSFER_PARAMETER
+		if hosting
+		{
+			value = callback($$GetLocalNetworkMissionParamater$$, parameter)
+		}
+		else
+		{
+			value = callback($$GetServerNetworkMissionParamater$$, parameter)
+		}
+
+		if value == 1
+			o_player.column[1].list_item[7] = localize$(IDS_GN_YES_LC)
+		else
+			o_player.column[1].list_item[7] = localize$(IDS_GN_NO_LC)
+
+		// Dedicated Server
+		o_player.column[0].list_item[8] = localize$(IDS_MP_HG_DEDICATED)
+		parameter = DEDICATED_SERVER_PARAMETER
+		if hosting
+		{
+			value = callback($$GetLocalNetworkMissionParamater$$, parameter)
+		}
+		else
+		{
+			value = callback($$GetServerNetworkMissionParamater$$, parameter)
+		}
+		if value == 1
+			o_player.column[1].list_item[8] = localize$(IDS_GN_YES_LC)
+		else
+			o_player.column[1].list_item[8] = localize$(IDS_GN_NO_LC)
+
+		// Use Map Cycle.txt
+		o_player.column[0].list_item[9] = localize$(IDS_MP_HG_MAP_CYCLE)
+		parameter = USE_MAP_CYCLE_PARAMETER
+		if hosting
+		{
+			value = callback($$GetLocalNetworkMissionParamater$$, parameter)
+		}
+		else
+		{
+			value = callback($$GetServerNetworkMissionParamater$$, parameter)
+		}
+		if value == 1
+			o_player.column[1].list_item[9] = localize$(IDS_GN_YES_LC)
+		else
+			o_player.column[1].list_item[9] = localize$(IDS_GN_NO_LC)
+
+		// Respawn Limit
+		o_player.column[0].list_item[10] = localize$(IDS_MP_HG_RESPAWN)
+		parameter = FORCE_RESPAWN_PARAMETER
+		if hosting
+		{
+			value = callback($$GetLocalNetworkMissionParamater$$, parameter)
+		}
+		else
+		{
+			value = callback($$GetServerNetworkMissionParamater$$, parameter)
+		}
+		if value == 1
+			o_player.column[1].list_item[10] = localize$(IDS_GN_YES_LC)
+		else
+			o_player.column[1].list_item[10] = localize$(IDS_GN_NO_LC)
+
+		// Unlimited Ammo
+		o_player.column[0].list_item[11] = localize$(IDS_MP_HLS_UNLIMAMMO)
+		parameter = UNLIMITED_AMMO_PARAMTER
+		if hosting
+		{
+			value = callback($$GetLocalNetworkMissionParamater$$, parameter)
+		}
+		else
+		{
+			value = callback($$GetServerNetworkMissionParamater$$, parameter)
+		}
+		if value == 1
+			o_player.column[1].list_item[11] = localize$(IDS_GN_YES_LC)
+		else
+			o_player.column[1].list_item[11] = localize$(IDS_GN_NO_LC)
+
+		// Heat
+		o_player.column[0].list_item[12] = localize$(IDS_MP_HG_HEAT_MGT)
+		parameter = HEAT_PARAMETER
+		if hosting
+		{
+			value = callback($$GetLocalNetworkMissionParamater$$, parameter)
+		}
+		else
+		{
+			value = callback($$GetServerNetworkMissionParamater$$, parameter)
+		}
+		if value == 1
+			o_player.column[1].list_item[12] = localize$(IDS_GN_YES_LC)
+		else
+			o_player.column[1].list_item[12] = localize$(IDS_GN_NO_LC)
+
+		// Friendly Fire
+		o_player.column[0].list_item[13] = localize$(IDS_MP_HG_FRIENDLY)
+		parameter = FRIENDLY_FIRE_PERCENTGE_PARAMETER
+		if hosting
+		{
+			value = callback($$GetLocalNetworkMissionParamater$$, parameter)
+		}
+		else
+		{
+			value = callback($$GetServerNetworkMissionParamater$$, parameter)
+		}
+		if value == 100
+			o_player.column[1].list_item[13] = localize$(IDS_GN_YES_LC)
+		else
+			o_player.column[1].list_item[13] = localize$(IDS_GN_NO_LC)
+
+		// Splash Damage
+		o_player.column[0].list_item[14] = localize$(IDS_MP_HG_SPLASH)
+		parameter =	SPLASH_ON_PARAMETER
+		if hosting
+		{
+			value = callback($$GetLocalNetworkMissionParamater$$, parameter)
+		}
+		else
+		{
+			value = callback($$GetServerNetworkMissionParamater$$, parameter)
+		}
+		if value == 1
+			o_player.column[1].list_item[14] = localize$(IDS_GN_YES_LC)
+		else
+			o_player.column[1].list_item[14] = localize$(IDS_GN_NO_LC)
+
+		// Allow Dead Chat
+		o_player.column[0].list_item[15] = localize$(IDS_MP_HLS_DEADTALK)
+		parameter =	ALLOW_DEAD_CHAT_PARAMETER
+		if hosting
+		{
+			value = callback($$GetLocalNetworkMissionParamater$$, parameter)
+		}
+		else
+		{
+			value = callback($$GetServerNetworkMissionParamater$$, parameter)
+		}
+		if value == 1
+			o_player.column[1].list_item[15] = localize$(IDS_GN_NO_LC)
+		else
+			o_player.column[1].list_item[15] = localize$(IDS_GN_YES_LC)
+
+		// Dead Mech can't see
+		o_player.column[0].list_item[16] = localize$(IDS_MP_HLS_DEADSEE)
+		parameter =	DEAD_MECH_CANT_SEE_PARAMETER
+		if hosting
+		{
+			value = callback($$GetLocalNetworkMissionParamater$$, parameter)
+		}
+		else
+		{
+			value = callback($$GetServerNetworkMissionParamater$$, parameter)
+		}
+		if value == 0
+			o_player.column[1].list_item[16] = localize$(IDS_GN_NO_LC)
+		else
+			o_player.column[1].list_item[16] = localize$(IDS_GN_YES_LC)
+
+		// Allow 3rd person
+		o_player.column[0].list_item[17] = localize$(IDS_MP_HLS_FORCEFIRST)
+		parameter = 	ALLOW_3RD_PERSON_PARAMETER
+		if hosting
+		{
+			value = callback($$GetLocalNetworkMissionParamater$$, parameter)
+		}
+		else
+		{
+			value = callback($$GetServerNetworkMissionParamater$$, parameter)
+		}
+		value = 1 - value
+		if value == 1
+			o_player.column[1].list_item[17] = localize$(IDS_GN_YES_LC)
+		else
+			o_player.column[1].list_item[17] = localize$(IDS_GN_NO_LC)
+
+
+		// minimum tonnage
+		o_player.column[0].list_item[18] = localize$(IDS_MP_HLS_MIN_TONNAGE)
+		parameter = MINIMUM_TONNAGE_PARAMETER
+		if hosting
+		{
+			value = callback($$GetLocalNetworkMissionParamater$$, parameter)
+		}
+		else
+		{
+			value = callback($$GetServerNetworkMissionParamater$$, parameter)
+		}
+		o_player.column[1].list_item[18] = conv$(value)
+
+		// maximum tonnage
+		o_player.column[0].list_item[19] = localize$(IDS_MP_HLS_MAX_TONNAGE)
+		parameter = MAXIMUM_TONNAGE_PARAMETER
+		if hosting
+		{
+			value = callback($$GetLocalNetworkMissionParamater$$, parameter)
+		}
+		else
+		{
+			value = callback($$GetServerNetworkMissionParamater$$, parameter)
+		}
+		o_player.column[1].list_item[19] = conv$(value)
+	}
+}
+
+
+genericbutton
+{
+	GUI_CREATE
+	{
+		location = 525,281,10
+		region = 0,0 to 696-525,314-281
+	}
+
+	LBUTTON_UPDATE
+	{
+		if mouse.left == BUTTON_CLICKED
+		{
+			mail (-1)
+		}
+	}
+}
+
+
+
+s_print_text
+{
+	GUI_CREATE
+	{
+		string text
+		font3d text_font
+		int text_color
+		int limit_the_width = -1
+		int id
+	}
+
+
+	GUI_DRAW
+	{
+		print3d_attributes = text_font,Text_Color,1,0,1,0,0,0,1
+		lprint3d_position = 0, 0
+		if limit_the_width == -1
+			lprint3d_margins = 0,0 to getprint3dwidth(text)+2,getprint3dheight(text)+2
+		else
+			lprint3d_margins = 0,0 to limit_the_width,getprint3dheight(text)+2
+					
+		if length$(text) > 0 
+		{ 
+			print3d text
+		}
+	}
+}

@@ -1,0 +1,140 @@
+#include "Content\\MercsShellScripts\\MechLabHeaders_MERCS.h" //for LastMechID
+#include "Content\\MercsShellScripts\\ScriptStrings.h"
+
+
+// Weight class designations
+#define WC_LIGHT  	0
+#define WC_MEDIUM   1
+#define WC_HEAVY    2
+#define WC_ASSAULT  3
+#define W_ANY		4
+
+
+mech_info
+{
+	GUI_CREATE
+	{
+		//copied from mechbay/chassis.script
+		int mech_num	= LastMechID + 1
+		int mechWeightClassString[mech_num]
+
+		mechWeightClassString[0]		= IDS_ML_CH_MEDIUM		// arctic wolf
+		mechWeightClassString[1]		= IDS_ML_CH_HEAVY		// Argus
+		mechWeightClassString[2]		= IDS_ML_CH_ASSAULT		// Atlas
+		mechWeightClassString[3]		= IDS_ML_CH_ASSAULT		// Awesome
+		mechWeightClassString[4]    		= IDS_ML_CH_HEAVY		// Black Knight
+		mechWeightClassString[5]		= IDS_ML_CH_MEDIUM		// Bushwacker
+		mechWeightClassString[6]		= IDS_ML_CH_HEAVY		// Catapult
+		mechWeightClassString[7]		= IDS_ML_CH_HEAVY		// cauldron-born
+		mechWeightClassString[8]		= IDS_ML_CH_MEDIUM		// Chimera
+		mechWeightClassString[9]		= IDS_ML_CH_LIGHT		// Cougar
+		mechWeightClassString[10]		= IDS_ML_CH_ASSAULT		// Daishi
+		mechWeightClassString[11]		= IDS_ML_CH_HEAVY		// dragon
+		mechWeightClassString[12]		= IDS_ML_CH_ASSAULT		// Fafnir
+		mechWeightClassString[13]		= IDS_ML_CH_LIGHT		// flea
+		mechWeightClassString[14]		= IDS_ML_CH_ASSAULT		// Gladiator
+		mechWeightClassString[15]		= IDS_ML_CH_ASSAULT		// Hauptmann
+		mechWeightClassString[16]		= IDS_ML_CH_MEDIUM		// Hellhound
+		mechWeightClassString[17]		= IDS_ML_CH_MEDIUM		// Hellspawn
+		mechWeightClassString[18]		= IDS_ML_CH_ASSAULT		// highlander
+		mechWeightClassString[19]		= IDS_ML_CH_MEDIUM		// hunchback
+		mechWeightClassString[20]		= IDS_ML_CH_ASSAULT		// kodiak
+		mechWeightClassString[21]		= IDS_ML_CH_HEAVY		// Loki
+		mechWeightClassString[22]		= IDS_ML_CH_ASSAULT		// Longbow
+		mechWeightClassString[23]		= IDS_ML_CH_HEAVY		// Madcat
+		mechWeightClassString[24]		= IDS_ML_CH_ASSAULT		// Madcat Mk II
+		mechWeightClassString[25]		= IDS_ML_CH_ASSAULT		// masakari
+		mechWeightClassString[26]		= IDS_ML_CH_ASSAULT		// Mauler
+		mechWeightClassString[27]		= IDS_ML_CH_HEAVY		// Novacat
+		mechWeightClassString[28]		= IDS_ML_CH_LIGHT		// Osiris
+		mechWeightClassString[29]		= IDS_ML_CH_LIGHT		// Owens
+		mechWeightClassString[30]		= IDS_ML_CH_LIGHT		// Puma
+		mechWeightClassString[31]		= IDS_ML_CH_LIGHT		// Raven
+		mechWeightClassString[32]		= IDS_ML_CH_MEDIUM		// Ryoken
+		mechWeightClassString[33]		= IDS_ML_CH_MEDIUM		// Shadowcat
+		mechWeightClassString[34]		= IDS_ML_CH_ASSAULT		// Sunder
+		mechWeightClassString[35]		= IDS_ML_CH_ASSAULT		// Templar
+		mechWeightClassString[36]		= IDS_ML_CH_HEAVY		// Thanatos
+		mechWeightClassString[37]		= IDS_ML_CH_HEAVY		// Thor
+		mechWeightClassString[38]		= IDS_ML_CH_LIGHT		// Uller
+		mechWeightClassString[39]		= IDS_ML_CH_MEDIUM		// Uziel
+		mechWeightClassString[40]		= IDS_ML_CH_ASSAULT		// Victor
+		mechWeightClassString[41]		= IDS_ML_CH_HEAVY		// Vulture
+		mechWeightClassString[42]		= IDS_ML_CH_LIGHT		// wolfhound
+		mechWeightClassString[43]		= IDS_ML_CH_ASSAULT		// Zeus
+		mechWeightClassString[M_Avatar]		= IDS_ML_CH_HEAVY		// Avatar	// mektek
+		mechWeightClassString[M_Warhammer]		= IDS_ML_CH_HEAVY		// Warhammer	// mektek
+		mechWeightClassString[M_Strider]		= IDS_ML_CH_MEDIUM	// Strider	// mektek
+		mechWeightClassString[M_Marauder]		= IDS_ML_CH_HEAVY		// Marauder	// mektek
+		mechWeightClassString[M_Bloodasp]		= IDS_ML_CH_ASSAULT	// Bloodasp // mektek
+		mechWeightClassString[M_UrbanmechIIC]	= IDS_ML_CH_LIGHT		// Warhammer	// mektek
+		mechWeightClassString[M_Stalker]		= IDS_ML_CH_ASSAULT	// mektek
+		mechWeightClassString[M_Ares]			= IDS_ML_CH_HEAVY		// mektek
+		mechWeightClassString[M_Urbanmech]		= IDS_ML_CH_LIGHT		// Warhammer	// mektek
+		mechWeightClassString[M_BrcticWolf]		= IDS_ML_CH_MEDIUM		// Mechstorm
+
+
+		int mechWeightClassArray[mech_num]
+
+		mechWeightClassArray[0]			= WC_MEDIUM			// arctic wolf
+		mechWeightClassArray[1]			= WC_HEAVY			// Argus
+		mechWeightClassArray[2]			= WC_ASSAULT		// Atlas
+		mechWeightClassArray[3]			= WC_ASSAULT		// Awesome
+		mechWeightClassArray[4]    		= WC_HEAVY			// Black Knight
+		mechWeightClassArray[5]			= WC_MEDIUM			// Bushwacker
+		mechWeightClassArray[6]			= WC_HEAVY			// Catapult
+		mechWeightClassArray[7]			= WC_HEAVY			// cauldron-born
+		mechWeightClassArray[8]			= WC_MEDIUM			// Chimera
+		mechWeightClassArray[9]			= WC_LIGHT			// Cougar
+		mechWeightClassArray[10]		= WC_ASSAULT		// Daishi
+		mechWeightClassArray[11]		= WC_HEAVY			// dragon
+		mechWeightClassArray[12]		= WC_ASSAULT		// Fafnir
+		mechWeightClassArray[13]		= WC_LIGHT			// flea
+		mechWeightClassArray[14]		= WC_ASSAULT		// Gladiator
+		mechWeightClassArray[15]		= WC_ASSAULT		// Hauptmann
+		mechWeightClassArray[16]		= WC_MEDIUM			// Hellhound
+		mechWeightClassArray[17]		= WC_MEDIUM			// Hellspawn
+		mechWeightClassArray[18]		= WC_ASSAULT		// highlander
+		mechWeightClassArray[19]		= WC_MEDIUM			// hunchback
+		mechWeightClassArray[20]		= WC_ASSAULT		// kodiak
+		mechWeightClassArray[21]		= WC_HEAVY			// Loki
+		mechWeightClassArray[22]		= WC_ASSAULT	  	// Longbow
+		mechWeightClassArray[23]		= WC_HEAVY			// Madcat
+		mechWeightClassArray[24]		= WC_ASSAULT		// Madcat Mk II
+		mechWeightClassArray[25]		= WC_ASSAULT		// masakari
+		mechWeightClassArray[26]		= WC_ASSAULT		// Mauler
+		mechWeightClassArray[27]		= WC_HEAVY			// Novacat
+		mechWeightClassArray[28]		= WC_LIGHT			// Osiris
+		mechWeightClassArray[29]		= WC_LIGHT			// Owens
+		mechWeightClassArray[30]		= WC_LIGHT			// Puma
+		mechWeightClassArray[31]		= WC_LIGHT			// Raven
+		mechWeightClassArray[32]		= WC_MEDIUM			// Ryoken
+		mechWeightClassArray[33]		= WC_MEDIUM			// Shadowcat
+		mechWeightClassArray[34]		= WC_ASSAULT		// Sunder
+		mechWeightClassArray[35]		= WC_ASSAULT		// Templar
+		mechWeightClassArray[36]		= WC_HEAVY			// Thanatos
+		mechWeightClassArray[37]		= WC_HEAVY			// Thor
+		mechWeightClassArray[38]		= WC_LIGHT			// Uller
+		mechWeightClassArray[39]		= WC_MEDIUM			// Uziel
+		mechWeightClassArray[40]		= WC_ASSAULT		// Victor
+		mechWeightClassArray[41]		= WC_HEAVY			// Vulture
+		mechWeightClassArray[42]		= WC_LIGHT			// wolfhound
+		mechWeightClassArray[43]		= WC_ASSAULT		// Zeus
+		mechWeightClassArray[M_Avatar]		= WC_HEAVY			// Avatar	// mektek
+		mechWeightClassArray[M_Warhammer]	= WC_HEAVY		// Warhammer	// mektek
+		mechWeightClassArray[M_Strider]		= WC_MEDIUM			// Strider	// mektek
+		mechWeightClassArray[M_Marauder]	= WC_HEAVY			// Madcat	// mektek
+		mechWeightClassArray[M_Bloodasp]	= WC_ASSAULT			// mektek
+		mechWeightClassArray[M_UrbanmechIIC]	= WC_LIGHT			// Urban Mech	// mektek
+		mechWeightClassArray[M_Stalker]		= WC_ASSAULT			// mektek
+		mechWeightClassArray[M_Ares]		= WC_HEAVY			// mektek
+		mechWeightClassArray[M_Urbanmech]	= WC_LIGHT			// Urban Mech	// mektek
+		mechWeightClassArray[M_BrcticWolf]	= WC_MEDIUM			// Mechstorm
+		
+	}
+}
+
+
+
+
+

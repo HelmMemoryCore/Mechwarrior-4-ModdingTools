@@ -1,0 +1,105 @@
+File: weaponsubsystems\<class>\<weapon>.data{GameModel}
+Purpose: functional parameters of the weapon.
+Size: 0x78 to 0xA4 depending on the weapon class.
+Content: see Wep.txt
+ 00 ?: Always 00 00 00 00
+ 04 ?: Unknown, seems garbage.
+ 08 ?: Unknown, seems garbage.
+ 0C I: Weapon class, the structure size is dependent on this value:
+ Class Size Description
+ 52040000 0x7C Lasers, instant hit weapons class.
+ 6E040000 0x98 Direct fire weapons (AC,UAC,Gauss,PPC,MGUN etc).
+ 74040000 0x9C SRM, it seems that the lock field is screwed in
+ this class, missiles fly in the wrong direction
+ when locked.
+ 75040000 0x9C MRM, flat path, the lock field allows for LRM-like
+ lock.
+ 76040000 0x9C LRM, arc path, allows lock.
+ 77040000 0x9C SSRM, SMRM, flat path, instant lock.
+ 83040000 0x98 NARC, handles the NARC behavior.
+ 8F040000 0x98 Flare, handles the Flare behavior.
+ 97040000 0x9C SRM Bomb, unused in the game, unknown behavior.
+ 9E040000 0x9C LongTom, arc path, lot of bugs.
+ A0040000 0x98 Flamer, what different from other direct fire
+ weapons ?
+ A4040000 0x98 Artillery Beacon, handles the delayed damage.
+ C1040000 0xA0 LBX, handles the damage reduction over distance.
+ CE040000 0xA4 RTX, handles the weapon jamming/unjamming.
+ D0040000 0x9C Arrows, flat path, lock, no visible LAMS effect
+ (but it seems to work, may be it would be better
+ to use the SMRM class for Arrows).
+ 5:17:27 PM: received this ?
+ 5:18:05 PM: yes
+ 5:18:07 PM: 10 X: Null reference, FF FF 00 00.
+ 14 X: Reference to:
+ weaponsubsystems\<class>\<weapon>.data{Element}
+ 18 ?: UNKNOWN, always 00 00 00 00.
+ 1C F: Weapon weight including the base ton of ammo (if not energy).
+ 20 I: It seems proportional to the damage (it is not the knock).
+ Documented as "Battle Value".
+ 24 I: Weapon price, only important in single player and c-bills limited
+ games.
+ 28 I: Number of slots (check if zero works).
+ 2C I: Weapon Group (0=Missile, 1=Projectile, 2=Energy).
+ 30 I: Weapon ID.
+ 34 X: Flare effect, reference to:
+ effects\<class>\<weapon>_flare.data
+ 38 X: Shell ejection effect, reference to:
+ effects\shell_ejection\<file>.data
+ 3C F: Heat generared by the weapon divided by two.
+ 40 F: UNKNOWN, it seems to be always 3.
+ Documented as "Heat Spread Time".
+ 44 I: Ammo_per_ton * 3 * @28 (it is a function of the number of slots).
+ 5:18:12 PM: append this
+48 I: Number of salvos, how many times the weapon fires.
+ 4C I: Ammo usage, how many ammunitions the weapon uses for each salvo.
+ 50 F: Heat to target divided by two.
+ 54 F: Weapon damage for each salvo.
+ 58 F: Range in meters.
+ 5C F: Blast radius/spread factor.
+ 60 F: Splash attenuation, it is related to splash damage, lower values
+ mean better splash in the defined area.
+ 64 F: UNKNOWN, always 0.05.
+ 68 F: UNKNOWN, always 0.15.
+ 6C F: Recycle time in seconds.
+ 70 F: Light Amp Flare Out (0.5 SRM/SSRM/Narc/Flare, 1 MRM/LRM, 0.9 Flamer,
+ 0.3 Arty, 0.8 Arrows, 0 other).
+ 74 F: Beam duration for lasers.
+ Time between salvos for other weapon classes.
+ 78 F: For lasers only, reference to:
+ weapons\<class>\<weapon>.data{GameModel}
+ For Long Tom contains 100 but unknown.
+ For others always 0.
+ 5:18:34 PM: 7C F: For missiles:
+ LT 100, 0 others.
+ 80 F: Projectile speed, I think it is meters/seconds.
+ For missiles it is the ejection speed of the missiles from the launcher
+ before the engine ignites.
+ 84 F: ???
+ 88 F: Gravity accelleration for LongTom (-9.8), it does not work for other
+ weapons.
+ 8C F: UNKNOWN, 100 LRM/SRM, 120 MRM, 40 Arrows, 0 SSRM/SMRM, 0 others.
+ 90 X: Reference to:
+ weapons\<class>\<weapon>.data
+ 94 F: Lock time in seconds for MRM, LRM, Arrows, SRM, SSRM, SMRM, it does 
+not work correctly for SRM class. Unused on other weapon classes
+ (always 00 00 00 00).
+ 98 F: Missiles: Engine Burn Time, zero disables the engine and the missile
+ follows a ballistic trajectory.
+ LBX, disipation start.
+ RTX, time to potential jam.
+ 9C F: UNKNOWN but.
+ LBX, max disipation.
+ RTX, time to jam.
+ A0 F: UNKNOWN but:
+ RTX, time to unjam.
+ 5:18:54 PM: this is what i know about the weapon gamemodel, it is most of it but not all
+ 5:19:12 PM: may be you will discover some more
+
+5-27-06 My research:
+
+A weapon with splash size of 3, splash factor .75, weapon damage of 12 => good point damage and about 1 point of armor damage to the remainder of the mech.
+
+ 34 X: Flare effect, reference to:
+ effects\<class>\<weapon>_flare.data
+This so far appears only to be a pointer to the "SOUND" of the weappon when it is shot.

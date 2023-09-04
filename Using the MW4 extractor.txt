@@ -1,0 +1,2 @@
+always add the archive number files 455_example.sample
+when merging the mw4 files use the folder \example\example\entry\your file here

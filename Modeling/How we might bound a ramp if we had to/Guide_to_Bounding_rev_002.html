@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head>
+
+
+	<meta http-equiv="CONTENT-TYPE" content="text/html; charset=windows-1252">
+	<title></title>
+	<meta name="GENERATOR" content="OpenOffice.org 2.4  (Win32)">
+	<meta name="AUTHOR" content="M F">
+	<meta name="CREATED" content="20081009;11582517">
+	<meta name="CHANGEDBY" content="M F">
+	<meta name="CHANGED" content="20081009;13305048">
+	<style type="text/css">
+	<!--
+		@page { size: 8.5in 11in; margin: 0.79in }
+		P { margin-bottom: 0.08in }
+	-->
+	</style>
+</head><body dir="ltr" lang="en-US">
+<p style="margin-bottom: 0in;">To do this we would need to set up
+basic rules.</p>
+<p style="margin-bottom: 0in;">This 3D triangle has 5 sides.  Most of
+the angles are &lt; 90 degs.</p>
+<p style="margin-bottom: 0in;">We can bound all of the sides that have
+4 points in the same plane using the VERY THIN BBOX.</p>
+<p style="margin-bottom: 0in;"><img src="Guide_to_Bounding_rev_002_files/Guide_to_Bounding_rev_002_html_717d096f.jpg" name="graphics1" align="left" border="0" width="665" height="601"><br clear="left"><br>
+</p>
+<p style="margin-bottom: 0in;"><br>
+</p>
+<p style="margin-bottom: 0in;"><br>
+</p>
+<p style="margin-bottom: 0in; page-break-before: always;"><br>
+</p>
+<p style="margin-bottom: 0in;">So, we pick a plane that has very close
+to a box shape (4 points) and bind the entire plane with a very thin
+box... It will look like this:</p>
+<p style="margin-bottom: 0in;"><img src="Guide_to_Bounding_rev_002_files/Guide_to_Bounding_rev_002_html_4fb850a1.jpg" name="graphics2" align="left" border="0" width="665" height="364"><br clear="left"><br>
+</p>
+<p style="margin-bottom: 0in;"><br>
+</p>
+<p style="margin-bottom: 0in;">We repeat that for all the planes with
+4 points that are box shaped...</p>
+<p style="margin-bottom: 0in;"><img src="Guide_to_Bounding_rev_002_files/Guide_to_Bounding_rev_002_html_5e435b5e.jpg" name="graphics3" align="left" border="0" width="665" height="365"><br clear="left">Notice
+the very thin white bounding boxes ... Now ... we just need to do the
+triangular sides. Using the same “thin Box method”.</p>
+<p style="margin-bottom: 0in; page-break-before: always;">Now... we
+create a “staircase” in both directions using the sides
+adjacent to the largest angle formed by the triangle.</p>
+<p style="margin-bottom: 0in;"><br>
+</p>
+<p style="margin-bottom: 0in;"><img src="Guide_to_Bounding_rev_002_files/Guide_to_Bounding_rev_002_html_m17ffd52a.jpg" name="graphics4" align="left" border="0" width="665" height="365"><br clear="left"><br>
+</p>
+<p style="margin-bottom: 0in;">Then repeat a similar process for the
+side Opposite the largest angle.</p>
+<p style="margin-bottom: 0in;"><br>
+</p>
+<p style="margin-bottom: 0in;"><img src="Guide_to_Bounding_rev_002_files/Guide_to_Bounding_rev_002_html_m2028b054.jpg" name="graphics5" align="left" border="0" width="665" height="365"><br clear="left"><br>
+</p>
+<p style="margin-bottom: 0in; page-break-before: always;"><br>
+</p>
+<p style="margin-bottom: 0in;">NOTICE that USER only selects the 3
+points in the Triangle to do this... the remainder is automated
+because it is simply mathematical principles using half way points
+and perpendicular lines.</p>
+<p style="margin-bottom: 0in;"><br>
+</p>
+<p style="margin-bottom: 0in;">Finally... notice we have bounded &gt;90%
+of the side with this method.</p>
+<p style="margin-bottom: 0in;"><img src="Guide_to_Bounding_rev_002_files/Guide_to_Bounding_rev_002_html_4795deb2.jpg" name="graphics6" align="left" border="0" width="500" height="405"><br clear="left"><br>
+</p>
+<p style="margin-bottom: 0in;">Only the very corner is unbounded.  The
+Amount of this unbounding would be determined by the number of splits
+you allow.</p>
+<p style="margin-bottom: 0in;"><br>
+</p>
+<p style="margin-bottom: 0in;">Alternatively... you could make a
+function to make a box from the 2 outer most points at that
+corner...and button most of it up.</p>
+<p style="margin-bottom: 0in;"><br>
+</p>
+</body></html>

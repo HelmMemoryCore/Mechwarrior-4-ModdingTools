@@ -1,0 +1,1586 @@
+// Mechwarrior: Vengeance
+// Copyright © 1999-2000
+// Mechbay_main.script
+// Paolo Malabuyo
+// July 12, 2000
+
+#include "Content\\MercsShellScripts\\stddefs.h"
+#include "Content\\MercsShellScripts\\ShellFunctionHeaders.hpp"
+#include "Content\\MercsShellScripts\\MechLabHeaders_MERCS.h"
+#include "Content\\MercsShellScripts\\ScriptStrings.h"
+
+armor
+{
+	GUI_CREATE
+	{
+
+		int labelx			= 22
+		int labely			= 79
+		int boxx			= 170
+		int boxy			= 92
+		int boxwidth		= 64
+		int edgex			= 307
+		int bodylabelx		= 22
+		int bodylabely		= 154 + 5
+		int bodyboxwidth	= 55
+		int bodyboxx1		= 122
+		int bodyboxx2		= bodyboxx1 + bodyboxwidth + 10
+		int bodyboxx3		= bodyboxx2 + bodyboxwidth + 10
+		int bodyboxy		= bodylabely - 3
+		int noneditx		= 355
+		int nonedity		= 470
+		int sepx1			= 22
+		int sepx2			= 308
+		int sepy1			= 152
+		int boxcontentx		= boxx + 5
+
+		int mech_id2 = -1
+
+		//Info gotten from the selected Mech
+		float	armor_array[A_Head + 1]
+		int		max_armor_array[A_Head + 1]
+		float	armor_tonnage_array[A_Head + 1]
+		int		armor_type
+		int		internal_type
+		int		pts_per_ton
+		float	armor_tonnage
+
+		string internal_structure[2]
+		internal_structure[0] = localize$(IDS_ML_AR_STANDARD)
+		internal_structure[1] = localize$(DNL_ENDOSTEEL)
+
+		float head
+		float left_arm
+		float right_arm
+		float left_front_torso
+		float center_front_torso
+		float right_front_torso
+		float rear_torso
+		float left_leg
+		float right_leg
+		float installed_armor
+
+		int max_head
+		int max_left_arm
+		int max_right_arm
+		int max_left_torso
+		int max_center_torso
+		int max_right_torso
+		int max_rear_torso
+		int max_left_leg
+		int max_right_leg
+
+		int head_pts
+		int left_arm_pts
+		int right_arm_pts
+		int left_torso_pts
+		int center_torso_pts
+		int right_torso_pts
+		int rear_torso_pts
+		int left_leg_pts
+		int right_leg_pts
+		int total_pts
+
+		sound btnTriggeredSound = APATH "sfx_button5.wav"
+
+		position head_bar[LastMechID+2]	// mektek
+		head_bar[0] 	= 570,290,10				// Arctic Wolf
+		head_bar[1] 	= 570,190,10				// Argus
+		head_bar[2] 	= 565,80,10					// Atlas
+		head_bar[3] 	= 565,160,10				// Awesome
+		head_bar[4] 	= 565,150,10				// Black Knight
+		head_bar[5] 	= 560,250,10				// Bushwacker
+		head_bar[6] 	= 560,220,10				// Catapult
+        head_bar[7] 	= 570,270,10        		// cauldron-born
+		head_bar[8] 	= 580,210,10				// Chimera
+		head_bar[9] 	= 570,270,10				// Cougar
+		head_bar[10]	= 575,170,10				// Daishi
+		head_bar[11]	= 575,170,10				// Dragon
+		head_bar[12]	= 565,150,10				// Fafnir
+		head_bar[13]	= 565,300,10				// Flea
+		head_bar[14]	= 565,150,10				// Gladiator
+		head_bar[15]	= 565,150,10				// Hauptmann
+		head_bar[16] 	= 580,210,10				// Hellhound
+		head_bar[17]	= 535,240,10				// Hellspawn
+		head_bar[18]	= 565,170,10				// highlander
+		head_bar[19]	= 565,170,10				// hunchback
+		head_bar[20]	= 565,160,10				// Kodiak
+		head_bar[21]	= 565,170,10				// Loki
+		head_bar[22]	= 565,150,10				// Longbow
+		head_bar[23]	= 565,200,10				// Madcat
+		head_bar[24]	= 565,180,10				// Madcat Mk. II
+		head_bar[25]	= 575,170,10				// Masakari
+		head_bar[26]	= 565,150,10				// Mauler
+		head_bar[27]	= 560,180,10				// Novacat
+		head_bar[28]	= 565,270,10				// Osiris
+		head_bar[29] 	= 580,280,10				// Owens
+		head_bar[30] 	= 570,290,10				// Puma
+		head_bar[31]	= 565,300,10				// Raven
+		head_bar[32]	= 560,250,10				// Ryoken
+		head_bar[33]	= 570,270,10				// Shadowcat
+		head_bar[34]	= 570,130,10				// Sunder
+		head_bar[35]	= 565,150,10				// Templar
+		head_bar[36]	= 565,200,10				// Thanatos
+		head_bar[37]	= 525,175,10				// Thor
+		head_bar[38]	= 570,270,10				// Uller
+		head_bar[39]	= 570,290,10				// Uziel
+		head_bar[40]	= 565,150,10				// Victor
+		head_bar[41]	= 560,175,10				// Vulture
+		head_bar[42]	= 560,180,10				// Wolfhound
+		head_bar[43]	= 560,180,10				// Zeus
+		head_bar[M_Avatar]	= 560,150,10				// Avatar	// mektek
+		head_bar[M_Warhammer]	= 570,150,10				// Warhammer	// mektek
+		head_bar[M_Strider]	= 565,260,10				// Strider	// mektek
+		head_bar[M_Bloodasp]	= 575,140,10				// mektek
+		head_bar[M_Marauder]	= 565,180,10				// Marauder	// mektek
+		head_bar[M_UrbanmechIIC]	= 565,260,10				// Urban Mech	// mektek
+		head_bar[M_Stalker]	= 575,170,10				// mektek
+		head_bar[M_Ares] 	= 560,250,10				// 
+		head_bar[M_Urbanmech]	= 565,260,10				// Urban Mech	// mektek
+		head_bar[M_BrcticWolf]	= 570,290,10				// Arctic Wolf II	// Mechstorm
+		head_bar[NoMechID]	= 560,100,10
+
+		position right_arm_bar[LastMechID+2]
+		right_arm_bar[0] = 460,280,10       		// Arctic Wolf
+		right_arm_bar[1] = 480,210,10       		// Argus
+		right_arm_bar[2] = 470,180,10       		// Atlas
+		right_arm_bar[3] = 460,180,10       		// Awesome
+		right_arm_bar[4] = 450,190,10       		// Black Knight
+		right_arm_bar[5] = 460,280,10       		// Bushwacker
+		right_arm_bar[6] = 475,190,10       		// Catapult
+        right_arm_bar[7] = 470,330,10       		// cauldron-born
+		right_arm_bar[8] = 475,270,10       		// Chimera
+		right_arm_bar[9] = 470,330,10       		// Cougar
+		right_arm_bar[10]= 460,180,10       		// Daishi
+		right_arm_bar[11]= 460,180,10				// Dragon
+		right_arm_bar[12]= 450,190,10       		// Fafnir
+		right_arm_bar[13]= 500,280,10       		// Flea
+		right_arm_bar[14]= 450,190,10       		// Gladiator
+		right_arm_bar[15]= 450,190,10       		// Hauptmann
+		right_arm_bar[16]= 475,270,10       		// Hellhound
+		right_arm_bar[17]= 490,280,10       		// Hellspawn
+        right_arm_bar[18]= 490,280,10       		// highlander
+        right_arm_bar[19]= 490,280,10       		// hunchback
+		right_arm_bar[20]= 460,180,10       		// Kodiak
+		right_arm_bar[21]= 465,200,10       		// Loki
+		right_arm_bar[22]= 450,190,10       		// Longbow
+		right_arm_bar[23]= 450,240,10       		// Madcat
+		right_arm_bar[24]= 465,210,10       		// Madcat Mk. II
+		right_arm_bar[25]= 460,180,10				// Masakari
+		right_arm_bar[26]= 450,190,10       		// Mauler
+		right_arm_bar[27]= 460,180,10       		// Novacat
+		right_arm_bar[28]= 480,280,10       		// Osiris
+		right_arm_bar[29]= 475,320,10       		// Owens
+		right_arm_bar[30]= 470,330,10       		// Puma
+		right_arm_bar[31]= 500,280,10       		// Raven
+		right_arm_bar[32]= 460,280,10       		// Ryoken
+		right_arm_bar[33]= 470,290,10       		// Shadowcat
+		right_arm_bar[34]= 470,200,10       		// Sunder
+		right_arm_bar[35]= 450,190,10       		// Templar
+		right_arm_bar[36]= 450,210,10       		// Thanatos
+		right_arm_bar[37]= 470,200,10       		// Thor
+		right_arm_bar[38]= 470,330,10       		// Uller
+		right_arm_bar[39]= 460,280,10       		// Uziel
+		right_arm_bar[40]= 450,190,10       		// Victor
+		right_arm_bar[41]= 475,250,10       		// Vulture
+		right_arm_bar[42]= 490,280,10       		// Wolfhound
+		right_arm_bar[43]= 490,280,10       		// Zeus
+		right_arm_bar[M_Avatar]= 435,250,10       		// Avatar	// mektek
+		right_arm_bar[M_Warhammer]= 430,280,10       		// Warhammer	// mektek
+		right_arm_bar[M_Strider]= 480,280,10       		// Strider	// mektek
+		right_arm_bar[M_Marauder]= 450,240,10       		// Marauder	// mektek
+		right_arm_bar[M_Bloodasp]= 460,240,10				// mektek
+		right_arm_bar[M_UrbanmechIIC]= 470,310,10       		// Urban Mech	// mektek
+		right_arm_bar[M_Stalker]= 460,180,10       		// mektek
+		right_arm_bar[M_Ares] = 460,280,10       		// 
+		right_arm_bar[M_Urbanmech]= 470,310,10       		// Urban Mech	// mektek
+		right_arm_bar[M_BrcticWolf]= 460,280,10       		// Arctic Wolf II	// Mechstorm
+		right_arm_bar[NoMechID]= 500,150,10
+
+		position left_arm_bar[LastMechID+2]
+		left_arm_bar[0] 	= 660,280,10    		// Arctic Wolf
+		left_arm_bar[1] 	= 670,210,10    		// Argus
+		left_arm_bar[2] 	= 670,180,10    		// Atlas
+		left_arm_bar[3] 	= 665,180,10    		// Awesome
+		left_arm_bar[4] 	= 670,190,10    		// Black Knight
+		left_arm_bar[5] 	= 640,280,10    		// Bushwacker
+		left_arm_bar[6] 	= 660,190,10    		// Catapult
+        	left_arm_bar[7] 	= 660,330,10    		// cauldron-born
+		left_arm_bar[8] 	= 665,270,10    		// Chimera
+		left_arm_bar[9] 	= 660,330,10    		// Cougar
+		left_arm_bar[10]	= 660,180,10    		// Daishi
+		left_arm_bar[11]	= 660,180,10			// Dragon
+		left_arm_bar[12]	= 670,190,10    		// Fafnir
+		left_arm_bar[13]	= 615,300,10    		// Flea
+		left_arm_bar[14]	= 670,190,10    		// Gladiator
+		left_arm_bar[15]	= 670,190,10    		// Hauptmann
+		left_arm_bar[16]	= 665,270,10    		// Hellhound
+		left_arm_bar[17]	= 630,280,10    		// Hellspawn
+        left_arm_bar[18]	= 630,280,10    		// highlander
+        left_arm_bar[19]	= 630,280,10    		// hunchback
+		left_arm_bar[20]	= 665,180,10    		// Kodiak
+		left_arm_bar[21]	= 650,200,10    		// Loki
+		left_arm_bar[22]	= 670,190,10    		// Longbow
+		left_arm_bar[23]	= 675,240,10    		// Madcat
+		left_arm_bar[24]	= 660,210,10    		// Madcat Mk. II
+		left_arm_bar[25]	= 660,180,10			// Masakari
+		left_arm_bar[26]	= 670,190,10    		// Mauler
+		left_arm_bar[27]	= 660,180,10    		// Novacat
+		left_arm_bar[28]	= 645,270,10    		// Osiris
+		left_arm_bar[29] 	= 650,320,10    		// Owens
+		left_arm_bar[30] 	= 660,330,10    		// Puma
+		left_arm_bar[31]	= 615,300,10    		// Raven
+		left_arm_bar[32]	= 640,280,10    		// Ryoken
+		left_arm_bar[33]	= 660,290,10    		// Shadowcat
+		left_arm_bar[34]	= 650,200,10    		// Sunder
+		left_arm_bar[35]	= 670,190,10    		// Templar
+		left_arm_bar[36]	= 650,210,10    		// Thanatos
+		left_arm_bar[37]	= 650,200,10    		// Thor
+		left_arm_bar[38]	= 660,330,10    		// Uller
+		left_arm_bar[39]	= 660,280,10    		// Uziel
+		left_arm_bar[40]	= 670,190,10    		// Victor
+		left_arm_bar[41]	= 650,250,10    		// Vulture
+		left_arm_bar[42]	= 630,280,10    		// Wolfhound
+		left_arm_bar[43]	= 630,280,10    		// Zeus
+		left_arm_bar[M_Avatar]	= 690,250,10    		// Avatar	// mektek
+		left_arm_bar[M_Warhammer]	= 690,280,10    		// Warhammer	// mektek
+		left_arm_bar[M_Strider]	= 635,280,10    		// Strider	// mektek
+		left_arm_bar[M_Marauder]	= 675,240,10    		// Marauder	// mektek
+		left_arm_bar[M_Bloodasp]	= 660,240,10			// mektek
+		left_arm_bar[M_UrbanmechIIC]	= 650,310,10    		// Urban Mech	// mektek
+		left_arm_bar[M_Stalker]	= 660,180,10    		// mektek
+		left_arm_bar[M_Ares] 	= 640,280,10    		// 
+		left_arm_bar[M_Urbanmech]	= 650,310,10    		// Urban Mech	// mektek
+		left_arm_bar[M_BrcticWolf]	= 660,280,10    		// Arctic Wolf II	// Mechstorm
+		left_arm_bar[NoMechID]	= 640,150,10
+
+		position right_torso_bar[LastMechID+2]
+		right_torso_bar[0] 	= 510,250,10    		// Arctic Wolf
+		right_torso_bar[1] 	= 530,220,10    		// Argus
+		right_torso_bar[2] 	= 520,150,10    		// Atlas
+		right_torso_bar[3] 	= 515,200,10    		// Awesome
+		right_torso_bar[4] 	= 510,160,10    		// Black Knight
+		right_torso_bar[5] 	= 525,270,10    		// Bushwacker
+		right_torso_bar[6] 	= 530,280,10    		// Catapult
+        right_torso_bar[7] 	= 510,300,10    		// cauldron-born
+		right_torso_bar[8] 	= 520,230,10    		// Chimera
+		right_torso_bar[9] 	= 510,300,10    		// Cougar
+		right_torso_bar[10]	= 515,200,10    		// Daishi
+		right_torso_bar[11]	= 515,200,10			// Dragon
+		right_torso_bar[12]	= 510,160,10    		// Fafnir
+		right_torso_bar[13]	= 530,310,10    		// Flea
+		right_torso_bar[14]	= 510,160,10    		// Gladiator
+		right_torso_bar[15]	= 510,160,10    		// Hauptmann
+		right_torso_bar[16]	= 520,230,10    		// Hellhound
+		right_torso_bar[17]	= 525,280,10    		// Hellspawn
+        right_torso_bar[18]	= 525,280,10    		// highlander
+        right_torso_bar[19]	= 525,280,10    		// hunchback
+		right_torso_bar[20]	= 515,200,10    		// Kodiak
+		right_torso_bar[21]	= 520,200,10    		// Loki
+		right_torso_bar[22]	= 510,160,10    		// Longbow
+		right_torso_bar[23]	= 525,240,10    		// Madcat
+		right_torso_bar[24]	= 520,230,10    		// Madcat Mk. II
+		right_torso_bar[25]	= 515,200,10			// Masakari
+		right_torso_bar[26]	= 510,160,10    		// Mauler
+		right_torso_bar[27]	= 515,200,10    		// Novacat
+		right_torso_bar[28]	= 510,290,10    		// Osiris
+		right_torso_bar[29]	= 520,280,10    		// Owens
+		right_torso_bar[30]	= 510,300,10    		// Puma
+		right_torso_bar[31]	= 530,310,10    		// Raven
+		right_torso_bar[32]	= 525,270,10    		// Ryoken
+		right_torso_bar[33]	= 530,280,10    		// Shadowcat
+		right_torso_bar[34]	= 520,220,10    		// Sunder
+		right_torso_bar[35]	= 510,160,10    		// Templar
+		right_torso_bar[36]	= 520,200,10    		// Thanatos
+		right_torso_bar[37]	= 520,220,10    		// Thor
+		right_torso_bar[38]	= 510,300,10    		// Uller
+		right_torso_bar[39]	= 510,250,10    		// Uziel
+		right_torso_bar[40]	= 510,160,10    		// Victor
+		right_torso_bar[41]	= 530,220,10    		// Vulture
+		right_torso_bar[42]	= 525,250,10    		// Wolfhound
+		right_torso_bar[43]	= 525,250,10    		// zeus
+		right_torso_bar[M_Avatar]	= 500,220,10    		// Avatar	// mektek
+		right_torso_bar[M_Warhammer]	= 520,220,10    		// Warhammer	// mektek
+		right_torso_bar[M_Strider]	= 530,290,10    		// Strider	// mektek
+		right_torso_bar[M_Marauder]	= 525,240,10    		// Marauder	// mektek
+		right_torso_bar[M_Bloodasp]	= 515,180,10			// mektek
+		right_torso_bar[M_UrbanmechIIC]	= 530,310,10    		// Urban Mech	// mektek
+		right_torso_bar[M_Stalker]	= 515,200,10    		// mektek
+		right_torso_bar[M_Ares] 	= 525,270,10    		// 
+		right_torso_bar[M_Urbanmech]	= 530,310,10    		// Urban Mech	// mektek
+		right_torso_bar[M_BrcticWolf]	= 510,250,10    		// Arctic Wolf II	// Mechstorm
+		right_torso_bar[NoMechID]	= 530,200,10
+
+		position center_torso_bar[LastMechID+2]
+		center_torso_bar[0] = 575,220,10    		// Arctic Wolf
+		center_torso_bar[1] = 580,240,10    		// Argus
+		center_torso_bar[2] = 580,150,10    		// Atlas
+		center_torso_bar[3] = 575,220,10    		// Awesome
+		center_torso_bar[4] = 575,220,10    		// Black Knight
+		center_torso_bar[5] = 575,290,10    		// Bushwacker
+		center_torso_bar[6] = 580,300,10    		// Catapult
+        center_torso_bar[7] = 570,330,10    		// cauldron-born
+		center_torso_bar[8] = 575,260,10    		// Chimera
+		center_torso_bar[9] = 570,330,10    		// Cougar
+		center_torso_bar[10]= 580,260,10    		// Daishi
+		center_torso_bar[11]= 580,260,10			// Dragon
+		center_torso_bar[12]= 575,220,10    		// Fafnir
+		center_torso_bar[13]= 575,340,10    		// Flea
+		center_torso_bar[14]= 575,220,10    		// Gladiator
+		center_torso_bar[15]= 575,220,10    		// Hauptmann
+		center_torso_bar[16]= 575,260,10    		// Hellhound
+		center_torso_bar[17]= 575,290,10    		// Hellspawn
+        center_torso_bar[18]= 575,290,10    		// highlander
+        center_torso_bar[19]= 575,290,10    		// hunchback
+		center_torso_bar[20]= 575,220,10    		// Kodiak
+		center_torso_bar[21]= 575,240,10    		// Loki
+		center_torso_bar[22]= 575,220,10    		// Longbow
+		center_torso_bar[23]= 575,250,10    		// Madcat
+		center_torso_bar[24]= 580,235,10    		// Madcat Mk. II
+		center_torso_bar[25]= 580,260,10			// Masakari
+		center_torso_bar[26]= 575,220,10    		// Mauler
+		center_torso_bar[27]= 580,230,10    		// Novacat
+		center_torso_bar[28]= 580,310,10    		// Osiris
+		center_torso_bar[29]= 575,340,10    		// Owens
+		center_torso_bar[30]= 570,330,10    		// Puma
+		center_torso_bar[31]= 575,340,10    		// Raven
+		center_torso_bar[32]= 575,290,10    		// Ryoken
+		center_torso_bar[33]= 580,310,10    		// Shadowcat
+		center_torso_bar[34]= 575,200,10    		// Sunder
+		center_torso_bar[35]= 575,220,10    		// Templar
+		center_torso_bar[36]= 580,250,10    		// Thanatos
+		center_torso_bar[37]= 575,200,10    		// Thor
+		center_torso_bar[38]= 570,330,10    		// Uller
+		center_torso_bar[39]= 575,220,10    		// Uziel
+		center_torso_bar[40]= 575,220,10    		// Victor
+		center_torso_bar[41]= 580,250,10    		// Vulture
+		center_torso_bar[42]= 575,230,10    		// Wolfhound
+		center_torso_bar[43]= 575,230,10    		// zeus
+		center_torso_bar[M_Avatar]= 575,220,10    		// Avatar	// mektek
+		center_torso_bar[M_Warhammer]= 575,260,10    		// Warhammer	// mektek
+		center_torso_bar[M_Strider]= 575,310,10    		// Strider	// mektek
+		center_torso_bar[M_Marauder]= 575,180,10    		// Marauder	// mektek
+		center_torso_bar[M_Bloodasp]= 580,210,10			// mektek
+		center_torso_bar[M_UrbanmechIIC]= 575,300,10    		// Urban Mech	// mektek
+		center_torso_bar[M_Stalker]= 580,260,10    		// mektek
+		center_torso_bar[M_Ares] = 575,290,10    		// 
+		center_torso_bar[M_Urbanmech]= 575,300,10    		// Urban Mech	// mektek
+		center_torso_bar[M_BrcticWolf]= 575,220,10    		// Arctic Wolf II	// Mechstorm
+		center_torso_bar[NoMechID]= 580,200,10
+
+		position left_torso_bar[LastMechID+2]
+		left_torso_bar[0] = 615,250,10      		// Arctic Wolf
+		left_torso_bar[1] = 610,220,10      		// Argus
+		left_torso_bar[2] = 610,150,10      		// Atlas
+		left_torso_bar[3] = 615,200,10      		// Awesome
+		left_torso_bar[4] = 620,160,10      		// Black Knight
+		left_torso_bar[5] = 605,270,10      		// Bushwacker
+		left_torso_bar[6] = 610,280,10      		// Catapult
+        left_torso_bar[7] = 620,300,10      		// cauldron-born
+		left_torso_bar[8] = 605,230,10      		// Chimera
+		left_torso_bar[9] = 620,300,10      		// Cougar
+		left_torso_bar[10]= 615,200,10      		// Daishi
+		left_torso_bar[11]= 615,200,10				// Dragon
+		left_torso_bar[12]= 620,160,10      		// Fafnir
+		left_torso_bar[13]= 595,310,10      		// Flea
+		left_torso_bar[14]= 620,160,10      		// Gladiator
+		left_torso_bar[15]= 620,160,10      		// Hauptmann
+		left_torso_bar[16]= 605,230,10      		// Hellhound
+		left_torso_bar[17]= 600,280,10      		// Hellspawn
+        left_torso_bar[18]= 600,280,10      		// highlander
+        left_torso_bar[19]= 600,280,10      		// hunchback
+		left_torso_bar[20]= 615,200,10      		// Kodiak
+		left_torso_bar[21]= 610,200,10      		// Loki
+		left_torso_bar[22]= 620,160,10      		// Longbow
+		left_torso_bar[23]= 605,240,10      		// Madcat
+		left_torso_bar[24]= 605,230,10      		// Madcat Mk. II
+		left_torso_bar[25]= 615,200,10				// Masakari
+		left_torso_bar[26]= 620,160,10      		// Mauler
+		left_torso_bar[27]= 610,200,10      		// Novacat
+		left_torso_bar[28]= 610,290,10      		// Osiris
+		left_torso_bar[29]= 605,280,10      		// Owens
+		left_torso_bar[30]= 620,300,10      		// Puma
+		left_torso_bar[31]= 595,310,10      		// Raven
+		left_torso_bar[32]= 605,270,10      		// Ryoken
+		left_torso_bar[33]= 610,280,10      		// Shadowcat
+		left_torso_bar[34]= 610,220,10      		// Sunder
+		left_torso_bar[35]= 620,160,10      		// Templar
+		left_torso_bar[36]= 610,200,10      		// Thanatos
+		left_torso_bar[37]= 610,220,10      		// Thor
+		left_torso_bar[38]= 620,300,10      		// Uller
+		left_torso_bar[39]= 615,250,10      		// Uziel
+		left_torso_bar[40]= 620,160,10      		// Victor
+		left_torso_bar[41]= 600,220,10      		// Vulture
+		left_torso_bar[42]= 600,250,10      		// Wolfhound
+		left_torso_bar[43]= 600,250,10      		// zeus
+		left_torso_bar[M_Avatar]= 630,220,10      		// Avatar	// mektek
+		left_torso_bar[M_Warhammer]= 610,220,10      		// Warhammer	// mektek
+		left_torso_bar[M_Strider]= 605,290,10      		// Strider	// mektek
+		left_torso_bar[M_Marauder]= 605,240,10      		// Marauder	// mektek
+		left_torso_bar[M_Bloodasp]= 615,180,10				// mektek
+		left_torso_bar[M_UrbanmechIIC]= 605,310,10      		// Urban Mech	// mektek
+		left_torso_bar[M_Stalker]= 615,200,10      		// mektek
+		left_torso_bar[M_Ares] = 605,270,10      		// 
+		left_torso_bar[M_Urbanmech]= 605,310,10      		// Urban Mech	// mektek
+		left_torso_bar[M_BrcticWolf]= 615,250,10      		// Arctic Wolf II	// Mechstorm
+		left_torso_bar[NoMechID]= 610,200,10
+
+		position rear_torso_bar[LastMechID+2]
+		rear_torso_bar[0] = 555,230,10      		// Arctic Wolf
+		rear_torso_bar[1] = 560,250,10      		// Argus
+		rear_torso_bar[2] = 560,160,10      		// Atlas
+		rear_torso_bar[3] = 555,230,10      		// Awesome
+		rear_torso_bar[4] = 560,200,10      		// Black Knight
+		rear_torso_bar[5] = 555,300,10      		// Bushwacker
+		rear_torso_bar[6] = 560,310,10      		// Catapult
+        rear_torso_bar[7] = 550,340,10      		// cauldron-born
+		rear_torso_bar[8] = 555,270,10      		// Chimera
+		rear_torso_bar[9] = 550,340,10      		// Cougar
+		rear_torso_bar[10]= 560,270,10      		// Daishi
+		rear_torso_bar[11]= 560,270,10				// Dragon
+		rear_torso_bar[12]= 555,230,10      		// Fafnir
+		rear_torso_bar[13]= 555,350,10      		// Flea
+		rear_torso_bar[14]= 555,230,10      		// Gladiator
+		rear_torso_bar[15]= 555,230,10      		// Hauptmann
+		rear_torso_bar[16]= 555,270,10      		// Hellhound
+		rear_torso_bar[17]= 555,300,10      		// Hellspawn
+        rear_torso_bar[18]= 555,300,10      		// highlander
+        rear_torso_bar[19]= 555,300,10      		// hunchback
+		rear_torso_bar[20]= 555,230,10      		// Kodiak
+		rear_torso_bar[21]= 555,250,10      		// Loki
+		rear_torso_bar[22]= 555,230,10      		// Longbow
+		rear_torso_bar[23]= 555,260,10      		// Madcat
+		rear_torso_bar[24]= 560,245,10      		// Madcat Mk. II
+		rear_torso_bar[25]= 560,270,10				// Masakari
+		rear_torso_bar[26]= 555,230,10      		// Mauler
+		rear_torso_bar[27]= 560,240,10      		// Novacat
+		rear_torso_bar[28]= 560,320,10      		// Osiris
+		rear_torso_bar[29]= 555,350,10      		// Owens
+		rear_torso_bar[30]= 550,340,10      		// Puma
+		rear_torso_bar[31]= 555,350,10      		// Raven
+		rear_torso_bar[32]= 555,300,10      		// Ryoken
+		rear_torso_bar[33]= 560,310,10      		// Shadowcat
+		rear_torso_bar[34]= 555,210,10      		// Sunder
+		rear_torso_bar[35]= 555,230,10      		// Templar
+		rear_torso_bar[36]= 560,260,10      		// Thanatos
+		rear_torso_bar[37]= 555,210,10      		// Thor
+		rear_torso_bar[38]= 550,340,10      		// Uller
+		rear_torso_bar[39]= 555,230,10      		// Uziel
+		rear_torso_bar[40]= 555,230,10      		// Victor
+		rear_torso_bar[41]= 560,260,10      		// Vulture
+		rear_torso_bar[42]= 555,240,10      		// Wolfhound
+		rear_torso_bar[43]= 555,240,10      		// zeus
+		rear_torso_bar[M_Avatar]= 550,220,10      		// Avatar	// mektek
+		rear_torso_bar[M_Warhammer]= 555,270,10      		// Warhammer	// mektek
+		rear_torso_bar[M_Strider]= 555,320,10 	     		// Strider	// mektek
+		rear_torso_bar[M_Marauder]= 555,260,10      		// Marauder	// mektek
+		rear_torso_bar[M_Bloodasp]= 560,220,10				// mektek
+		rear_torso_bar[M_UrbanmechIIC]= 555,310,10      		// Urban Mech	// mektek
+		rear_torso_bar[M_Stalker]= 560,270,10      		// mektek
+		rear_torso_bar[M_Ares] = 555,300,10      		// 
+		rear_torso_bar[M_Urbanmech]= 555,310,10      		// Urban Mech	// mektek
+		rear_torso_bar[M_BrcticWolf]= 555,310,10      		// Arctic Wolf II	// Mechstorm
+		rear_torso_bar[NoMechID]= 555,230,10
+
+		position right_leg_bar[LastMechID+2]
+		right_leg_bar[0] = 500,380,10       		// Arctic Wolf
+		right_leg_bar[1] = 500,350,10       		// Argus
+		right_leg_bar[2] = 520,350,10       		// Atlas
+		right_leg_bar[3] = 500,350,10       		// Awesome
+		right_leg_bar[4] = 500,350,10       		// Black Knight
+		right_leg_bar[5] = 505,370,10       		// Bushwacker
+		right_leg_bar[6] = 500,370,10       		// Catapult
+        right_leg_bar[7] = 525,400,10       		// cauldron-born
+		right_leg_bar[8] = 510,370,10       		// Chimera
+		right_leg_bar[9] = 525,400,10       		// Cougar
+		right_leg_bar[10]= 480,350,10       		// Daishi
+		right_leg_bar[11]= 480,350,10				// Dragon
+		right_leg_bar[12]= 500,350,10       		// Fafnir
+		right_leg_bar[13]= 510,390,10       		// Flea
+		right_leg_bar[14]= 500,350,10       		// Gladiator
+		right_leg_bar[15]= 500,350,10       		// Hauptmann
+		right_leg_bar[16]= 510,370,10       		// Hellhound
+		right_leg_bar[17]= 520,370,10       		// Hellspawn
+        right_leg_bar[18]= 520,370,10       		// highlander
+        right_leg_bar[19]= 520,370,10       		// hunchback
+		right_leg_bar[20]= 500,350,10       		// Kodiak
+		right_leg_bar[21]= 510,350,10       		// Loki
+		right_leg_bar[22]= 500,350,10       		// Longbow
+		right_leg_bar[23]= 505,350,10       		// Madcat
+		right_leg_bar[24]= 470,350,10       		// Madcat Mk. II
+		right_leg_bar[25]= 480,350,10				// Masakari
+		right_leg_bar[26]= 500,350,10       		// Mauler
+		right_leg_bar[27]= 510,350,10       		// Novacat
+		right_leg_bar[28]= 510,390,10       		// Osiris
+		right_leg_bar[29]= 510,400,10       		// Owens
+		right_leg_bar[30]= 525,400,10       		// Puma
+		right_leg_bar[31]= 510,390,10       		// Raven
+		right_leg_bar[32]= 505,370,10       		// Ryoken
+		right_leg_bar[33]= 500,370,10       		// Shadowcat
+		right_leg_bar[34]= 510,350,10       		// Sunder
+		right_leg_bar[35]= 500,350,10       		// Templar
+		right_leg_bar[36]= 510,350,10       		// Thanatos
+		right_leg_bar[37]= 510,350,10       		// Thor
+		right_leg_bar[38]= 525,400,10       		// Uller
+		right_leg_bar[39]= 500,380,10       		// Uziel
+		right_leg_bar[40]= 500,350,10       		// Victor
+		right_leg_bar[41]= 505,350,10       		// Vulture
+		right_leg_bar[42]= 520,370,10       		// Wolfhound
+		right_leg_bar[43]= 520,370,10       		// zeus
+		right_leg_bar[M_Avatar]= 480,370,10       		// Avatar	// mektek
+		right_leg_bar[M_Warhammer]= 480,350,10       		// Warhammer	// mektek
+		right_leg_bar[M_Strider]= 490,390,10       		// Strider	// mektek
+		right_leg_bar[M_Marauder]= 490,350,10       		// Marauder	// mektek
+		right_leg_bar[M_Bloodasp]= 470,350,10				// mektek
+		right_leg_bar[M_UrbanmechIIC]= 500,390,10       		// Urban Mech	// mektek
+		right_leg_bar[M_Stalker]= 480,350,10       		// mektek
+		right_leg_bar[M_Ares] = 505,370,10       		// 
+		right_leg_bar[M_Urbanmech]= 500,390,10       		// Urban Mech	// mektek
+		right_leg_bar[M_BrcticWolf]= 500,380,10       		// Arctic Wolf II	// Mechstorm
+		right_leg_bar[NoMechID]= 500,350,10
+
+		position left_leg_bar[LastMechID+2]
+		left_leg_bar[0] = 610,380,10        		// Arctic Wolf
+		left_leg_bar[1] = 615,350,10        		// Argus
+		left_leg_bar[2] = 610,350,10        		// Atlas
+		left_leg_bar[3] = 630,350,10        		// Awesome
+		left_leg_bar[4] = 640,350,10        		// Black Knight
+		left_leg_bar[5] = 620,370,10        		// Bushwacker
+		left_leg_bar[6] = 625,370,10        		// Catapult
+        left_leg_bar[7] = 590,400,10        		// cauldron-born
+		left_leg_bar[8] = 610,370,10        		// Chimera
+		left_leg_bar[9] = 590,400,10        		// Cougar
+		left_leg_bar[10]= 640,350,10        		// Daishi
+		left_leg_bar[11]= 640,350,10				// Dragon
+		left_leg_bar[12]= 640,350,10        		// Fafnir
+		left_leg_bar[13]= 605,390,10        		// Flea
+		left_leg_bar[14]= 640,350,10        		// Hauptmann
+		left_leg_bar[15]= 640,350,10        		// Hauptmann
+		left_leg_bar[16]= 610,370,10        		// Hellhound
+		left_leg_bar[17]= 600,370,10        		// Hellspawn
+        left_leg_bar[18]= 600,370,10        		// highlander
+        left_leg_bar[19]= 600,370,10        		// hunchback
+		left_leg_bar[20]= 630,350,10        		// Kodiak
+		left_leg_bar[21]= 620,350,10        		// Loki
+		left_leg_bar[22]= 640,350,10        		// Longbow
+		left_leg_bar[23]= 610,350,10        		// Madcat
+		left_leg_bar[24]= 645,350,10        		// Madcat Mk. II
+		left_leg_bar[25]= 640,350,10				// Masakari
+		left_leg_bar[26]= 640,350,10        		// Mauler
+		left_leg_bar[27]= 620,350,10        		// Novacat
+		left_leg_bar[28]= 600,390,10        		// Osiris
+		left_leg_bar[29]= 610,400,10        		// Owens
+		left_leg_bar[30]= 590,400,10        		// Puma
+		left_leg_bar[31]= 605,390,10        		// Raven
+		left_leg_bar[32]= 620,370,10        		// Ryoken
+		left_leg_bar[33]= 615,370,10        		// Shadowcat
+		left_leg_bar[34]= 625,350,10        		// Sunder
+		left_leg_bar[35]= 640,350,10        		// Templar
+		left_leg_bar[36]= 620,350,10        		// Thanatos
+		left_leg_bar[37]= 625,350,10        		// Thor
+		left_leg_bar[38]= 590,400,10        		// Uller
+		left_leg_bar[39]= 610,380,10        		// Uziel
+		left_leg_bar[40]= 640,350,10        		// Victor
+		left_leg_bar[41]= 610,350,10        		// Vulture
+		left_leg_bar[42]= 600,370,10        		// Wolfhound
+		left_leg_bar[43]= 600,370,10        		// zeus
+		left_leg_bar[M_Avatar]= 650,370,10        		// Avatar	// mektek
+		left_leg_bar[M_Warhammer]= 655,350,10        		// Warhammer	// mektek
+		left_leg_bar[M_Strider]= 620,390,10        		// Strider	// mektek
+		left_leg_bar[M_Marauder]= 630,350,10        		// Marauder	// mektek
+		left_leg_bar[M_Bloodasp]= 650,350,10				// mektek
+		left_leg_bar[M_UrbanmechIIC]= 625,390,10        		// Urban Mech	// mektek
+		left_leg_bar[M_Stalker]= 640,350,10        		// mektek
+		left_leg_bar[M_Ares] = 620,370,10        		// 
+		left_leg_bar[M_Urbanmech]= 625,390,10        		// Urban Mech	// mektek
+		left_leg_bar[M_BrcticWolf]= 625,390,10        		// Arctic Wolf II	// Mechstorm
+		left_leg_bar[NoMechID]= 640,350,10
+
+		int CurrentType
+		object o_armortypedroplist =						s_droplistbox
+		o_armortypedroplist.location =						labelx, boxy, 25
+		o_armortypedroplist.list_size =						3
+		o_armortypedroplist.label =							localize$(IDS_ML_CH_TYPE)
+		o_armortypedroplist.offsetLabel =					-1, -17
+		o_armortypedroplist.itemWidth =						269
+		o_armortypedroplist.max_displayed =					3
+		o_armortypedroplist.boxFont3d =						FPATH localize$(IDS_F_ML_LABEL)
+		o_armortypedroplist.itemHeight =					20
+		o_armortypedroplist.labelFont3d =					FPATH localize$(IDS_F_ML_LABEL)
+		o_armortypedroplist.arrowHeight =					15
+		o_armortypedroplist.id = 276
+		o_armortypedroplist.list_item[0] =					localize$(DNL_FERROFIB)
+		o_armortypedroplist.list_item[1] =					localize$(IDS_ML_AR_REACTIVE)
+		o_armortypedroplist.list_item[2] =					localize$(IDS_ML_AR_REFLECTIVE)
+		initialize(o_armortypedroplist)
+
+		// head_armor spinbox
+		object o_head_spinbox = s_plus_minus_float
+		o_head_spinbox.boxwidth = bodyboxwidth + 16
+		o_head_spinbox.location = boxx, bodyboxy + 30, 10
+		o_head_spinbox.id = 278
+		initialize(o_head_spinbox)
+		// right_arm_armor spinbox
+		object o_right_arm_spinbox = s_plus_minus_float
+		o_right_arm_spinbox.boxwidth = bodyboxwidth + 16
+		o_right_arm_spinbox.location = boxx, bodyboxy + 60, 10
+		o_right_arm_spinbox.id = 282
+		initialize(o_right_arm_spinbox)
+		// left_arm_armor spinbox
+		object o_left_arm_spinbox = s_plus_minus_float
+		o_left_arm_spinbox.boxwidth = bodyboxwidth + 16
+		o_left_arm_spinbox.location = boxx, bodyboxy + 90, 10
+		o_left_arm_spinbox.id = 280
+		initialize(o_left_arm_spinbox)
+		// right_front_torso armor spinbox
+		object o_right_front_torso_spinbox = s_plus_minus_float
+		o_right_front_torso_spinbox.boxwidth = bodyboxwidth + 16
+		o_right_front_torso_spinbox.location = boxx, bodyboxy + 120, 10
+		o_right_front_torso_spinbox.id = 288
+		initialize(o_right_front_torso_spinbox)
+		// center_front_torso armor spinbox
+		object o_center_front_torso_spinbox = s_plus_minus_float
+		o_center_front_torso_spinbox.boxwidth = bodyboxwidth + 16
+		o_center_front_torso_spinbox.location = boxx, bodyboxy + 150, 10
+		o_center_front_torso_spinbox.id = 286
+		initialize(o_center_front_torso_spinbox)
+		// left_front_torso armor spinbox
+		object o_left_front_torso_spinbox = s_plus_minus_float
+		o_left_front_torso_spinbox.boxwidth = bodyboxwidth + 16
+		o_left_front_torso_spinbox.location = boxx, bodyboxy + 180, 10
+		o_left_front_torso_spinbox.id = 284
+		initialize(o_left_front_torso_spinbox)
+		// rear_torso armor spinbox
+		object o_rear_torso_spinbox = s_plus_minus_float
+		o_rear_torso_spinbox.boxwidth = bodyboxwidth + 16
+		o_rear_torso_spinbox.location = boxx, bodyboxy + 210, 10
+		o_rear_torso_spinbox.id = 290
+		initialize(o_rear_torso_spinbox)
+		// right_leg armor spinbox
+		object o_right_leg_spinbox = s_plus_minus_float
+		o_right_leg_spinbox.boxwidth = bodyboxwidth + 16
+		o_right_leg_spinbox.location = boxx, bodyboxy + 240, 10
+		o_right_leg_spinbox.id = 294
+		initialize(o_right_leg_spinbox)
+		// left_leg armor spinbox
+		object o_left_leg_spinbox = s_plus_minus_float
+		o_left_leg_spinbox.boxwidth = bodyboxwidth + 16
+		o_left_leg_spinbox.location = boxx, bodyboxy + 270, 10
+		o_left_leg_spinbox.id = 292
+		initialize(o_left_leg_spinbox)
+
+		object o_head_armor_bar		= armor_bar
+		o_head_armor_bar.label		= "1"
+		initialize(o_head_armor_bar)
+
+		object o_ra_armor_bar		= armor_bar
+		o_ra_armor_bar.label		= "2"
+		initialize(o_ra_armor_bar)
+
+		object o_la_armor_bar		= armor_bar
+		o_la_armor_bar.label		= "3"
+		initialize(o_la_armor_bar)
+
+		object o_rt_armor_bar		= armor_bar
+		o_rt_armor_bar.label		= "4"
+		initialize(o_rt_armor_bar)
+
+		object o_ct_armor_bar		= armor_bar
+		o_ct_armor_bar.label		= "5"
+		initialize(o_ct_armor_bar)
+
+		object o_lt_armor_bar		= armor_bar
+		o_lt_armor_bar.label		= "6"
+		initialize(o_lt_armor_bar)
+
+		object o_bt_armor_bar		= armor_bar
+		o_bt_armor_bar.label		= "7"
+		initialize(o_bt_armor_bar)
+
+		object o_rl_armor_bar		= armor_bar
+		o_rl_armor_bar.label		= "8"
+		initialize(o_rl_armor_bar)
+
+		object o_ll_armor_bar		= armor_bar
+		o_ll_armor_bar.label		= "9"
+		initialize(o_ll_armor_bar)
+
+		callback($$ML_CallbackHandler$$, MLDataSetupGetMechArmor, armor_array[], max_armor_array[], armor_tonnage_array[], armor_type, internal_type, pts_per_ton, armor_tonnage, installed_armor)
+
+		// help region for points per ton
+		object o_ptsperton_info		= help_region
+		o_ptsperton_info.location	= boxx, boxy + 30
+		o_ptsperton_info.rwidth		= edgex - boxx
+		o_ptsperton_info.rheight	= 20
+		o_ptsperton_info.id			= 300
+		initialize(o_ptsperton_info)
+
+		// button for max armor
+		object o_maxarmor_button		= s_multistatepane
+		o_maxarmor_button.file			= WPATH "button_reg_138x23_4state.tga"
+		o_maxarmor_button.total_states		= 4
+		o_maxarmor_button.text			= localize$(IDS_ML_MAX_ARMOR)
+		o_maxarmor_button.location		= labelx-8, bodyboxy + 325, 10
+		o_maxarmor_button.gFont3d		= FPATH localize$( IDS_MICROSTYLE9BOLDEXT )
+		o_maxarmor_button.id			= 301
+		initialize(o_maxarmor_button)
+
+		// button for add armor
+		object o_addarmor_button		= s_multistatepane
+		o_addarmor_button.file			= WPATH "button_reg_74x23_4state.tga"
+		o_addarmor_button.total_states		= 4
+		o_addarmor_button.text			= "ADD"
+		o_addarmor_button.location		= labelx + 137, bodyboxy + 325, 10
+		o_addarmor_button.gFont3d		= FPATH localize$( IDS_MICROSTYLE9BOLDEXT )
+		o_addarmor_button.id			= 501
+		initialize(o_addarmor_button)
+
+		// button for add armor
+		object o_reducearmor_button		= s_multistatepane
+		o_reducearmor_button.file		= WPATH "button_reg_74x23_4state.tga"
+		o_reducearmor_button.total_states	= 4
+		o_reducearmor_button.text		= "SUB"
+		o_reducearmor_button.location		= labelx + 217, bodyboxy + 325, 10
+		o_reducearmor_button.gFont3d		= FPATH localize$( IDS_MICROSTYLE9BOLDEXT )
+		o_reducearmor_button.id			= 502
+		initialize(o_reducearmor_button)
+
+		int old_armor
+
+		object o_mechValue	 					= static_label
+		object o_value_mechValue	 			= static_label
+
+	}
+
+	GUI_INIT
+	{
+		int STATUS_LABELS_X	  	= 348
+		int STATUS_LABELS_Y   	= 200
+		int STATUS_LABELS_Z   	= 50
+		int LABEL_SPACING		= 40
+		int VALUE_SPACING		= 12
+		int whichLabel			= 0
+		int _labelWidth 		= 190
+		int INDENT				= 10
+
+		o_mechValue                     ._origin   					= STATUS_LABELS_X, STATUS_LABELS_Y+(LABEL_SPACING*whichLabel), STATUS_LABELS_Z
+		o_mechValue                     ._width	   					= _labelWidth
+		o_mechValue                     .text	   					= localize$( IDS_MECH_VALUE )
+		o_mechValue                     ._justification  			= just_left
+
+		o_value_mechValue               ._origin   		= o_mechValue._origin.x + INDENT, o_mechValue._origin.y + VALUE_SPACING, o_mechValue._origin.z
+		o_value_mechValue               ._width	   		= _labelWidth
+		o_value_mechValue               .text	   		= fmtcommanum$(callback($$GetMechValuePlusWeapons$$))
+		o_value_mechValue               ._justification	= just_left
+		o_value_mechValue        	    ._isFloat		= false
+		o_value_mechValue		        ._textColor		=  packcolor (72,203,135,255)
+
+ 		initialize( o_mechValue	 			 )
+ 		initialize( o_value_mechValue	 	 )
+	}
+
+	GUI_ACTIVATE
+	{
+
+		// mektek		
+		if ($$m_isCampaign$$ == 1)
+		{
+			mech_id2 = parent.mech_id
+		}
+		else
+		{
+			mech_id2 = @MechBay_main@mech_id2
+		}
+
+		o_value_mechValue               .text	   		= fmtcommanum$(callback($$GetMechValuePlusWeapons$$))
+		initialize( o_value_mechValue	 	 )
+
+		callback($$ML_CallbackHandler$$, MLDataSetupGetMechArmor, armor_array[], max_armor_array[], armor_tonnage_array[], armor_type, internal_type, pts_per_ton, armor_tonnage, installed_armor)
+
+		o_armortypedroplist.nselected = armor_type
+
+		head					= armor_tonnage_array[A_Head]
+		left_arm				= armor_tonnage_array[A_LeftArm]
+		right_arm				= armor_tonnage_array[A_RightArm]
+		left_front_torso		= armor_tonnage_array[A_LeftTorso]
+		center_front_torso		= armor_tonnage_array[A_CenterTorso]
+		right_front_torso		= armor_tonnage_array[A_RightTorso]
+		rear_torso				= armor_tonnage_array[A_RearTorso]
+		left_leg				= armor_tonnage_array[A_LeftLeg]
+		right_leg				= armor_tonnage_array[A_RightLeg]
+		installed_armor = head + left_arm + right_arm + left_front_torso + center_front_torso + right_front_torso + rear_torso + left_leg + right_leg
+
+		max_head				= max_armor_array[A_Head]
+		max_left_arm			= max_armor_array[A_LeftArm]
+		max_right_arm			= max_armor_array[A_RightArm]
+		max_left_torso			= max_armor_array[A_LeftTorso]
+		max_center_torso		= max_armor_array[A_CenterTorso]
+		max_right_torso			= max_armor_array[A_RightTorso]
+		max_rear_torso			= max_armor_array[A_RearTorso]
+		max_left_leg			= max_armor_array[A_LeftLeg]
+		max_right_leg			= max_armor_array[A_RightLeg]
+
+		head_pts				= armor_array[A_Head]
+		left_arm_pts			= armor_array[A_LeftArm]
+		right_arm_pts			= armor_array[A_RightArm]
+		left_torso_pts			= armor_array[A_LeftTorso]
+		center_torso_pts		= armor_array[A_CenterTorso]
+		right_torso_pts			= armor_array[A_RightTorso]
+		rear_torso_pts			= armor_array[A_RearTorso]
+		left_leg_pts			= armor_array[A_LeftLeg]
+		right_leg_pts			= armor_array[A_RightLeg]
+		total_pts				= head_pts + left_arm_pts + right_arm_pts + left_torso_pts + center_torso_pts + right_torso_pts + rear_torso_pts + left_leg_pts + right_leg_pts
+
+		if armor_type == 0
+		{
+			o_armortypedroplist.nselected = 0
+		}
+		if armor_type == 1
+		{
+			o_armortypedroplist.nselected = 1
+		}
+		if armor_type == 2
+		{
+			o_armortypedroplist.nselected = 2
+		}
+
+		old_armor = o_armortypedroplist.nselected
+
+		if parent.mech_exists == true
+		{
+			o_head_spinbox.displayed_value					= head
+			initialize(o_head_spinbox)
+			o_right_arm_spinbox.displayed_value				= right_arm
+			initialize(o_right_arm_spinbox)
+			o_left_arm_spinbox.displayed_value				= left_arm
+			initialize(o_left_arm_spinbox)
+			o_right_front_torso_spinbox.displayed_value		= right_front_torso
+			initialize(o_right_front_torso_spinbox)
+			o_center_front_torso_spinbox.displayed_value	= center_front_torso
+			initialize(o_center_front_torso_spinbox)
+			o_left_front_torso_spinbox.displayed_value		= left_front_torso
+			initialize(o_left_front_torso_spinbox)
+			o_rear_torso_spinbox.displayed_value			= rear_torso
+			initialize(o_rear_torso_spinbox)
+			o_right_leg_spinbox.displayed_value				= right_leg
+			initialize(o_right_leg_spinbox)
+			o_left_leg_spinbox.displayed_value				= left_leg
+			initialize(o_head_spinbox)
+		}
+
+
+		o_head_armor_bar.location	= head_bar[mech_id2]
+		o_head_armor_bar.maxval		= max_head
+		o_head_armor_bar.curval		= head_pts
+		o_ra_armor_bar.location		= right_arm_bar[mech_id2]
+		o_ra_armor_bar.maxval		= max_right_arm
+		o_ra_armor_bar.curval		= right_arm_pts
+		o_la_armor_bar.location		= left_arm_bar[mech_id2]
+		o_la_armor_bar.maxval		= max_left_arm
+		o_la_armor_bar.curval		= left_arm_pts
+		o_rt_armor_bar.location		= right_torso_bar[mech_id2]
+		o_rt_armor_bar.maxval		= max_right_torso
+		o_rt_armor_bar.curval		= right_torso_pts
+		o_ct_armor_bar.location		= center_torso_bar[mech_id2]
+		o_ct_armor_bar.maxval		= max_center_torso
+		o_ct_armor_bar.curval		= center_torso_pts
+		o_lt_armor_bar.location		= left_torso_bar[mech_id2]
+		o_lt_armor_bar.maxval		= max_left_torso
+		o_lt_armor_bar.curval		= left_torso_pts
+		o_bt_armor_bar.location		= rear_torso_bar[mech_id2]
+		o_bt_armor_bar.maxval		= max_rear_torso
+		o_bt_armor_bar.curval		= rear_torso_pts
+		o_rl_armor_bar.location		= right_leg_bar[mech_id2]
+		o_rl_armor_bar.maxval		= max_right_leg
+		o_rl_armor_bar.curval		= right_leg_pts
+		o_ll_armor_bar.location		= left_leg_bar[mech_id2]
+		o_ll_armor_bar.maxval		= max_left_leg
+		o_ll_armor_bar.curval		= left_leg_pts
+
+		activate(o_armortypedroplist)
+		activate(o_head_spinbox)
+		activate(o_left_arm_spinbox)
+		activate(o_right_arm_spinbox)
+		activate(o_left_front_torso_spinbox)
+		activate(o_center_front_torso_spinbox)
+		activate(o_right_front_torso_spinbox)
+		activate(o_rear_torso_spinbox)
+		activate(o_left_leg_spinbox)
+		activate(o_right_leg_spinbox)
+
+		activate(o_head_armor_bar)
+		activate(o_ra_armor_bar)
+		activate(o_la_armor_bar)
+		activate(o_rt_armor_bar)
+		activate(o_ct_armor_bar)
+		activate(o_lt_armor_bar)
+		activate(o_bt_armor_bar)
+		activate(o_rl_armor_bar)
+		activate(o_ll_armor_bar)
+
+		activate(o_ptsperton_info)
+		activate(o_maxarmor_button)
+		activate(o_addarmor_button)
+		activate(o_reducearmor_button)
+ 		activate( o_mechValue	)
+ 		activate( o_value_mechValue )
+
+
+		mail(1)
+	}
+
+	GUI_DEACTIVATE
+	{
+		deactivate(o_armortypedroplist)
+		deactivate(o_head_spinbox)
+		deactivate(o_left_arm_spinbox)
+		deactivate(o_right_arm_spinbox)
+		deactivate(o_left_front_torso_spinbox)
+		deactivate(o_center_front_torso_spinbox)
+		deactivate(o_right_front_torso_spinbox)
+		deactivate(o_rear_torso_spinbox)
+		deactivate(o_left_leg_spinbox)
+		deactivate(o_right_leg_spinbox)
+
+		deactivate(o_head_armor_bar)
+		deactivate(o_ra_armor_bar)
+		deactivate(o_la_armor_bar)
+		deactivate(o_rt_armor_bar)
+		deactivate(o_ct_armor_bar)
+		deactivate(o_lt_armor_bar)
+		deactivate(o_bt_armor_bar)
+		deactivate(o_rl_armor_bar)
+		deactivate(o_ll_armor_bar)
+
+		deactivate(o_ptsperton_info)
+		deactivate(o_maxarmor_button)
+		deactivate(o_addarmor_button)
+		deactivate(o_reducearmor_button)
+ 		deactivate( o_mechValue	)
+ 		deactivate( o_value_mechValue )
+
+	}
+
+	GUI_EXECUTE
+	{
+		if CurrentType != o_armortypedroplist.nselected
+		{
+			if o_armortypedroplist.nselected == 0
+			{
+				callback($$ML_CallbackHandler$$, MLSetArmorType, o_armortypedroplist.nselected)
+				callback($$ML_CallbackHandler$$, MLDataSetupGetMechArmor, armor_array[], max_armor_array[], armor_tonnage_array[], armor_type, internal_type, pts_per_ton, armor_tonnage, installed_armor)
+			}
+			if o_armortypedroplist.nselected == 1
+			{
+				callback($$ML_CallbackHandler$$, MLSetArmorType, o_armortypedroplist.nselected)
+				callback($$ML_CallbackHandler$$, MLDataSetupGetMechArmor, armor_array[], max_armor_array[], armor_tonnage_array[], armor_type, internal_type, pts_per_ton, armor_tonnage, installed_armor)
+			}
+			if o_armortypedroplist.nselected == 2
+			{
+				callback($$ML_CallbackHandler$$, MLSetArmorType, o_armortypedroplist.nselected)
+				callback($$ML_CallbackHandler$$, MLDataSetupGetMechArmor, armor_array[], max_armor_array[], armor_tonnage_array[], armor_type, internal_type, pts_per_ton, armor_tonnage, installed_armor)
+			}
+
+			activate(this)
+
+			CurrentType = o_armortypedroplist.nselected
+		}
+	}
+
+	GUI_DRAW
+	{
+		setpencolor(0x66ffffff)
+		// Separator line 1
+		drawline sepx1, sepy1 to sepx2, sepy1
+		drawline sepx1, sepy1 - 1 to sepx1 + 20, sepy1 - 1
+		drawline sepx1, sepy1 + 1 to sepx1 + 20, sepy1 + 1
+		drawline sepx2 - 20, sepy1 - 1 to sepx2, sepy1 - 1
+		drawline sepx2 - 20, sepy1 + 1 to sepx2, sepy1 + 1
+
+		setpencolor(0xffffffff)
+		// Points per ton
+		drawframe boxx, boxy + 30 to edgex, boxy + 50
+
+		print3d_attributes = regfont, 0xffffffff, 1, 1, 1, 0, 0
+		print3d_margins = 20, labely to 315, 530
+		print3d_position = labelx, labely + 46
+		print3d localize$(IDS_ML_AR_POINTSPERTON)
+		print3d_position = boxcontentx, labely + 46
+		print3d conv$(pts_per_ton) ".00"
+
+		print3d_attributes = regfont, 0xffffffff, 1, 1, 1, 0, 0
+		print3d_margins = 20, labely to 315, 530
+		print3d_position = bodylabelx, bodylabely
+		print3d localize$(IDS_ML_AR_LOCATION)
+		print3d_position = boxx, bodylabely
+		print3d localize$(IDS_ML_WP_TONS)
+		print3d_position = bodylabelx, bodylabely + 300
+		print3d localize$(IDS_LM_AR_TOTAL)
+
+		print3d_attributes = regfont, 0xffffffff, 1, 1, 1, 0, 0, just_right
+		print3d_margins = bodyboxx3, labely to bodyboxx3 + bodyboxwidth, 530
+		print3d_position = bodyboxx3, bodylabely
+		print3d localize$(IDS_ML_AR_POINTS)
+
+		// body parts
+		print3d_attributes = regfont, 0xffffffff, 1, 1, 1, 0, 0
+		print3d_margins = 20, labely to 160, 530
+		print3d_position = bodylabelx, bodylabely + 30
+		print3d "1. " localize$(IDS_ML_AR_HEAD)
+		print3d_position = bodylabelx, bodylabely + 60
+		print3d "2. " localize$(IDS_ML_AR_RARM)
+		print3d_position = bodylabelx, bodylabely + 90
+		print3d "3. " localize$(IDS_ML_AR_LARM)
+		print3d_position = bodylabelx, bodylabely + 120
+		print3d "4. " localize$(IDS_ML_AR_RTORSO)
+		print3d_position = bodylabelx, bodylabely + 150
+		print3d "5. " localize$(IDS_ML_AR_CTORSO)
+		print3d_position = bodylabelx, bodylabely + 180
+		print3d "6. " localize$(IDS_ML_AR_LTORSO)
+		print3d_position = bodylabelx, bodylabely + 210
+		print3d "7. " localize$(IDS_ML_AR_BTORSO)
+		print3d_position = bodylabelx, bodylabely + 240
+		print3d "8. " localize$(IDS_ML_AR_RLEG)
+		print3d_position = bodylabelx, bodylabely + 270
+		print3d "9. " localize$(IDS_ML_AR_LLEG)
+
+		// body parts - points
+		print3d_attributes	= regfont, 0xffffffff, 1, 1, 1, 0, 0, just_right
+		print3d_margins		= bodyboxx3, bodylabely to bodyboxx3 + bodyboxwidth, 530
+		print3d_position	= bodyboxx3, bodylabely + 30
+		print3d head_pts
+		drawframe bodyboxx3, bodyboxy + 30 to bodyboxx3 + bodyboxwidth, bodyboxy + 50
+		print3d_position	= bodyboxx3, bodylabely + 60
+		print3d right_arm_pts
+		drawframe bodyboxx3, bodyboxy + 60 to bodyboxx3 + bodyboxwidth, bodyboxy + 80
+		print3d_position	= bodyboxx3, bodylabely + 90
+		print3d left_arm_pts
+		drawframe bodyboxx3, bodyboxy + 90 to bodyboxx3 + bodyboxwidth, bodyboxy + 110
+		print3d_position	= bodyboxx3, bodylabely + 120
+		print3d right_torso_pts
+		drawframe bodyboxx3, bodyboxy + 120 to bodyboxx3 + bodyboxwidth, bodyboxy + 140
+		print3d_position	= bodyboxx3, bodylabely + 150
+		print3d center_torso_pts
+		drawframe bodyboxx3, bodyboxy + 150 to bodyboxx3 + bodyboxwidth, bodyboxy + 170
+		print3d_position	= bodyboxx3, bodylabely + 180
+		print3d left_torso_pts
+		drawframe bodyboxx3, bodyboxy + 180 to bodyboxx3 + bodyboxwidth, bodyboxy + 200
+		print3d_position	= bodyboxx3, bodylabely + 210
+		print3d rear_torso_pts
+		drawframe bodyboxx3, bodyboxy + 210 to bodyboxx3 + bodyboxwidth, bodyboxy + 230
+		print3d_position	= bodyboxx3, bodylabely + 240
+		print3d right_leg_pts
+		drawframe bodyboxx3, bodyboxy + 240 to bodyboxx3 + bodyboxwidth, bodyboxy + 260
+		print3d_position	= bodyboxx3, bodylabely + 270
+		print3d left_leg_pts
+		drawframe bodyboxx3, bodyboxy + 270 to bodyboxx3 + bodyboxwidth, bodyboxy + 290
+		print3d_position	= bodyboxx3, bodylabely + 300
+		print3d total_pts
+		drawframe bodyboxx3, bodyboxy + 300 to bodyboxx3 + bodyboxwidth, bodyboxy + 320
+
+		print3d_margins		= boxx, bodylabely + 300 to boxx + bodyboxwidth, bodyboxy + 320
+		print3d_position	= boxx, bodylabely + 300
+		print3d installed_armor
+		drawframe boxx, bodyboxy + 300 to boxx + bodyboxwidth, bodyboxy + 320
+
+
+		// Non-editable information
+		if parent.mech_exists == true
+		{
+			print3d_attributes = boldfont, 0xffffffff, 1, 1, 1, 0, 0
+			print3d_margins = noneditx, nonedity to getresx() - 10, nonedity + 64
+			print3d_position = noneditx, nonedity
+			print3d localize$(IDS_ML_AR_INTSTRUCTURE)
+
+			print3d_attributes = boldfont, 0xffffffff, 1, 1, 1, 0, 0
+			print3d_margins = noneditx, nonedity to getresx() - 10, nonedity + 64
+			print3d_position = noneditx + 20, nonedity + 15
+			print3d internal_structure[internal_type]
+		}
+
+	}
+
+	GUI_MAILBOX
+	{
+		if sender == o_armortypedroplist
+		{
+			if old_armor != o_armortypedroplist.nselected
+			{
+				callback($$ML_CallbackHandler$$, MLSetArmorType, o_armortypedroplist.nselected)
+				parent.just_saved = false
+
+				parent.o_restorebutton.state	= 0
+				initialize(parent.o_restorebutton)
+				//if ($$m_isCampaign$$ != 1)
+				//{
+					parent.o_savebutton.state		= 0
+					initialize(parent.o_savebutton)
+				//}
+			}
+		}
+
+		if sender == o_head_spinbox
+		{
+			int value = A_Head
+			if getmessage() == 1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLAddArmorToZone, value)
+			}
+			if getmessage() == -1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLRemoveArmorFromZone, value)
+			}
+
+			callback($$ML_CallbackHandler$$, MLDataSetupGetMechArmor, armor_array[], max_armor_array[], armor_tonnage_array[], armor_type, internal_type, pts_per_ton, armor_tonnage, installed_armor)
+			parent.just_saved = false
+
+			parent.o_restorebutton.state	= 0
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 0
+				initialize(parent.o_savebutton)
+			//}
+
+			initialize(o_head_spinbox)
+			o_head_armor_bar.curval		= head_pts
+			activate(this)
+		}
+
+		if sender == o_left_arm_spinbox
+		{
+			int value = A_LeftArm
+			if getmessage() == 1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLAddArmorToZone, value)
+			}
+			if getmessage() == -1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLRemoveArmorFromZone, value)
+			}
+
+			callback($$ML_CallbackHandler$$, MLDataSetupGetMechArmor, armor_array[], max_armor_array[], armor_tonnage_array[], armor_type, internal_type, pts_per_ton, armor_tonnage, installed_armor)
+			parent.just_saved = false
+
+			parent.o_restorebutton.state	= 0
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 0
+				initialize(parent.o_savebutton)
+			//}
+
+			initialize(o_left_arm_spinbox)
+			o_la_armor_bar.curval		= left_arm_pts
+			activate(this)
+		}
+
+		if sender == o_right_arm_spinbox
+		{
+			int value = A_RightArm
+			if getmessage() == 1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLAddArmorToZone, value)
+			}
+			if getmessage() == -1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLRemoveArmorFromZone, value)
+			}
+
+			callback($$ML_CallbackHandler$$, MLDataSetupGetMechArmor, armor_array[], max_armor_array[], armor_tonnage_array[], armor_type, internal_type, pts_per_ton, armor_tonnage, installed_armor)
+			parent.just_saved = false
+
+			parent.o_restorebutton.state	= 0
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 0
+				initialize(parent.o_savebutton)
+			//}
+
+			initialize(o_right_arm_spinbox)
+			o_ra_armor_bar.curval		= right_arm_pts
+			activate(this)
+		}
+
+		if sender == o_left_front_torso_spinbox
+		{
+			int value = A_LeftTorso
+			if getmessage() == 1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLAddArmorToZone, value)
+			}
+			if getmessage() == -1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLRemoveArmorFromZone, value)
+			}
+
+			callback($$ML_CallbackHandler$$, MLDataSetupGetMechArmor, armor_array[], max_armor_array[], armor_tonnage_array[], armor_type, internal_type, pts_per_ton, armor_tonnage, installed_armor)
+			parent.just_saved = false
+
+			parent.o_restorebutton.state	= 0
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 0
+				initialize(parent.o_savebutton)
+			//}
+
+			initialize(o_left_front_torso_spinbox)
+			o_lt_armor_bar.curval		= left_torso_pts
+			activate(this)
+		}
+
+		if sender == o_center_front_torso_spinbox
+		{
+			int value = A_CenterTorso
+			if getmessage() == 1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLAddArmorToZone, value)
+			}
+			if getmessage() == -1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLRemoveArmorFromZone, value)
+			}
+
+			callback($$ML_CallbackHandler$$, MLDataSetupGetMechArmor, armor_array[], max_armor_array[], armor_tonnage_array[], armor_type, internal_type, pts_per_ton, armor_tonnage, installed_armor)
+			parent.just_saved = false
+
+			parent.o_restorebutton.state	= 0
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 0
+				initialize(parent.o_savebutton)
+			//}
+
+			initialize(o_center_front_torso_spinbox)
+			o_ct_armor_bar.curval		= center_torso_pts
+			activate(this)
+		}
+
+		if sender == o_right_front_torso_spinbox
+		{
+			int value = A_RightTorso
+			if getmessage() == 1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLAddArmorToZone, value)
+			}
+			if getmessage() == -1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLRemoveArmorFromZone, value)
+			}
+
+			callback($$ML_CallbackHandler$$, MLDataSetupGetMechArmor, armor_array[], max_armor_array[], armor_tonnage_array[], armor_type, internal_type, pts_per_ton, armor_tonnage, installed_armor)
+			parent.just_saved = false
+
+			parent.o_restorebutton.state	= 0
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 0
+				initialize(parent.o_savebutton)
+			//}
+
+			initialize(o_right_front_torso_spinbox)
+			o_rt_armor_bar.curval		= right_torso_pts
+			activate(this)
+		}
+
+		if sender == o_rear_torso_spinbox
+		{
+			int value = A_RearTorso
+			if getmessage() == 1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLAddArmorToZone, value)
+			}
+			if getmessage() == -1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLRemoveArmorFromZone, value)
+			}
+
+			callback($$ML_CallbackHandler$$, MLDataSetupGetMechArmor, armor_array[], max_armor_array[], armor_tonnage_array[], armor_type, internal_type, pts_per_ton, armor_tonnage, installed_armor)
+			parent.just_saved = false
+
+			parent.o_restorebutton.state	= 0
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 0
+				initialize(parent.o_savebutton)
+			//}
+
+			initialize(o_rear_torso_spinbox)
+			o_bt_armor_bar.curval		= rear_torso_pts
+			activate(this)
+		}
+
+		if sender == o_left_leg_spinbox
+		{
+			int value = A_LeftLeg
+			if getmessage() == 1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLAddArmorToZone, value)
+			}
+			if getmessage() == -1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLRemoveArmorFromZone, value)
+			}
+
+			callback($$ML_CallbackHandler$$, MLDataSetupGetMechArmor, armor_array[], max_armor_array[], armor_tonnage_array[], armor_type, internal_type, pts_per_ton, armor_tonnage, installed_armor)
+			parent.just_saved = false
+
+			parent.o_restorebutton.state	= 0
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 0
+				initialize(parent.o_savebutton)
+			//}
+
+			initialize(o_left_leg_spinbox)
+			o_ll_armor_bar.curval		= left_leg_pts
+			activate(this)
+		}
+
+		if sender == o_right_leg_spinbox
+		{
+			int value = A_RightLeg
+			if getmessage() == 1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLAddArmorToZone, value)
+			}
+			if getmessage() == -1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLRemoveArmorFromZone, value)
+			}
+
+			callback($$ML_CallbackHandler$$, MLDataSetupGetMechArmor, armor_array[], max_armor_array[], armor_tonnage_array[], armor_type, internal_type, pts_per_ton, armor_tonnage, installed_armor)
+			parent.just_saved = false
+
+			parent.o_restorebutton.state	= 0
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 0
+				initialize(parent.o_savebutton)
+			//}
+
+			initialize(o_right_leg_spinbox)
+			o_rl_armor_bar.curval		= right_leg_pts
+			activate(this)
+		}
+
+		if sender == o_reducearmor_button
+		{
+			int value = 0
+			for (value = A_LeftLeg; value <= A_Head; value++)
+			{
+				callback($$ML_CallbackHandler$$, MLRemoveArmorFromZone, value)
+			}
+
+			parent.just_saved = false
+			parent.o_restorebutton.state = 0
+			initialize(parent.o_restorebutton)
+			parent.o_savebutton.state		= 0
+			initialize(parent.o_savebutton)
+
+			activate(this)
+		}
+
+		if sender == o_addarmor_button
+		{
+			int value = 0
+			for (value = A_LeftLeg; value <= A_Head; value++)
+			{
+				callback($$ML_CallbackHandler$$, MLAddArmorToZone, value)
+			}
+
+			parent.just_saved = false
+			parent.o_restorebutton.state = 0
+			initialize(parent.o_restorebutton)
+			parent.o_savebutton.state		= 0
+			initialize(parent.o_savebutton)
+
+			activate(this)
+		}
+
+		if sender == o_maxarmor_button
+		{
+			float tonnage = parent.o_tonnage_nums[2].value
+
+			// if we have tonnage available than distribute it
+			if (tonnage > 0)
+			{
+				int value = 0
+				int full_armor = 9
+				int armor_slot = full_armor
+				int pts_required = 0
+
+				// First find out how many armor slots are full
+				for (value = A_LeftLeg; value <= A_Head; value++)
+				{
+					if (pts_per_ton > ((max_armor_array[value] - armor_array[value]) * 10))
+						armor_slot = armor_slot - 1
+				}
+
+				if (armor_slot > 0)
+				{
+					// Then work with the remaining tonnage until tonnage is smaller than number of non-full armor slots
+					while (((tonnage + 0.0001) * 10) >= (full_armor - armor_slot))
+					{
+						armor_slot = 9
+						for (value = A_LeftLeg; value <= A_Head; value++)
+						{
+							if (pts_per_ton <= ((max_armor_array[value] - armor_array[value]) * 10))
+							{
+								callback($$ML_CallbackHandler$$, MLAddArmorToZone, value)
+								callback($$ML_CallbackHandler$$, MLDataSetupGetMechArmor, armor_array[], max_armor_array[], armor_tonnage_array[], armor_type, internal_type, pts_per_ton, armor_tonnage, installed_armor)
+								tonnage = tonnage - 0.1
+								armor_slot = armor_slot - 1
+							}
+						}
+
+						// if we have full armor, break!
+						if (armor_slot == full_armor)
+							break
+					}
+
+					// distribute remaining weight if we don't have full armor already
+					int armor_priority[9]
+					armor_priority[0] = A_Head
+					armor_priority[1] = A_CenterTorso
+					armor_priority[2] = A_RearTorso
+					armor_priority[3] = A_LeftLeg
+					armor_priority[4] = A_RightLeg
+					armor_priority[5] = A_LeftTorso
+					armor_priority[6] = A_RightTorso
+					armor_priority[7] = A_LeftArm
+					armor_priority[8] = A_RightArm
+					if ((tonnage > 0) && (armor_slot != full_armor))
+					{
+						for (int i = 0; i <= 8; i++)
+						{
+							value = armor_priority[i]
+							while ((tonnage > 0) && (pts_per_ton <= ((max_armor_array[value] - armor_array[value]) * 10)))
+							{
+								callback($$ML_CallbackHandler$$, MLAddArmorToZone, value)
+								callback($$ML_CallbackHandler$$, MLDataSetupGetMechArmor, armor_array[], max_armor_array[], armor_tonnage_array[], armor_type, internal_type, pts_per_ton, armor_tonnage, installed_armor)
+								tonnage = tonnage - 0.1
+							}
+
+							if ((tonnage + 0.0001) < 0.1)
+								break
+						}
+					}
+
+					parent.just_saved = false
+					parent.o_restorebutton.state = 0
+					initialize(parent.o_restorebutton)
+					//if ($$m_isCampaign$$ != 1)
+					//{
+						parent.o_savebutton.state		= 0
+						initialize(parent.o_savebutton)
+					//}
+
+					initialize(o_head_spinbox)
+					initialize(o_left_arm_spinbox)
+					initialize(o_right_arm_spinbox)
+					initialize(o_left_front_torso_spinbox)
+					initialize(o_center_front_torso_spinbox)
+					initialize(o_right_front_torso_spinbox)
+					initialize(o_rear_torso_spinbox)
+					initialize(o_left_leg_spinbox)
+					initialize(o_right_leg_spinbox)
+					o_head_armor_bar.curval		= head_pts
+					o_la_armor_bar.curval		= left_arm_pts
+					o_ra_armor_bar.curval		= right_arm_pts
+					o_lt_armor_bar.curval		= left_torso_pts
+					o_ct_armor_bar.curval		= center_torso_pts
+					o_rt_armor_bar.curval		= right_torso_pts
+					o_bt_armor_bar.curval		= rear_torso_pts
+					o_ll_armor_bar.curval		= left_leg_pts
+					o_rl_armor_bar.curval		= right_leg_pts
+					activate(this)
+				}
+			}
+		}
+
+		mail(1)
+	}
+}
+
+armor_bar
+{
+	GUI_CREATE
+	{
+		string label
+		int barcolor	= packcolor(100, 100, 150, 255)
+		int maxval		= 100
+		int curval		= 100
+		int barwidth	= 10
+		int tempval
+
+		framerate		= 10
+	}
+
+	GUI_INIT
+	{
+		region			= 0, 0 to location.x + barwidth, location.y + maxval
+	}
+
+	GUI_DRAW
+	{
+		setpencolor(0, 0, 0, 150)
+		drawrect location.x, location.y to location.x + barwidth, location.y + maxval
+
+		setpencolor(barcolor)
+		drawrect location.x, (location.y + (maxval - curval)) to location.x + barwidth, location.y + maxval
+
+		setpencolor(255, 255, 255, 200)
+		ldrawline 0, 0 to barwidth, 0
+		ldrawline 0, 0 to 0, maxval
+		ldrawline 0, maxval to barwidth, maxval
+		if maxval > 20
+		{
+			ldrawline 0, (maxval / 2) to barwidth, (maxval / 2)
+			ldrawline 0, (maxval / 4) to (barwidth / 2), (maxval / 4)
+			ldrawline 0, maxval - (maxval / 4) to (barwidth / 2), maxval - (maxval / 4)
+		}
+		else
+		{
+			ldrawline 0, (maxval / 2) to (barwidth / 2), (maxval / 2)
+		}
+
+		setpencolor(0xffffffff)
+		drawframe location.x, location.y to location.x + barwidth, location.y + maxval
+
+		print3d_attributes		= regfont, 0xff000000, 1, 1, 1, 0, 0
+		print3d_margins			= location.x + 1, location.y - 14 to location.x + barwidth + 1, location.y + 1
+		print3d_position		= location.x + 1, location.y - 14
+		print3d label
+
+		print3d_attributes		= regfont, 0xffffffff, 1, 1, 1, 0, 0
+		print3d_margins			= location.x, location.y - 15 to location.x + barwidth, location.y
+		print3d_position		= location.x, location.y - 15
+		print3d label
+	}
+}

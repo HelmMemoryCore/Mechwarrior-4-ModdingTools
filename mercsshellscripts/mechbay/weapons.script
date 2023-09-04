@@ -1,0 +1,2350 @@
+// Mechwarrior: Vengeance
+// Copyright © 1999-2000
+// Mechbay_main.script
+// Paolo Malabuyo
+// July 12, 2000
+
+#include "Content\\MercsShellScripts\\stddefs.h"
+#include "Content\\MercsShellScripts\\ShellFunctionHeaders.hpp"
+#include "Content\\MercsShellScripts\\MechLabHeaders_MERCS.h"
+#include "Content\\MercsShellScripts\\ScriptStrings.h"
+
+
+weapons
+{
+	GUI_CREATE
+	{
+		int labelx = 22
+		int labely = 64
+		int boxx = 145
+		int boxy = 140 - 64
+		int noneditx = 331
+		int nonedity = 160
+
+		int mech_id
+		int showinfo
+		int sel_weapon
+
+		int ids[LastWeaponID]
+		int slots[LastWeaponID]
+		int slot_size[LastWeaponID]
+		float ton[LastWeaponID]
+		float damage[LastWeaponID]
+		float range[LastWeaponID]
+		float heat[LastWeaponID]
+		float weapon_recycle[LastWeaponID]
+		float trade_value[LastWeaponID]
+		int inventory_count[LastWeaponID]
+		int num_weap
+
+		int la_unique_id[10]
+		int ra_unique_id[10]
+		int ll_unique_id[10]
+		int rl_unique_id[10]
+		int lt_unique_id[10]
+		int rt_unique_id[10]
+		int ct_unique_id[10]
+		int h_unique_id[10]
+		int s1_unique_id[10]
+		int s2_unique_id[10]
+
+		int la_ids[10]
+		int la_slots[10]
+		int la_slot_size[10]
+		float la_ton[10]
+		float la_damage[10]
+		float la_range[10]
+		float la_heat[10]
+		float la_recycle[10]
+		int la_num_weap
+		int ra_ids[10]
+		int ra_slots[10]
+		int ra_slot_size[10]
+		float ra_ton[10]
+		float ra_damage[10]
+		float ra_range[10]
+		float ra_heat[10]
+		float ra_recycle[10]
+		int ra_num_weap
+		int ll_ids[10]
+		int ll_slots[10]
+		int ll_slot_size[10]
+		float ll_ton[10]
+		float ll_damage[10]
+		float ll_range[10]
+		float ll_heat[10]
+		float ll_recycle[10]
+		int ll_num_weap
+		int rl_ids[10]
+		int rl_slots[10]
+		int rl_slot_size[10]
+		float rl_ton[10]
+		float rl_damage[10]
+		float rl_range[10]
+		float rl_heat[10]
+		float rl_recycle[10]
+		int rl_num_weap
+		int lt_ids[10]
+		int lt_slots[10]
+		int lt_slot_size[10]
+		float lt_ton[10]
+		float lt_damage[10]
+		float lt_range[10]
+		float lt_heat[10]
+		float lt_recycle[10]
+		int lt_num_weap
+		int rt_ids[10]
+		int rt_slots[10]
+		int rt_slot_size[10]
+		float rt_ton[10]
+		float rt_damage[10]
+		float rt_range[10]
+		float rt_heat[10]
+		float rt_recycle[10]
+		int rt_num_weap
+		int ct_ids[10]
+		int ct_slots[10]
+		int ct_slot_size[10]
+		float ct_ton[10]
+		float ct_damage[10]
+		float ct_range[10]
+		float ct_heat[10]
+		float ct_recycle[10]
+		int ct_num_weap
+		int h_ids[10]
+		int h_slots[10]
+		int h_slot_size[10]
+		float h_ton[10]
+		float h_damage[10]
+		float h_range[10]
+		float h_heat[10]
+		float h_recycle[10]
+		int h_num_weap
+		int s1_ids[10]
+		int s1_slots[10]
+		int s1_slot_size[10]
+		float s1_ton[10]
+		float s1_damage[10]
+		float s1_range[10]
+		float s1_heat[10]
+		float s1_recycle[10]
+		int s1_num_weap
+		int s2_ids[20]
+		int s2_slots[20]
+		int s2_slot_size[20]
+		float s2_ton[20]
+		float s2_damage[20]
+		float s2_range[20]
+		float s2_heat[20]
+		float s2_recycle[10]
+		int s2_num_weap
+
+		int lineStartIndex
+		int lineEndIndex
+		int previousWordBreak
+		int lastLineWidth
+		int costWidth
+		int colwidth
+		int nToSpew
+
+		string weapon_names[150]
+
+		// let everyone use these....
+
+		sound btnRolloverSound		= APATH "sfx_button7.wav"
+		sound btnPressedSound		= APATH "sfx_button5.wav"
+		sound btnTriggeredSound		= APATH "sfx_button5.wav"
+		sound addWeapon			= APATH "sfx_add_weapon.wav"
+		sound notAllowed		= APATH "sfx_wrongbutton.wav"
+
+		weapon_names[0]  = localize$(DNL_LGLAS)
+		weapon_names[1]  = localize$(DNL_MDLAS)
+		weapon_names[2]  = localize$(DNL_SMLAS)
+		weapon_names[3]  = localize$(DNL_CERLGL_SHORT)
+		weapon_names[4]  = localize$(DNL_CERMDL_SHORT)
+		weapon_names[5]  = localize$(DNL_CERSML_SHORT)
+		weapon_names[6]  = localize$(DNL_LGPLS)
+		weapon_names[7]  = localize$(DNL_MDPLS)
+		weapon_names[8]  = localize$(DNL_SMPLS)
+		weapon_names[9]  = localize$(DNL_LGXPLS)
+		weapon_names[10] = localize$(DNL_MDXPLS)
+		weapon_names[11] = localize$(DNL_SMXPLS)
+		weapon_names[12] = localize$(DNL_CLGPLS_SHORT)
+		weapon_names[13] = localize$(DNL_CMDPLS_SHORT)
+		weapon_names[14] = localize$(DNL_CSMPLS_SHORT)
+		weapon_names[15] = localize$(DNL_PPC_SHORT)
+		weapon_names[16] = localize$(DNL_CERPPC_SHORT)
+		weapon_names[17] = localize$(DNL_FLAMER)
+		weapon_names[18] = localize$(DNL_CFLAMER)
+		weapon_names[W_CapPPC] = "CapPPC"  // Evil
+		weapon_names[W_HeavyLargeLaser] = "Heavy Large Laser"  // Evil
+		weapon_names[W_HeavyMediumLaser] = "Heavy Medium Laser"  // Evil
+
+		weapon_names[51] = localize$(DNL_LRM5_SHORT)
+		weapon_names[52] = localize$(DNL_LRM10_SHORT)
+		weapon_names[53] = localize$(DNL_LRM15_SHORT)
+		weapon_names[54] = localize$(DNL_LRM20_SHORT)
+		weapon_names[55] = localize$(DNL_CLRM5_SHORT)
+		weapon_names[56] = localize$(DNL_CLRM10_SHORT)
+		weapon_names[57] = localize$(DNL_CLRM15_SHORT)
+		weapon_names[58] = localize$(DNL_CLRM20_SHORT)
+		weapon_names[59] = localize$(DNL_MRM10_SHORT)
+		weapon_names[60] = localize$(DNL_MRM20_SHORT)
+		weapon_names[61] = localize$(DNL_MRM30_SHORT)
+		weapon_names[62] = localize$(DNL_MRM40_SHORT)
+		weapon_names[63] = localize$(DNL_SMRM10_SHORT)
+		weapon_names[64] = localize$(DNL_SMRM20_SHORT)
+		weapon_names[65] = localize$(DNL_SMRM30_SHORT)
+		weapon_names[66] = localize$(DNL_SMRM40_SHORT)
+		weapon_names[67] = localize$(DNL_SRM2_SHORT)
+		weapon_names[68] = localize$(DNL_SRM4_SHORT)
+		weapon_names[69] = localize$(DNL_SRM6_SHORT)
+		weapon_names[70] = localize$(DNL_SSRM2_SHORT)
+		weapon_names[71] = localize$(DNL_SSRM4_SHORT)
+		weapon_names[72] = localize$(DNL_SSRM6_SHORT)
+		weapon_names[73] = localize$(DNL_ARROWCLUSTER_SHORT)
+		weapon_names[74] = localize$(DNL_ARROWHEAVY_SHORT)
+		weapon_names[75] = localize$(DNL_NARC)
+		weapon_names[76] = localize$(DNL_CNARC)
+		weapon_names[77] = localize$(DNL_FLARE)
+		weapon_names[78] = localize$(DNL_ARTILLERY)
+		weapon_names[W_ISRM2] = "Inferno SRM2"  // Evil
+		weapon_names[W_RL20] = "Rocket Launcher"  // Evil
+		weapon_names[W_ATM6M] = "ATM6 Medium"  // Evil
+		weapon_names[W_ATM12M] = "ATM12 Medium"  // Evil
+		weapon_names[W_ATM6E] = "ATM6 Extended"  // Evil
+		weapon_names[W_ATM12E] = "ATM12 Extended"  // Evil
+
+		weapon_names[W_MiniGauss] = "MiniGauss"  // jeho
+		weapon_names[W_Napalm] = "Inferno-AGL"  // jeho
+		weapon_names[W_LongTomTracer] = "LongTom Tracer"  // jeho
+		weapon_names[W_ThumperTracer] = "AGL Tracer"  // jeho
+		weapon_names[W_Thumper] = "HEAP-AGL"  // Evil
+		weapon_names[W_ClanLightMGun] = "Clan Light Machine Gun"  // Evil
+		weapon_names[W_LAC5] = "LightAC5"  // Evil
+		weapon_names[W_HVAC2] = "HyperAC2"  // Evil
+		weapon_names[W_HVAC5] = "HyperAC5"  // Evil
+		weapon_names[W_HVAC10] = "HyperAC10"  // Evil
+		weapon_names[W_HVAC20] = "HyperAC20"  // Evil
+
+		weapon_names[100] = localize$(DNL_AC5_SHORT)
+		weapon_names[101] = localize$(DNL_AC10_SHORT)
+		weapon_names[102] = localize$(DNL_AC20_SHORT)
+		weapon_names[103] = localize$(DNL_LBXAC10_SHORT)
+		weapon_names[104] = localize$(DNL_LBXAC20_SHORT)
+		weapon_names[105] = localize$(DNL_CLBXAC10_SHORT)
+		weapon_names[106] = localize$(DNL_CLBXAC20_SHORT)
+		weapon_names[107] = localize$(DNL_RTXAC2)
+		weapon_names[108] = localize$(DNL_RTXAC5)
+		weapon_names[109] = localize$(DNL_UAC2_SHORT)
+		weapon_names[110] = localize$(DNL_UAC5_SHORT)
+		weapon_names[111] = localize$(DNL_UAC10_SHORT)
+		weapon_names[112] = localize$(DNL_UAC20_SHORT)
+		weapon_names[113] = localize$(DNL_CUAC2_SHORT)
+		weapon_names[114] = localize$(DNL_CUAC5_SHORT)
+		weapon_names[115] = localize$(DNL_CUAC10_SHORT)
+		weapon_names[116] = localize$(DNL_CUAC20_SHORT)
+		weapon_names[117] = localize$(DNL_LGAUSS)
+		weapon_names[118] = localize$(DNL_GAUSS)
+		weapon_names[119] = localize$(DNL_HGAUSS)
+		weapon_names[120] = localize$(DNL_CGAUSS)
+		weapon_names[121] = localize$(DNL_MG)
+		weapon_names[122] = localize$(DNL_CMG)
+		weapon_names[123] = localize$(DNL_LONGTOM)
+
+
+		int CurrentList
+		object o_weaponsdroplistbox					= s_droplistbox
+		o_weaponsdroplistbox.boxFont3d				= FPATH localize$(IDS_F_ML_LABEL)
+		o_weaponsdroplistbox.itemHeight				= 20
+		o_weaponsdroplistbox.max_displayed			= 8
+		o_weaponsdroplistbox.labelFont3d			= FPATH localize$(IDS_F_ML_LABEL)
+		o_weaponsdroplistbox.offsetLabel			= 0,-15
+		o_weaponsdroplistbox.arrowHeight			= 15
+		o_weaponsdroplistbox.location				= 22, 92, 20
+		o_weaponsdroplistbox.list_size				= 4
+		o_weaponsdroplistbox.label					= localize$(IDS_ML_WP_LIST)
+		o_weaponsdroplistbox.offsetLabel			= -1, -17
+		o_weaponsdroplistbox.itemWidth				= 269
+		o_weaponsdroplistbox.max_displayed			= 4
+		o_weaponsdroplistbox.id						= 226
+
+		o_weaponsdroplistbox.list_item[0]			= localize$(IDS_ML_WP_LISTALL)
+		o_weaponsdroplistbox.list_item[1]			= localize$(IDS_ML_WP_LISTBEAM)
+		o_weaponsdroplistbox.list_item[2]			= localize$(IDS_ML_WP_LISTBALLISTIC)
+		o_weaponsdroplistbox.list_item[3]			= localize$(IDS_ML_WP_LISTMISSILE)
+
+		initialize(o_weaponsdroplistbox)
+		deactivate(o_weaponsdroplistbox)
+
+		// begin multicolumn listbox
+		//Create our STANDARD listbox///////////////////////////////////////////////////////////////////////////////////////////////////////////
+		callback($$ML_CallbackHandler$$, MLDataSetupAllWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)
+
+		object o_weaponslistbox				= s_mc_listbox_weapon
+		o_weaponslistbox.id				= 244
+		o_weaponslistbox.location			= 22, 124, 10
+
+		o_weaponslistbox.boxFont3d			= FPATH localize$(IDS_F_ML_LABEL)		//MUST BE INITIALIZED
+		o_weaponslistbox.itemWidth			= 268						//MUST BE INITIALIZED
+		o_weaponslistbox.itemHeight			= 1
+		o_weaponslistbox.itemHeight_padding		= 15
+		o_weaponslistbox.list_size			= num_weap					//11
+		o_weaponslistbox.NUM_OF_COLUMNS			= 4						//MUST BE INITIALIZED
+
+		o_weaponslistbox.column_header_height		= 20
+		o_weaponslistbox.arrowheight			= 20
+		o_weaponslistbox.max_displayed			= 331
+		o_weaponslistbox.uniform_item_height		= 0
+
+		o_weaponslistbox.labelFont3d			= FPATH localize$(IDS_F_ML_LABEL)		//CAN BE INITIALIZED
+		o_weaponslistbox.offsetLabel			= 0,-18						//CAN BE INITIALIZED offsetLabel of text from button = 0,-25
+		o_weaponslistbox.buttonwidth			= 16						//CAN BE INITIALIZED
+
+		o_weaponslistbox.first_delay			= 10	//time delay value n/60; for the buttons
+		o_weaponslistbox.second_delay			= 3	//time delay value n/60; for the buttons
+
+		o_weaponslistbox.column[0].location.x		= 5
+		o_weaponslistbox.column[1].location.x		= 65
+		o_weaponslistbox.column[2].location.x		= 190
+		o_weaponslistbox.column[3].location.x		= 235
+
+		o_weaponslistbox.column[0].fontcolor		= packcolor(255,0,0,255)
+		o_weaponslistbox.column[1].fontcolor		= packcolor(255,255,255,255)
+		o_weaponslistbox.column[2].fontcolor		= packcolor(255,255,255,255)
+		o_weaponslistbox.column[3].fontcolor		= packcolor(255,255,255,255)
+
+		o_weaponslistbox.offsetx[1]					= 5
+
+		o_weaponslistbox.column[0].icondisplays		= true
+
+		o_weaponslistbox.column[0].numeric			= true
+		o_weaponslistbox.column[2].numeric			= true
+		o_weaponslistbox.column[3].numeric			= true
+
+		o_weaponslistbox.column[0].fontAlignment	= 0
+		o_weaponslistbox.column[1].fontAlignment	= just_left
+		o_weaponslistbox.column[2].fontAlignment	= just_right
+		o_weaponslistbox.column[3].fontAlignment	= just_center
+
+		float ton_times_ten							= 0.f
+		int ton_int_times_ten						= 0
+		int ton_decimal_times_ten					= 0
+		int counter									= 0
+		int w
+
+		for w = 0; w < num_weap; w++
+		{
+			if ids[w] > -1 and ids[w] < LastWeaponID+1	// second condition added by mektek
+			{
+				o_weaponslistbox.column[0].list_item[counter]	= conv$(ids[w])
+
+				ton_times_ten									= ton[w] * 10.0
+				ton_int_times_ten								= ton[w] * 10
+				ton_decimal_times_ten							= ton_times_ten - ton_int_times_ten
+				o_weaponslistbox.column[2].list_item[counter]	= conv$(ton[w]) "." conv$(ton_decimal_times_ten)
+				o_weaponslistbox.column[3].list_item[counter]	= conv$(inventory_count[w])
+				o_weaponslistbox.list_order[counter]			= counter
+				counter++
+			}
+			else
+			{
+				o_weaponslistbox.list_size--
+			}
+		}
+
+		int greatest_x
+		int greatest_y
+
+
+		for w = 0; w < o_weaponslistbox.list_size; w++
+		{
+
+			o_weaponslistbox.column[0].list_icon[w] = MB_GPATH "weapon_" o_weaponslistbox.column[0].list_item[w] ".tga",1,volatile
+			alphamode(o_weaponslistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha
+
+			if exists(o_weaponslistbox.column[0].list_icon[w])
+			{
+				if getwidth(o_weaponslistbox.column[0].list_icon[w]) > greatest_x
+					greatest_x = getwidth(o_weaponslistbox.column[0].list_icon[w])
+
+				if getheight(o_weaponslistbox.column[0].list_icon[w]) > greatest_y
+					greatest_y = getheight(o_weaponslistbox.column[0].list_icon[w])
+			}
+
+		}
+
+
+
+		if greatest_x > 0 && greatest_y > 0
+			bitmap_create black = greatest_x,greatest_y  //comment out if you don't have any images
+		else
+			bitmap_create black = 20,20  //makes something for now
+
+		initialize(o_weaponslistbox)
+
+		o_weaponslistbox.column[0].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+		o_weaponslistbox.column[1].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+		o_weaponslistbox.column[2].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+		o_weaponslistbox.column[3].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+
+		o_weaponslistbox.column[0].o_header.s_text	= localize$(IDS_ML_WP_SLOTS)
+		o_weaponslistbox.column[1].o_header.s_text	= localize$(IDS_ML_WP_NAME)
+		o_weaponslistbox.column[2].o_header.s_text	= localize$(IDS_ML_WP_TONS)
+		o_weaponslistbox.column[3].o_header.s_text	= "#"
+
+		object o_groupweaponsbutton					= s_multistatepane
+		o_groupweaponsbutton.file					= WPATH "button_reg_138x36_4state.tga"
+		o_groupweaponsbutton.total_states			= 4
+		o_groupweaponsbutton.text					= localize$(IDS_ML_WP_GROUP)
+		o_groupweaponsbutton.location				= 20, 466, 10
+		o_groupweaponsbutton.gFont3d				= FPATH localize$(IDS_F_ML_BUTTON)
+		o_groupweaponsbutton.id						= 227
+		initialize(o_groupweaponsbutton)
+		deactivate(o_groupweaponsbutton)
+
+		object o_stripweaponsbutton					= s_multistatepane
+		o_stripweaponsbutton.file					= WPATH "button_reg_138x36_4state.tga"
+		o_stripweaponsbutton.total_states			= 4
+		o_stripweaponsbutton.text					= localize$(IDS_ML_WP_STRIP)
+		o_stripweaponsbutton.location				= 20 + 148, 466, 10
+		o_stripweaponsbutton.gFont3d				= FPATH localize$(IDS_F_ML_BUTTON)
+		o_stripweaponsbutton.id						= 228
+		initialize(o_stripweaponsbutton)
+		deactivate(o_stripweaponsbutton)
+
+///////////////////////////////////////////////////////
+
+		position head_location[LastMechID+2]	// mektek
+		head_location[0]	= 0,0,50		// Arctic Wolf
+		head_location[1]	= 0,0,50		// Argus
+		head_location[2]	= 542,95,50		// Atlas
+		head_location[3]	= 0,0,50		// Awesome
+		head_location[4]	= 540,130,50	// Black Knight
+		head_location[5]	= 0,0,50		// Bushwacker
+		head_location[6]	= 0,0,50		// Catapult
+		head_location[7] 	= 0,0,50		// Cauldron-Born
+		head_location[8]	= 0,0,50		// Chimera
+		head_location[9 ]	= 0,0,50		// Cougar
+		head_location[10]	= 0,0,50		// Daishi
+		head_location[11]	= 0,0,50		// dragon
+		head_location[12]	= 0,0,50		// Fafnir
+		head_location[13]	= 0,0,50		// Flea
+		head_location[14]	= 0,0,50		// Gladiator
+		head_location[15]	= 600,135,50		// Hauptmann
+		head_location[16]	= 0,0,50		// Hellhound
+		head_location[17]	= 0,0,50		// Hellspawn
+		head_location[18]	= 0,0,50		// Highlander
+		head_location[19]	= 0,0,50		// Hunchback
+		head_location[20]	= 0,0,50		// Kodiak
+		head_location[21]	= 0,0,50		// Loki
+		head_location[22]	= 0,0,50		// Longbow
+		head_location[23]	= 0,0,50		// Madcat
+		head_location[24]	= 0,0,50		// Madcat Mk II
+		head_location[25]	= 0,0,50		// masakari
+		head_location[26]	= 0,0,50		// Mauler
+		head_location[27]	= 0,0,50		// Novacat
+		head_location[28]	= 0,0,50		// Osiris
+		head_location[29]	= 0,0,50		// Owens
+		head_location[30]	= 0,0,50		// Puma
+		head_location[31]	= 0,0,50		// Raven
+		head_location[32]	= 0,0,50		// Ryoken
+		head_location[33]	= 0,0,50		// Shadowcat
+		head_location[34]	= 0,0,50		// sunder
+		head_location[35]	= 540,130,50	// Templar
+		head_location[36]	= 0,0,50		// Thanatos
+		head_location[37]	= 0,0,50		// Thor
+		head_location[38]	= 0,0,50		// Uller
+		head_location[39]	= 0,0,50		// Uziel
+		head_location[40]	= 0,0,50		// Victor
+		head_location[41]	= 0,0,50		// Vulture
+		head_location[42]	= 0,0,50		// wolfhound
+		head_location[43]	= 0,0,50		// zeus
+		head_location[M_Avatar]	= 0,0,50		// Avatar	// mektek
+		head_location[M_Warhammer]	= 0,0,50		// Warhammer	// mektek
+		head_location[M_Strider]	= 0,0,50		// Strider	// mektek
+		head_location[M_Marauder]	= 0,0,50		// Marauder	// mektek
+		head_location[M_Bloodasp]	= 0,0,50		// mektek
+		head_location[M_UrbanmechIIC]	= 0,0,50		// Urban Mech	// mektek
+		head_location[M_Stalker]	= 0,0,50		// mektek
+		head_location[M_Ares]	= 0,0,50		// 
+		head_location[M_Urbanmech]	= 0,0,50		// Urban Mech	// mektek
+		head_location[M_BrcticWolf ]	= 0,0,50		// Arctic Wolf II	// Mechstorm
+		head_location[NoMechID]	= 0,0,50		// nothing	// mektek
+
+
+		position lefttorso_location[LastMechID+2]	// mektek
+		lefttorso_location[0]	= 600,270,50    	// Arctic Wolf
+		lefttorso_location[1]  = 570,280,50     	// Argus
+		lefttorso_location[2]  = 605,130,50     	// Atlas
+		lefttorso_location[3]  = 625,175,50     	// Awesome
+		lefttorso_location[4]  = 595,200,50     	// Black Knight
+		lefttorso_location[5]  = 0,0,50         	// Bushwacker
+		lefttorso_location[6]  = 635,320,50     	// Catapult
+		lefttorso_location[7]  = 550,280,50     	// Cauldron-Born
+		lefttorso_location[8]  = 0,0,50         	// Chimera
+		lefttorso_location[9 ]  = 625,225,50     	// Cougar
+		lefttorso_location[10] = 595,180,50     	// Daishi
+		lefttorso_location[11] = 595,180,50     	// dragon
+		lefttorso_location[12] = 580,100,50     	// Fafnir
+		lefttorso_location[13] = 585,340,50     	// Flea
+		lefttorso_location[14] = 620,100,50     	// Gladiator
+		lefttorso_location[15] = 610,233,50     	// Hauptmann
+		lefttorso_location[16] = 615,170,50     	// Hellhound
+		lefttorso_location[17] = 580,330,50     	// Hellspawn
+		lefttorso_location[18] = 605,170,50     	// Highlander
+		lefttorso_location[19] = 580,170,50     	// Hunchback
+		lefttorso_location[20] = 600,95,50      	// Kodiak
+		lefttorso_location[21] = 570,230,50     	// Loki
+		lefttorso_location[22] = 600,120,50     	// Longbow
+		lefttorso_location[23] = 585,280,50     	// Madcat
+		lefttorso_location[24] = 580,340,50     	// Madcat Mk II
+		lefttorso_location[25] = 595,180,50     	// masakari
+		lefttorso_location[26] = 580,100,50     	// Mauler
+		lefttorso_location[27] = 530,250,50     	// Novacat
+		lefttorso_location[28] = 0,0,50         	// Osiris
+		lefttorso_location[29]  = 610,260,50       	// Owens
+		lefttorso_location[30]  = 625,225,50     	// Puma
+		lefttorso_location[31] = 585,340,50     	// Raven
+		lefttorso_location[32] = 590,160,50     	// Ryoken
+		lefttorso_location[33] = 590,325,50     	// Shadowcat
+		lefttorso_location[34] = 575,260,50     	// sunder
+		lefttorso_location[35] = 580,100,50     	// Templar
+		lefttorso_location[36] = 590,200,50     	// Thanatos
+		lefttorso_location[37] = 600,335,50     	// Thor
+		lefttorso_location[38] = 625,225,50     	// Uller
+		lefttorso_location[39] = 600,250,50     	// Uziel
+		lefttorso_location[40] = 600,100,50     	// Victor
+		lefttorso_location[41] = 615,150,50     	// Vulture
+		lefttorso_location[42] = 580,330,50     	// wolfhound
+		lefttorso_location[43] = 630,150,50     	// Zeus
+		lefttorso_location[M_Avatar] = 615,150,50     	// Avatar	// mektek
+		lefttorso_location[M_Warhammer] = 575,270,50     	// warhammer	// mektek
+		lefttorso_location[M_Strider] = 620,280,50     	// Strider	// mektek
+		lefttorso_location[M_Marauder] = 630,180,50     	// Marauder	// mektek
+		lefttorso_location[M_Bloodasp] = 610,210,50     	// mektek
+		lefttorso_location[M_UrbanmechIIC] = 580,200,50     	// urbie	// mektek
+		lefttorso_location[M_Stalker] = 640,270,50     	// mektek
+		lefttorso_location[M_Ares]  = 0,0,50         	// Bushwacker
+		lefttorso_location[M_Urbanmech] = 580,200,50     	// urbie	// mektek
+		lefttorso_location[M_BrcticWolf ] = 600,270,50      // Arctic Wolf II	// Mechstorm
+		lefttorso_location[NoMechID] = 0,0,50         	// nothing	// mektek
+
+		position centertorso_location[LastMechID+2]	// mektek
+		centertorso_location[0]		= 0,0,50    	// Arctic Wolf
+		centertorso_location[1]		= 0,0,50    	// Argus
+		centertorso_location[2]		= 542,200,50	// Atlas
+		centertorso_location[3]		= 540,270,50	// Awesome
+		centertorso_location[4]		= 0,0,50    	// Black Knight
+		centertorso_location[5]		= 528,330,50	// Bushwacker
+		centertorso_location[6]		= 550,330,50	// Catapult
+		centertorso_location[7] 	= 0,0,50    	// Cauldron-Born
+		centertorso_location[8]		= 0,0,50    	// Chimera
+		centertorso_location[9]		= 0,0,50    	// Cougar
+		centertorso_location[10]	= 540,300,50	// Daishi
+		centertorso_location[11]	= 540,300,50	// dragon
+		centertorso_location[12]	= 540,300,50	// Fafnir
+		centertorso_location[13]	= 540,388,50	// Flea
+		centertorso_location[14]	= 540,240,50    	// Gladiator
+		centertorso_location[15]	= 540,280,50   	// Hauptmann
+		centertorso_location[16]	= 540,320,50	// Hellhound
+		centertorso_location[17]	= 0,0,50    	// Hellspawn
+		centertorso_location[18]	= 540,190,50	// Highlander
+		centertorso_location[19]	= 545,300,50	// Hunchback
+		centertorso_location[20]	= 550,250,50	// Kodiak
+		centertorso_location[21]	= 0,0,50    	// Loki
+		centertorso_location[22]	= 540,220,50    // Longbow
+		centertorso_location[23]	= 0,0,50    	// Madcat
+		centertorso_location[24]	= 0,0,50    	// Madcat Mk II
+		centertorso_location[25]	= 540,300,50	// masakari
+		centertorso_location[26]	= 0,0,50    	// Mauler
+		centertorso_location[27] 	= 0,0,50    	// Novacat
+		centertorso_location[28] 	= 0,0,50    	// Osiris
+		centertorso_location[29]	= 540,275,50    // Owens
+		centertorso_location[30]	= 540,275,50    	// Puma
+		centertorso_location[31] 	= 0,0,50    	// Raven
+		centertorso_location[32] 	= 535,330,50	// Ryoken
+		centertorso_location[33] 	= 0,0,50    	// Shadowcat
+		centertorso_location[34] 	= 540,100,50	// sunder
+		centertorso_location[35] 	= 530,300,50	// Templar
+		centertorso_location[36] 	= 0,0,50    	// Thanatos
+		centertorso_location[37] 	= 0,0,50    	// Thor
+		centertorso_location[38] 	= 0,0,50    	// Uller
+		centertorso_location[39] 	= 0,0,50    	// Uziel
+		centertorso_location[40]	= 525,250,50   		// Victor
+		centertorso_location[41] 	= 0,0,50    	// Vulture
+		centertorso_location[42] 	= 540,240,50	// wolfhound
+		centertorso_location[43] 	= 550,260,50	// zeus
+		centertorso_location[M_Avatar] 	= 0,0,50    	// Avatar	// mektek
+		centertorso_location[M_Warhammer] 	= 0,0,50	// warhammer	// mektek
+		centertorso_location[M_Strider]	= 540,320,50	// Strider	// mektek
+		centertorso_location[M_Marauder]	= 0,0,50    	// Marauder	// mektek
+		centertorso_location[M_Bloodasp]	= 550,280,50	// mektek
+		centertorso_location[M_UrbanmechIIC]	= 0,0,50    	// urbie	// mektek
+		centertorso_location[M_Stalker]	= 540,300,50	// mektek
+		centertorso_location[M_Ares]		= 0,0,50	// Bushwacker
+		centertorso_location[M_Urbanmech]	= 550,280,50    	// urbie	// mektek
+		centertorso_location[M_BrcticWolf ]	= 0,0,50	// Arctic Wolf II	// Mechstorm
+		centertorso_location[NoMechID] 	= 0,0,50    	// nothing	// mektek
+
+		position righttorso_location[LastMechID+2]
+		righttorso_location[0] 		= 475,270,50	// Arctic Wolf
+		righttorso_location[1] 		= 500,280,50	// Argus
+		righttorso_location[2] 		= 475,130,50	// Atlas
+		righttorso_location[3] 		= 460,175,50	// Awesome
+		righttorso_location[4] 		= 500,200,50	// Black Knight
+		righttorso_location[5] 		= 0,0,50    	// Bushwacker
+		righttorso_location[6] 		= 465,320,50	// Catapult
+		righttorso_location[7] 		= 485,280,50	// Cauldron-Born
+		righttorso_location[8] 		= 545,270,50	// Chimera
+		righttorso_location[9 ]		= 455,225,50	// Cougar
+		righttorso_location[10]		= 475,180,50	// Daishi
+		righttorso_location[11]		= 475,180,50	// dragon
+		righttorso_location[12]		= 480,100,50	// Fafnir
+		righttorso_location[13]		= 475,340,50	// Flea
+		righttorso_location[14]		= 470,100,50	// Gladiator
+		righttorso_location[15]		= 443,233,50	// Hauptmann
+		righttorso_location[16]		= 465,110,50	// Hellhound
+		righttorso_location[17]		= 480,330,50    // Hellspawn
+		righttorso_location[18]		= 475,110,50    // Highlander
+		righttorso_location[19]		= 0,0,50    	// Hunchback
+		righttorso_location[20]		= 468,95,50     // Kodiak
+		righttorso_location[21]		= 0,0,50        // Loki
+		righttorso_location[22]		= 480,120,50	// Longbow
+		righttorso_location[23]		= 485,280,50    // Madcat
+		righttorso_location[24]		= 480,340,50    // Madcat Mk II
+		righttorso_location[25]		= 475,180,50    // masakari
+		righttorso_location[26]		= 480,100,50    // Mauler
+		righttorso_location[27]		= 495,250,50    // Novacat
+		righttorso_location[28]		= 0,0,50        // Osiris
+		righttorso_location[29] 	= 490,220,50	// Owens
+		righttorso_location[30]		= 455,225,50	// Puma
+		righttorso_location[31]		= 475,340,50    // Raven
+		righttorso_location[32]		= 490,160,50    // Ryoken
+		righttorso_location[33]		= 495,325,50    // Shadowcat
+		righttorso_location[34]		= 505,260,50    // sunder
+		righttorso_location[35]		= 480,100,50    // Templar
+		righttorso_location[36]		= 490,200,50    // Thanatos
+		righttorso_location[37]		= 500,335,50    // Thor
+		righttorso_location[38]		= 455,225,50    // Uller
+		righttorso_location[39]		= 475,250,50    // Uziel
+		righttorso_location[40]		= 480,100,50	// Victor
+		righttorso_location[41]		= 465,150,50    // Vulture
+		righttorso_location[42]		= 480,330,50    // wolfhound
+		righttorso_location[43]		= 470,150,50    // Zeus
+		righttorso_location[M_Avatar]	= 465,150,50    // Avatar	// mektek
+		righttorso_location[M_Warhammer]	= 485,270,50    // warhammer	// mektek
+		righttorso_location[M_Strider]	= 460,280,50	// Strider	// mektek
+		//righttorso_location[M_Marauder]		= 470,220,50    // Marauder	// mektek
+		righttorso_location[M_Marauder]		= 0,0,50    // Marauder	// mektek
+		righttorso_location[M_Bloodasp]		= 475,210,50    // mektek
+		righttorso_location[M_UrbanmechIIC]		= 480,200,50    // urbie	// mektek
+		righttorso_location[M_Stalker]		= 455,270,50	// mektek
+		righttorso_location[M_Ares] 		= 0,0,50    	// Bushwacker
+		righttorso_location[M_Urbanmech]		= 480,200,50    // urbie	// mektek
+		righttorso_location[M_BrcticWolf ]		= 475,270,50		// Arctic Wolf II	// Mechstorm
+		righttorso_location[NoMechID]	= 0,0,50        // nothing	// mektek
+
+		position leftarm_location[LastMechID+2]	// mektek
+		leftarm_location[0]	= 630,320,50       	// Arctic Wolf
+		leftarm_location[1]	= 640,240,50       	// Argus
+		leftarm_location[2]	= 640,225,50       	// Atlas
+		leftarm_location[3]	= 640,280,50       	// Awesome
+		leftarm_location[4]	= 640,305,50       	// Black Knight
+		leftarm_location[5]	= 620,280,50       	// Bushwacker
+		leftarm_location[6]	= 620,180,50       	// Catapult
+		leftarm_location[7] 	= 645,290,50       	// Cauldron-Born
+		leftarm_location[8]	= 640,270,50       	// Chimera
+		leftarm_location[9 ]	= 640,310,50       	// Cougar
+		leftarm_location[10]	= 640,285,50       	// Daishi
+		leftarm_location[11]	= 640,300,50       	// dragon
+		leftarm_location[12]	= 666,295,50       	// Fafnir
+		leftarm_location[13]	= 600,260,50       	// Flea
+		leftarm_location[14]	= 666,250,50       	// Gladiator
+		leftarm_location[15]	= 666,343,50       	// Hauptmann
+		leftarm_location[16]	= 640,270,50       	// Hellhound
+		leftarm_location[17]	= 640,240,50       	// Hellspawn
+		leftarm_location[18]	= 640,260,50       	// Highlander
+		leftarm_location[19]	= 640,278,50       	// Hunchback
+		leftarm_location[20]	= 650,250,50       	// Kodiak
+		leftarm_location[21]	= 640,250,50       	// Loki
+		leftarm_location[22]	= 666,285,50       	// Longbow
+		leftarm_location[23]	= 620,360,50       	// Madcat
+		leftarm_location[24]	= 650,240,50       	// Madcat Mk II
+		leftarm_location[25]	= 640,260,50       	// masakari
+		leftarm_location[26]	= 666,295,50       	// Mauler
+		leftarm_location[27]	= 640,210,50       	// Novacat
+		leftarm_location[28]	= 640,270,50       	// Osiris
+		leftarm_location[29]	= 620,350,50       	// Owens
+		leftarm_location[30]	= 640,310,50       	// Puma
+		leftarm_location[31]	= 640,300,50       	// Raven
+		leftarm_location[32]	= 640,280,50       	// Ryoken
+		leftarm_location[33]	= 640,210,50       	// Shadowcat
+		leftarm_location[34]	= 640,230,50       	// sunder
+		leftarm_location[35]	= 666,295,50       	// Templar
+		leftarm_location[36]	= 640,290,50       	// Thanatos
+		leftarm_location[37]	= 650,230,50       	// Thor
+		leftarm_location[38]	= 640,310,50       	// Uller
+		leftarm_location[39]	= 640,330,50       	// Uziel
+		leftarm_location[40]	= 660,295,50       	// Victor
+		leftarm_location[41]	= 640,295,50       	// Vulture
+		leftarm_location[42]	= 640,270,50       	// wolfhound
+		leftarm_location[43]	= 640,260,50       	// zeus
+		leftarm_location[M_Avatar]	= 640,295,50       	// Avatar	// mektek
+		leftarm_location[M_Warhammer]	= 666,280,50       	// warhammer	// mektek
+		leftarm_location[M_Strider]	= 620,140,50       	// Strider	// mektek
+		leftarm_location[M_Marauder]	= 660,300,50       	// Marauder	// mektek
+		leftarm_location[M_Bloodasp]	= 640,260,50       	// mektek
+		leftarm_location[M_UrbanmechIIC]	= 666,295,50       	// urbie	// mektek
+		leftarm_location[M_Stalker]	= 670,140,50       	// mektek
+		leftarm_location[M_Ares]	= 660,280,50       	// 
+		leftarm_location[M_Urbanmech]	= 666,295,50       	// urbie	// mektek
+		leftarm_location[M_BrcticWolf ]	= 630,320,50       	// Arctic Wolf II	// Mechstorm
+		leftarm_location[NoMechID]	= 0,0,50           	// nothing	// mektek
+
+		position rightarm_location[LastMechID+2]	// mektek
+		rightarm_location[0] 	= 424,320,50      	// Arctic Wolf
+		rightarm_location[1] 	= 400,240,50      	// Argus
+		rightarm_location[2] 	= 440,225,50      	// Atlas
+		rightarm_location[3] 	= 440,280,50      	// Awesome
+		rightarm_location[4] 	= 430,305,50      	// Black Knight
+		rightarm_location[5] 	= 390,280,50      	// Bushwacker
+		rightarm_location[6] 	= 450,180,50      	// Catapult
+		rightarm_location[7] 	= 385,290,50      	// Cauldron-Born
+		rightarm_location[8] 	= 440,270,50      	// Chimera
+		rightarm_location[9 ] 	= 440,310,50      	// Cougar
+		rightarm_location[10]	= 440,285,50      	// Daishi
+		rightarm_location[11]	= 440,300,50      	// dragon
+		rightarm_location[12]	= 400,295,50      	// Fafnir
+		rightarm_location[13]	= 460,260,50      	// Flea
+		rightarm_location[14]	= 400,250,50      	// Gladiator
+		rightarm_location[15]	= 420,343,50      	// Hauptmann
+		rightarm_location[16]	= 440,270,50      	// Hellhound
+		rightarm_location[17]	= 400,240,50      	// Hellspawn
+		rightarm_location[18]	= 450,260,50      	// Highlander
+		rightarm_location[19]	= 400,278,50      	// Hunchback
+		rightarm_location[20]	= 450,250,50      	// Kodiak
+		rightarm_location[21]	= 420,250,50      	// Loki
+		rightarm_location[22]	= 410,285,50      	// Longbow
+		rightarm_location[23]	= 440,360,50      	// Madcat
+		rightarm_location[24]	= 420,240,50      	// Madcat Mk II
+		rightarm_location[25]	= 440,260,50      	// masakari
+		rightarm_location[26]	= 400,295,50      	// Mauler
+		rightarm_location[27]	= 450,210,50      	// Novacat
+		rightarm_location[28]	= 410,270,50      	// Osiris
+		rightarm_location[29] 	= 450,350,50      	// Owens
+		rightarm_location[30] 	= 440,310,50      	// Puma
+		rightarm_location[31]	= 440,260,50      	// Raven
+		rightarm_location[32]	= 450,280,50      	// Ryoken
+		rightarm_location[33]	= 460,210,50      	// Shadowcat
+		rightarm_location[34]	= 440,230,50      	// sunder
+		rightarm_location[35]	= 400,295,50      	// Templar
+		rightarm_location[36]	= 390,300,50      	// Thanatos
+		rightarm_location[37]	= 450,230,50      	// Thor
+		rightarm_location[38]	= 440,310,50      	// Uller
+		rightarm_location[39]	= 440,330,50      	// Uziel
+		rightarm_location[40]	= 430,280,50      	// Victor
+		rightarm_location[41]	= 430,295,50      	// Vulture
+		rightarm_location[42]	= 400,270,50      	// wolfhound
+		rightarm_location[43]	= 440,260,50      	// Zeus
+		rightarm_location[M_Avatar]	= 460,295,50      	// Avatar	// mektek
+		rightarm_location[M_Warhammer]	= 410,280,50      	// warhammer	// mektek
+		rightarm_location[M_Strider]	= 460,140,50      	// Strider	// mektek
+		rightarm_location[M_Marauder]	= 440,300,50      	// Marauder	// mektek
+		rightarm_location[M_Bloodasp]	= 460,260,50      	// mektek
+		rightarm_location[M_UrbanmechIIC]	= 400,295,50      	// urbie	// mektek
+		rightarm_location[M_Stalker]	= 370,270,50      	// mektek
+		rightarm_location[M_Ares] 	= 420,280,50      	// 
+		rightarm_location[M_Urbanmech]	= 400,295,50      	// urbie	// mektek
+		rightarm_location[M_BrcticWolf ]	= 424,320,50      // Arctic Wolf II	// Mechstorm
+		rightarm_location[NoMechID]	= 0,0,50          	// nothing	// mektek
+
+		position special1_location[LastMechID+2]	// mektek
+		special1_location[0]	= 464,180,50  		// Arctic Wolf
+		special1_location[1]	= 0,0,50      		// Argus
+		special1_location[2]	= 440,360,50  		// Atlas
+		special1_location[3]	= 0,0,50      		// Awesome
+		special1_location[4]	= 0,0,50      		// Black Knight
+		special1_location[5]	= 620,185,50  		// Bushwacker
+		special1_location[6]	= 0,0,50      		// Catapult
+		special1_location[7] 	= 460,180,50  		// Cauldron-Born
+		special1_location[8]	= 0,0,50      		// Chimera
+		special1_location[9 ]	= 0,0,50      		// Cougar
+		special1_location[10] 	= 590,95,50   		// Daishi
+		special1_location[11] 	= 0,0,50      		// dragon
+		special1_location[12] 	= 0,0,50      		// Fafnir
+		special1_location[13] 	= 0,0,50      		// Flea
+		special1_location[14] 	= 0,0,50      		// Gladiator
+		special1_location[15] 	= 470,100,50  		// Hauptmann
+		special1_location[16] 	= 0,0,50      		// Hellhound
+		special1_location[17] 	= 465,170,50  		// Hellspawn
+		special1_location[18] 	= 0,0,50      		// Highlander
+		special1_location[19] 	= 465,148,50  		// Hunchback
+		special1_location[20] 	= 0,0,50      		// Kodiak
+		special1_location[21] 	= 485,125,50  		// Loki
+		special1_location[22] 	= 0,0,50      		// Longbow
+		special1_location[23] 	= 470,160,50  		// Madcat
+		special1_location[24] 	= 490,100,50  		// Madcat Mk II
+		special1_location[25] 	= 0,0,50      		// masakari
+		special1_location[26] 	= 0,0,50      		// Mauler
+		special1_location[27] 	= 0,0,50      		// Novacat
+		special1_location[28] 	= 540,210,50  		// Osiris
+		special1_location[29]	= 0,0,50      		// Owens
+		special1_location[30]	= 0,0,50      		// Puma
+		special1_location[31] 	= 0,0,50      		// Raven
+		special1_location[32] 	= 535,130,50  		// Ryoken
+		special1_location[33] 	= 0,0,50      		// Shadowcat
+		special1_location[34] 	= 500,100,50  		// sunder
+		special1_location[35] 	= 0,0,50      		// Templar
+		special1_location[36] 	= 0,0,50      		// Thanatos
+		special1_location[37] 	= 575,130,50  		// Thor
+		special1_location[38] 	= 0,0,50      		// Uller
+		special1_location[39] 	= 535,180,50  		// Uziel
+		special1_location[40] 	= 0,0,50      		// Victor
+		special1_location[41] 	= 535,310,50  		// Vulture
+		special1_location[42] 	= 465,170,50  		// wolfhound
+		special1_location[43] 	= 0,0,50      		// Zeus
+		special1_location[M_Avatar] 	= 552,310,50  		// Avatar	// mektek
+		special1_location[M_Warhammer] 	= 0,0,50  		// Warhammer	// mektek
+		special1_location[M_Strider] 	= 0,0,50      		// Strider	// mektek
+		special1_location[M_Marauder] 	= 470,110,50  		// Marauder
+		special1_location[M_Bloodasp] 	= 640,100,50  		// mektek
+		special1_location[M_UrbanmechIIC] 	= 0,0,50      		// urbie	// mektek
+		special1_location[M_Stalker] 	= 600,95,50  		// mektek
+		special1_location[M_Ares]	= 550,340,50  		// 
+		special1_location[M_Urbanmech] 	= 0,0,50      		// urbie	// mektek
+		special1_location[M_BrcticWolf ] 	= 464,180,50        		// Arctic Wolf II	// Mechstorm
+		special1_location[NoMechID] 	= 0,0,50      		// nothing	// mektek
+
+
+		position special2_location[LastMechID+2]	// mektek
+		special2_location[0]	= 589,180,50  		// Arctic Wolf
+		special2_location[1]	= 0,0,50      		// Argus
+		special2_location[2]	= 0,0,50      		// Atlas
+		special2_location[3]	= 0,0,50      		// Awesome
+		special2_location[4]	= 0,0,50      		// Black Knight
+		special2_location[5]	= 0,0,50      		// Bushwacker
+		special2_location[6]	= 0,0,50      		// Catapult
+		special2_location[7]	= 630,180,50  		// Cauldron-Born
+		special2_location[8]	= 0,0,50      		// Chimera
+		special2_location[9 ]	= 0,0,50      		// Cougar
+		special2_location[10] 	= 0,0,50      		// Daishi
+		special2_location[11] 	= 0,0,50      		// dragon
+		special2_location[12] 	= 0,0,50      		// Fafnir
+		special2_location[13] 	= 0,0,50      		// Flea
+		special2_location[14] 	= 0,0,50      		// Gladiator
+		special2_location[15] 	= 0,0,50      		// Hauptmann
+		special2_location[16]	= 0,0,50      		// Hellhound
+		special2_location[17] 	= 0,0,50      		// Hellspawn
+		special2_location[18] 	= 0,0,50      		// Highlander
+		special2_location[19] 	= 0,0,50      		// Hunchback
+		special2_location[20] 	= 0,0,50      		// Kodiak
+		special2_location[21] 	= 0,0,50      		// Loki
+		special2_location[22] 	= 0,0,50      		// Longbow
+		special2_location[23] 	= 615,160,50  		// Madcat
+		special2_location[24] 	= 590,100,50  		// Madcat Mk II
+		special2_location[25] 	= 0,0,50      		// masakari
+		special2_location[26] 	= 0,0,50      		// Mauler
+		special2_location[27] 	= 0,0,50      		// Novacat
+		special2_location[28] 	= 540,360,50  		// Osiris
+		special2_location[29]	= 0,0,50      		// Owens
+		special2_location[30]	= 0,0,50      		// Puma
+		special2_location[31] 	= 0,0,50      		// Raven
+		special2_location[32] 	= 0,0,50      		// Ryoken
+		special2_location[33] 	= 0,0,50      		// Shadowcat
+		special2_location[34] 	= 0,0,50      		// sunder
+		special2_location[35] 	= 0,0,50      		// Templar
+		special2_location[36] 	= 0,0,50      		// Thanatos
+		special2_location[37] 	= 0,0,50      		// Thor
+		special2_location[38] 	= 0,0,50      		// Uller
+		special2_location[39] 	= 0,0,50      		// Uziel
+		special2_location[40] 	= 0,0,50      		// Victor
+		special2_location[41] 	= 0,0,50      		// Vulture
+		special2_location[42] 	= 0,0,50      		// wolfhound
+		special2_location[43] 	= 0,0,50      		// Zeus
+		special2_location[M_Avatar] 	= 0,0,50      		// Avatar	// mektek
+		special2_location[M_Warhammer] 	= 525,100,50  		// warhammer	// mektek
+		special2_location[M_Strider] 	= 0,0,50      		// Strider	// mektek
+		special2_location[M_Marauder] 	= 550,300,50  		// Marauder
+		special2_location[M_Bloodasp] 	= 460,100,50  		// mektek
+		special2_location[M_UrbanmechIIC] 	= 0,0,50      		// urbie	// mektek
+		special2_location[M_Stalker] 	= 470,95,50   		// mektek
+		special2_location[M_Ares]	= 620,130,50      		// 
+		special2_location[M_Urbanmech] 	= 0,0,50      		// urbie	// mektek
+		special2_location[M_BrcticWolf ] 	= 589,180,50		// Arctic Wolf II	// Mechstorm
+		special2_location[NoMechID] 	= 0,0,50      		// nothing
+
+		string location_label[8]
+		location_label[0] = ""
+		location_label[1] = ""
+		location_label[2] = localize$(IDS_ML_WP_LARM)
+		location_label[3] = localize$(IDS_ML_WP_RARM)
+		location_label[4] = localize$(IDS_ML_WP_RTORSO)
+		location_label[5] = localize$(IDS_ML_WP_LTORSO)
+		location_label[6] = localize$(IDS_ML_WP_CTORSO)
+		location_label[7] = localize$(IDS_ML_WP_HEAD)
+
+		string special1_label[LastMechID+2]	// mektek
+		special1_label[M_ArcticWolf] 	= localize$(IDS_ML_WP_MISSILERACK)  	// Arctic Wolf
+		special1_label[M_Atlas] 	= localize$(IDS_ML_WP_GUNRACK)      	// Atlas
+		special1_label[M_Bushwacker] 	= localize$(IDS_ML_WP_MISSILERACK)  	// Bushwacker
+		special1_label[M_CauldronBorn] 	= localize$(IDS_ML_WP_MISSILERACK)  	// cauldron-born
+		special1_label[M_Daishi] 	= localize$(IDS_ML_WP_MISSILERACK)  	// Daishi
+		special1_label[M_Hauptmann] 	= localize$(IDS_ML_WP_GUNRACK)      	// Hauptmann
+		special1_label[M_Hellspawn] 	= localize$(IDS_ML_WP_MISSILERACK)  	// Hellspawn
+		special1_label[M_Hunchback] 	= localize$(IDS_ML_WP_GUNRACK)   		// Hunchback
+		special1_label[M_Loki] 		= localize$(IDS_ML_WP_MISSILERACK)  	// Loki
+		special1_label[M_Madcat]	= localize$(IDS_ML_WP_MISSILERACK)  	// Madcat
+		special1_label[M_Madcat_MKII] 	= localize$(IDS_ML_WP_MISSILERACK)  	// Madcat Mk II
+		special1_label[M_Osiris] 	= localize$(IDS_ML_WP_GUNRACK)      	// Osiris
+        	special1_label[M_Ryoken] 	= localize$(IDS_ML_WP_MISSILERACK)  	// Ryoken
+        	special1_label[M_Sunder] 	= localize$(IDS_ML_WP_MISSILERACK)  	// sunder
+		special1_label[M_Thor] 	 	= localize$(IDS_ML_WP_MISSILERACK)  	// Thor
+		special1_label[M_Uziel]  	= localize$(IDS_ML_WP_MISSILERACK)  	// Uziel
+		special1_label[M_Vulture]	= localize$(IDS_ML_WP_OMNIRACK)     	// Vulture
+		special1_label[M_Avatar]	= localize$(IDS_ML_WP_BEAMRACK)     	// Avatar	// mektek
+		special1_label[M_Marauder]	= "Dorsal Gun"     	// Marauder	// mektek
+		special1_label[M_Bloodasp]	= "Left Gun"     	// mektek
+		special1_label[M_Stalker]	= localize$(IDS_ML_WP_MISSILERACK)     	// mektek
+		special1_label[M_Ares]		= localize$(IDS_ML_WP_OMNIRACK)     	// mektek
+		special1_label[M_BrcticWolf ]	= "Missile-Storm Pack"     	// Arctic Wolf II	// Mechstorm
+
+		string special2_label[LastMechID+2]	// mektek
+		special2_label[M_ArcticWolf] 	= localize$(IDS_ML_WP_MISSILERACK)  	// Arctic Wolf
+		special2_label[M_CauldronBorn] 	= localize$(IDS_ML_WP_MISSILERACK)  	// cauldron-born
+		special2_label[M_Madcat] 	= localize$(IDS_ML_WP_MISSILERACK)  	// Madcat
+		special2_label[M_Madcat_MKII] 	= localize$(IDS_ML_WP_MISSILERACK)  	// Madcat Mk II
+		special2_label[M_Osiris] 	= localize$(IDS_ML_WP_BEAMRACK)     	// Osiris
+		special2_label[M_Warhammer]	= localize$(IDS_ML_WP_MISSILERACK)     	// Warhammer	// mektek
+		special2_label[M_Marauder]	= localize$(IDS_ML_WP_BEAMRACK)     	// Marauder	// mektek
+		special2_label[M_Bloodasp]	= "Right Gun"     	// mektek
+		special2_label[M_Stalker]	= localize$(IDS_ML_WP_MISSILERACK)     	// mektek
+		special2_label[M_Ares]		= localize$(IDS_ML_WP_MISSILERACK)     	// mektek
+		special2_label[M_BrcticWolf ]	= "Missile-Storm Pack"     	// Arctic Wolf II	// Mechstorm
+
+
+		object headweapons = s_weapon_slot
+		headweapons.label = location_label[7]
+		headweapons.id = 230
+
+		object lefttorsoweapons = s_weapon_slot
+		lefttorsoweapons.label = location_label[5]
+		lefttorsoweapons.id = 231
+
+		object centertorsoweapons = s_weapon_slot
+		centertorsoweapons.label = location_label[6]
+		centertorsoweapons.id = 232
+
+		object righttorsoweapons = s_weapon_slot
+		righttorsoweapons.label = location_label[4]
+		righttorsoweapons.id = 233
+
+		object leftarmweapons = s_weapon_slot
+		leftarmweapons.label = location_label[2]
+		leftarmweapons.id = 234
+
+		object rightarmweapons = s_weapon_slot
+		rightarmweapons.label = location_label[3]
+		rightarmweapons.id = 235
+
+		object special1weapons = s_weapon_slot
+		special1weapons.id = 236
+
+		object special2weapons = s_weapon_slot
+		special2weapons.id = 237
+
+//////////////////////////////////////////////////////
+
+		// Icon display for selected weapon
+		object o_weapon_pointer = weapon_pointer
+		o_weapon_pointer.location = 0, 0, 200
+		deactivate(o_weapon_pointer)
+
+		object o_weapon_mask = weapon_mask
+		o_weapon_mask.location = 0, 0, 40
+		o_weapon_mask.region = 0,0 to 0,0
+		deactivate(o_weapon_mask)
+
+// SUPPORT FOR DEACTIVATING GROUP & STRIP BUTTONS WHEN THERE ARE NO MOUNTED WEAPONS
+
+		int grp_array_size = 30
+		int grp_typearray[grp_array_size]
+		int grp_id_array[grp_array_size]
+		int grp_loc_array[grp_array_size]
+		int grp_group1_array[grp_array_size]
+		int grp_group2_array[grp_array_size]
+		int grp_group3_array[grp_array_size]
+		int grp_group4_array[grp_array_size]
+		int grp_group5_array[grp_array_size]
+		int grp_group6_array[grp_array_size]
+		int grp_num_weapons
+		callback($$ML_CallbackHandler$$, MLDataGetWeaponGroups, grp_typearray[], grp_id_array[], grp_loc_array[], grp_group1_array[], grp_group2_array[], grp_group3_array[], grp_group4_array[], grp_group5_array[], grp_group6_array[], grp_num_weapons, grp_array_size)
+
+// SUPPORT FOR KEEPING THE LIST WHERE IT SHOULD BE WHEN ACTIVATING
+		int top_of_list
+
+		framerate = 5
+
+		object o_mechValue	 					= static_label
+		object o_value_mechValue	 			= static_label
+
+	}
+
+	GUI_EXECUTE
+	{
+		if CurrentList != o_weaponsdroplistbox.nselected
+		{
+			// Kill all list box buttons
+			for w = 0; w < o_weaponslistbox.list_size; w++
+			{
+					kill o_weaponslistbox.list_button[w]
+			}
+
+			if o_weaponsdroplistbox.nselected == 0
+			{
+				callback($$ML_CallbackHandler$$, MLDataSetupAllWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)
+			}
+			if o_weaponsdroplistbox.nselected == 1
+			{
+				//callback($$ML_CallbackHandler$$, MLDataSetupBeamWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)
+				callback($$ML_CallbackHandler$$, MLDataSetupAllWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)	// mektek
+				for w = 0; w < num_weap; w++	// mektek
+				{
+					if ids[w] < FirstBeamID or ids[w] > LastBeamID
+					{
+						ids[w] = -1	// reject it
+					}
+				}
+
+			}
+			if o_weaponsdroplistbox.nselected == 2
+			{
+				//callback($$ML_CallbackHandler$$, MLDataSetupProjectileWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)
+				callback($$ML_CallbackHandler$$, MLDataSetupAllWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)	// mektek
+				for w = 0; w < num_weap; w++	// mektek
+				{
+					if ids[w] < FirstProjectileID or ids[w] > LastProjectileID
+					{
+						ids[w] = -1	// reject it
+					}
+				}
+			}
+			if o_weaponsdroplistbox.nselected == 3
+			{
+				//callback($$ML_CallbackHandler$$, MLDataSetupMissileWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)
+				callback($$ML_CallbackHandler$$, MLDataSetupAllWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)	// mektek
+				for w = 0; w < num_weap; w++	// mektek
+				{
+					if ids[w] < FirstMissileID or ids[w] > LastMissileID
+					{
+						ids[w] = -1	// reject it
+					}
+				}
+			}
+
+			initialize(this)
+
+			CurrentList = o_weaponsdroplistbox.nselected
+		}
+	}
+
+	GUI_INIT
+	{
+		mech_id = parent.mech_id
+
+		callback($$ML_CallbackHandler$$, MLDataSetupLeftArm, la_ids[], la_unique_id[], la_slots[], la_slot_size[], la_ton[], la_damage[], la_range[], la_heat[], la_recycle[], la_num_weap, 10)
+		callback($$ML_CallbackHandler$$, MLDataSetupRightArm, ra_ids[], ra_unique_id[], ra_slots[], ra_slot_size[], ra_ton[], ra_damage[], ra_range[], ra_heat[], ra_recycle[], ra_num_weap, 10)
+		callback($$ML_CallbackHandler$$, MLDataSetupLeftLeg, ll_ids[], ll_unique_id[], ll_slots[], ll_slot_size[], ll_ton[], ll_damage[], ll_range[], ll_heat[], ll_recycle[], ll_num_weap, 10)
+		callback($$ML_CallbackHandler$$, MLDataSetupRightLeg, rl_ids[], rl_unique_id[], rl_slots[], rl_slot_size[], rl_ton[], rl_damage[], rl_range[], rl_heat[], rl_recycle[], rl_num_weap, 10)
+		callback($$ML_CallbackHandler$$, MLDataSetupLeftTorso, lt_ids[], lt_unique_id[], lt_slots[], lt_slot_size[], lt_ton[], lt_damage[], lt_range[], lt_heat[], lt_recycle[], lt_num_weap, 10)
+		callback($$ML_CallbackHandler$$, MLDataSetupRightTorso, rt_ids[], rt_unique_id[], rt_slots[], rt_slot_size[], rt_ton[], rt_damage[], rt_range[], rt_heat[], rt_recycle[], rt_num_weap, 10)
+		callback($$ML_CallbackHandler$$, MLDataSetupCenterTorso, ct_ids[], ct_unique_id[], ct_slots[], ct_slot_size[], ct_ton[], ct_damage[], ct_range[], ct_heat[], ct_recycle[], ct_num_weap, 10)
+		callback($$ML_CallbackHandler$$, MLDataSetupHead, h_ids[], h_unique_id[], h_slots[], h_slot_size[], h_ton[], h_damage[], h_range[], h_heat[], h_recycle[], h_num_weap, 10)
+		callback($$ML_CallbackHandler$$, MLDataSetupSpecial1, s1_ids[], s1_unique_id[], s1_slots[], s1_slot_size[], s1_ton[], s1_damage[], s1_range[], s1_heat[], s1_recycle[], s1_num_weap, 10)
+		callback($$ML_CallbackHandler$$, MLDataSetupSpecial2, s2_ids[], s2_unique_id[], s2_slots[], s2_slot_size[], s2_ton[], s2_damage[], s2_range[], s2_heat[], s2_recycle[], s2_num_weap, 10)
+
+		if $$m_isCampaign$$ == 1
+		{
+			if o_weaponsdroplistbox.nselected == 0
+			{
+				callback($$ML_CallbackHandler$$, MLDataSetupAllWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)
+			}
+			if o_weaponsdroplistbox.nselected == 1
+			{
+				//callback($$ML_CallbackHandler$$, MLDataSetupBeamWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)
+				callback($$ML_CallbackHandler$$, MLDataSetupAllWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)	// mektek
+				for w = 0; w < num_weap; w++	// mektek
+				{
+					if ids[w] < FirstBeamID or ids[w] > LastBeamID
+					{
+						ids[w] = -1	// reject it
+					}
+				}
+
+			}
+			if o_weaponsdroplistbox.nselected == 2
+			{
+				//callback($$ML_CallbackHandler$$, MLDataSetupProjectileWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)
+				callback($$ML_CallbackHandler$$, MLDataSetupAllWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)	// mektek
+				for w = 0; w < num_weap; w++	// mektek
+				{
+					if ids[w] < FirstProjectileID or ids[w] > LastProjectileID
+					{
+						ids[w] = -1	// reject it
+					}
+				}
+			}
+			if o_weaponsdroplistbox.nselected == 3
+			{
+				//callback($$ML_CallbackHandler$$, MLDataSetupMissileWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)
+				callback($$ML_CallbackHandler$$, MLDataSetupAllWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)	// mektek
+				for w = 0; w < num_weap; w++	// mektek
+				{
+					if ids[w] < FirstMissileID or ids[w] > LastMissileID
+					{
+						ids[w] = -1	// reject it
+					}
+				}
+			}
+		}
+
+		if (num_weap == 0)
+		{
+			for (w = 0; w < o_weaponslistbox.list_size; w++)
+			{
+				kill o_weaponslistbox.list_button[w]
+			}
+			o_weaponslistbox.list_size = 0
+		}
+		else
+		{
+			o_weaponslistbox.list_size = num_weap
+			counter = 0
+
+ 			print3d_attributes = o_weaponslistbox.boxFont3d, o_weaponslistbox.boxTextColor,1,1,1,0,0,o_weaponslistbox.column[1].fontAlignment
+			lprint3d_margins = o_weaponslistbox.column[1].location.x + o_weaponslistbox.offsetx[1],0 to getresx(),getresy()
+			lprint3d_position = o_weaponslistbox.column[1].location.x + o_weaponslistbox.offsetx[1],0
+			colwidth = o_weaponslistbox.column[1].o_header.buttonwidth
+
+			nToSpew = 8
+			for w = 0; w < num_weap; w++
+			{
+				if ids[w] > -1 and ids[w] < LastWeaponID+1	// second condition added by mektek
+				{
+					// The following 30 or so kludgy lines accomplish the following:
+					// When the Weapons list box displays the names of the weapons in col 1 (next to the icon),
+					// it wraps the name if it over-extends the alloted margins. Since I want the cost of the
+					// weapon to appear on the next line below the name, I need to know if the code is going
+					// to wrap the text automatically, or if I need to put in a \n myself. I do this by
+					// iterating through the text word by word, and check to see if the width of the final line of text is greater
+					// than the column width (after appending the cost string). If it is, I don't add the line break.
+					// Note: if something goes wrong, the commented spew are very helpful in viewing what the code is actually doing.
+					// set nToSpew to the list item index that is not printing properly.
+					lineStartIndex = 0
+					lineEndIndex = 0
+
+					//if ( w==nToSpew )
+					//{
+					//	spew "(" weapon_names[ids[w]] ")", "l=" conv$( length$( weapon_names[ids[w]] ) )
+					//	spew "columnWidth = " conv$( o_weaponslistbox.column[1].o_header.buttonwidth )
+					//}
+
+					while ( lineEndIndex < length$( weapon_names[ids[w]] ) )
+					{
+						previousWordBreak = lineEndIndex
+						// find next wordbreak:
+						lineEndIndex++
+						while ( lineEndIndex < length$( weapon_names[ids[w]] ) && !equal$( mid$( weapon_names[ids[w]], lineEndIndex-1, lineEndIndex ), " " ) )
+						{
+							lineEndIndex++
+						}
+
+						//if ( w==nToSpew )
+						//{
+						//	spew ">" mid$( weapon_names[ids[w]], lineStartIndex, lineEndIndex ) "< " conv$( lineStartIndex ) "," conv$( lineEndIndex ) ":" conv$( getprint3dwidth( mid$( weapon_names[ids[w]], lineStartIndex, lineEndIndex ) ) )
+						//	spew "li=" conv$( lineEndIndex )
+						//}
+
+						if ( getprint3dwidth( mid$( weapon_names[ids[w]], lineStartIndex, lineEndIndex ) ) >= o_weaponslistbox.column[1].o_header.buttonwidth-1 )
+						{
+							lineStartIndex = previousWordBreak
+						}
+					}
+
+					lastLineWidth = getprint3dwidth( mid$( weapon_names[ids[w]], lineStartIndex, lineEndIndex ) ) //  " " conv$( trade_value[w] ) )
+					costWidth = getprint3dwidth( conv$( trade_value[w] ) )
+
+					//if ( w==nToSpew )
+					//{
+					//	spew ">" mid$( weapon_names[ids[w]], lineStartIndex, lineEndIndex ) "< " conv$( lineStartIndex ) "," conv$( lineEndIndex ) ":" conv$( getprint3dwidth( mid$( weapon_names[ids[w]], lineStartIndex, lineEndIndex ) ) )
+					//	spew "print3dWidth=" conv$( lastLineWidth ) ", colWidth = " conv$( colwidth )
+					//	spew "{" mid$( weapon_names[ids[w]], lineStartIndex, lineEndIndex ) " " conv$( trade_value[w] ) "}"
+					//}
+
+
+					if ( lastLineWidth + costWidth >= colwidth )
+					{
+						o_weaponslistbox.column[1].list_item[counter] = weapon_names[ids[w]] " " conv$( trade_value[w] )
+					}
+					else
+					{
+						o_weaponslistbox.column[1].list_item[counter] = weapon_names[ids[w]] "\n" conv$( trade_value[w] )
+					}
+
+					o_weaponslistbox.column[0].list_item[counter] = conv$(ids[w])
+					ton_times_ten = ton[w] * 10.0
+					ton_int_times_ten = ton[w] * 10
+					ton_decimal_times_ten = ton_times_ten - ton_int_times_ten
+					o_weaponslistbox.column[2].list_item[counter] = conv$(ton[w]) "." conv$(ton_decimal_times_ten)
+					if inventory_count[w] > -1
+					{
+						o_weaponslistbox.column[3].list_item[counter] = conv$(inventory_count[w])
+					}
+					else
+					{
+						o_weaponslistbox.column[3].list_item[counter] = "-"
+					}
+					o_weaponslistbox.list_order[counter] = counter
+					counter++
+				}
+				else
+				{
+					o_weaponslistbox.list_size--
+				}
+			}
+
+			greatest_x = 0
+			greatest_y = 0
+			int k
+			for k = 0; k < o_weaponslistbox.list_size; k++
+			{
+				o_weaponslistbox.column[0].list_icon[k] = MB_GPATH "weapon_" o_weaponslistbox.column[0].list_item[k] ".tga",1,volatile
+//				o_weaponslistbox.column[0].list_icon[k] = MB_GPATH "weapon_" conv$(ids[k]) ".tga",1,volatile
+				alphamode(o_weaponslistbox.column[0].list_icon[k]) = am_alpha_alphainvalpha
+
+				if exists(o_weaponslistbox.column[0].list_icon[k])
+				{
+					if getwidth(o_weaponslistbox.column[0].list_icon[k]) > greatest_x
+						greatest_x = getwidth(o_weaponslistbox.column[0].list_icon[k])
+
+					if getheight(o_weaponslistbox.column[0].list_icon[k]) > greatest_y
+						greatest_y = getheight(o_weaponslistbox.column[0].list_icon[k])
+				}
+
+			}
+			if greatest_x > 0 && greatest_y > 0
+				bitmap_create black = greatest_x,greatest_y  //comment out if you don't have any images
+		}
+
+		if parent.o_tabs.on_tab == 1
+		{
+			initialize(o_weaponslistbox)
+		}
+
+		o_weaponslistbox.column[0].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_weaponslistbox.column[1].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_weaponslistbox.column[2].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_weaponslistbox.column[3].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+
+		o_weaponslistbox.column[0].o_header.s_text = localize$(IDS_ML_WP_SLOTS)
+		o_weaponslistbox.column[1].o_header.s_text = localize$(IDS_ML_WP_NAME)
+		o_weaponslistbox.column[2].o_header.s_text = localize$(IDS_ML_WP_TONS)
+		o_weaponslistbox.column[3].o_header.s_text = "#"
+
+		// Because the icons have been changed since our last
+		// initialize() call on o_weaponslistbox
+		// this mail message is to refresh the weapon list box to
+		// avoid the clipping problem at the bottom of the list box
+		mail(-1, o_weaponslistbox)
+
+		int STATUS_LABELS_X	  	= 348
+		int STATUS_LABELS_Y   	= 200
+		int STATUS_LABELS_Z   	= 50
+		int LABEL_SPACING		= 40
+		int VALUE_SPACING		= 12
+		int whichLabel			= 0
+		int _labelWidth 		= 190
+		int INDENT				= 10
+
+		o_mechValue                     ._origin   					= STATUS_LABELS_X, STATUS_LABELS_Y+(LABEL_SPACING*whichLabel), STATUS_LABELS_Z
+		o_mechValue                     ._width	   					= _labelWidth
+		o_mechValue                     .text	   					= localize$( IDS_MECH_VALUE )
+		o_mechValue                     ._justification  			= just_left
+
+		o_value_mechValue               ._origin   		= o_mechValue._origin.x + INDENT, o_mechValue._origin.y + VALUE_SPACING, o_mechValue._origin.z
+		o_value_mechValue               ._width	   		= _labelWidth
+		o_value_mechValue               .text	   		= fmtcommanum$(callback($$GetMechValuePlusWeapons$$))
+		o_value_mechValue               ._justification	= just_left
+		o_value_mechValue        	    ._isFloat		= false
+		o_value_mechValue		        ._textColor		=  packcolor (72,203,135,255)
+
+ 		initialize( o_mechValue	 			 )
+ 		initialize( o_value_mechValue	 	 )
+		top_of_list = 0
+	}
+
+
+	GUI_ACTIVATE
+	{
+		float mech_tonnage
+		float mech_max_tonnage
+		int battle_value
+		int armor_value
+		int speed_value
+		int heat_eff
+
+		o_value_mechValue               .text	   		= fmtcommanum$(callback($$GetMechValuePlusWeapons$$))
+		initialize( o_value_mechValue	 	 )
+
+		if $$m_isCampaign$$ == 1
+		{
+			int top_before		= top_of_list
+
+			if o_weaponsdroplistbox.nselected == 0
+			{
+				callback($$ML_CallbackHandler$$, MLDataSetupAllWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)
+			}
+			if o_weaponsdroplistbox.nselected == 1
+			{
+				//callback($$ML_CallbackHandler$$, MLDataSetupBeamWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)
+				callback($$ML_CallbackHandler$$, MLDataSetupAllWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)	// mektek
+				for w = 0; w < num_weap; w++	// mektek
+				{
+					if ids[w] < FirstBeamID or ids[w] > LastBeamID
+					{
+						ids[w] = -1	// reject it
+					}
+				}
+
+			}
+			if o_weaponsdroplistbox.nselected == 2
+			{
+				//callback($$ML_CallbackHandler$$, MLDataSetupProjectileWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)
+				callback($$ML_CallbackHandler$$, MLDataSetupAllWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)	// mektek
+				for w = 0; w < num_weap; w++	// mektek
+				{
+					if ids[w] < FirstProjectileID or ids[w] > LastProjectileID
+					{
+						ids[w] = -1	// reject it
+					}
+				}
+			}
+			if o_weaponsdroplistbox.nselected == 3
+			{
+				//callback($$ML_CallbackHandler$$, MLDataSetupMissileWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)
+				callback($$ML_CallbackHandler$$, MLDataSetupAllWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], trade_value[], num_weap, LastWeaponID)	// mektek
+				for w = 0; w < num_weap; w++	// mektek
+				{
+					if ids[w] < FirstMissileID or ids[w] > LastMissileID
+					{
+						ids[w] = -1	// reject it
+					}
+				}
+			}
+			if (num_weap == 0)
+			{
+				for (w = 0; w < o_weaponslistbox.list_size; w++)
+				{
+					kill o_weaponslistbox.list_button[w]
+				}
+
+				o_weaponslistbox.list_size = 0
+			}
+			else
+			{
+				o_weaponslistbox.list_size = num_weap
+				counter = 0
+ 				print3d_attributes = o_weaponslistbox.boxFont3d, o_weaponslistbox.boxTextColor,1,1,1,0,0,o_weaponslistbox.column[1].fontAlignment
+				lprint3d_margins = o_weaponslistbox.column[1].location.x + o_weaponslistbox.offsetx[1],0 to getresy(),getresy()
+				lprint3d_position = o_weaponslistbox.column[1].location.x + o_weaponslistbox.offsetx[1],2
+
+				for w = 0; w < num_weap; w++
+				{
+					if ids[w] > -1 and ids[w] < LastWeaponID+1	// second condition added by mektek
+					{
+						lineStartIndex = 0
+						lineEndIndex = 0
+
+						while ( lineEndIndex < length$( weapon_names[ids[w]] ) )
+						{
+							previousWordBreak = lineEndIndex
+							// find next wordbreak:
+							lineEndIndex++
+							while ( lineEndIndex < length$( weapon_names[ids[w]] ) && !equal$( mid$( weapon_names[ids[w]], lineEndIndex-1, lineEndIndex ), " " ) )
+							{
+								lineEndIndex++
+							}
+							if ( getprint3dwidth( mid$( weapon_names[ids[w]], lineStartIndex, lineEndIndex ) ) >= o_weaponslistbox.column[1].o_header.buttonwidth-1 )
+							{
+								lineStartIndex = previousWordBreak
+							}
+						}
+
+						lastLineWidth = getprint3dwidth( mid$( weapon_names[ids[w]], lineStartIndex, lineEndIndex ) ) // " " conv$( trade_value[w] ) )
+						costWidth = getprint3dwidth( conv$( trade_value[w] ) )
+
+						if ( lastLineWidth + costWidth >= colwidth )
+						{
+							o_weaponslistbox.column[1].list_item[counter] = weapon_names[ids[w]] " " conv$( trade_value[w] )
+						}
+						else
+						{
+							o_weaponslistbox.column[1].list_item[counter] = weapon_names[ids[w]] "\n" conv$( trade_value[w] )
+						}
+
+						o_weaponslistbox.column[0].list_item[counter] = conv$(ids[w])
+						ton_times_ten = ton[w] * 10.0
+						ton_int_times_ten = ton[w] * 10
+						ton_decimal_times_ten = ton_times_ten - ton_int_times_ten
+						o_weaponslistbox.column[2].list_item[counter] = conv$(ton[w]) "." conv$(ton_decimal_times_ten)
+						o_weaponslistbox.column[3].list_item[counter] = conv$(inventory_count[w])
+						o_weaponslistbox.list_order[counter] = counter
+						counter++
+					}
+					else
+					{
+						o_weaponslistbox.list_size--
+					}
+				}
+
+				greatest_x = 0
+				greatest_y = 0
+				int k
+				for k = 0; k < o_weaponslistbox.list_size; k++
+				{
+					o_weaponslistbox.column[0].list_icon[k] = MB_GPATH "weapon_" o_weaponslistbox.column[0].list_item[k] ".tga",1,volatile
+	//				o_weaponslistbox.column[0].list_icon[k] = MB_GPATH "weapon_" conv$(ids[k]) ".tga",1,volatile
+					alphamode(o_weaponslistbox.column[0].list_icon[k]) = am_alpha_alphainvalpha
+
+					if exists(o_weaponslistbox.column[0].list_icon[k])
+					{
+						if getwidth(o_weaponslistbox.column[0].list_icon[k]) > greatest_x
+							greatest_x = getwidth(o_weaponslistbox.column[0].list_icon[k])
+
+						if getheight(o_weaponslistbox.column[0].list_icon[k]) > greatest_y
+							greatest_y = getheight(o_weaponslistbox.column[0].list_icon[k])
+					}
+
+				}
+				if greatest_x > 0 && greatest_y > 0
+					bitmap_create black = greatest_x,greatest_y  //comment out if you don't have any images
+			}
+
+			initialize(o_weaponslistbox)
+
+			if parent.o_tabs.on_tab == 1
+			{
+				if (num_weap != 0)
+				{
+					if num_weap < top_before
+					{
+						mail(-4, num_weap, o_weaponslistbox)
+					}
+					else
+					{
+						mail(-4, top_before, o_weaponslistbox)
+					}
+				}
+			}
+
+			o_weaponslistbox.column[0].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+			o_weaponslistbox.column[1].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+			o_weaponslistbox.column[2].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+			o_weaponslistbox.column[3].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+
+			o_weaponslistbox.column[0].o_header.s_text = localize$(IDS_ML_WP_SLOTS)
+			o_weaponslistbox.column[1].o_header.s_text = localize$(IDS_ML_WP_NAME)
+			o_weaponslistbox.column[2].o_header.s_text = localize$(IDS_ML_WP_TONS)
+			o_weaponslistbox.column[3].o_header.s_text = "#"
+
+			// Because the icons have been changed since our last
+			// initialize() call on o_weaponslistbox
+			// this mail message is to refresh the weapon list box to
+			// avoid the clipping problem at the bottom of the list box
+			mail(-1, o_weaponslistbox)
+		}
+
+
+		callback($$ML_CallbackHandler$$, MLDataSetupGetMechData, mech_id, mech_tonnage, mech_max_tonnage, battle_value, heat_eff, speed_value, armor_value)
+
+		mech_id = parent.mech_id	// mektek
+
+		callback($$ML_CallbackHandler$$, MLDataSetupLeftArm, la_ids[], la_unique_id[], la_slots[], la_slot_size[], la_ton[], la_damage[], la_range[], la_heat[], la_recycle[], la_num_weap, 10)
+		callback($$ML_CallbackHandler$$, MLDataSetupRightArm, ra_ids[], ra_unique_id[], ra_slots[], ra_slot_size[], ra_ton[], ra_damage[], ra_range[], ra_heat[], ra_recycle[], ra_num_weap, 10)
+		callback($$ML_CallbackHandler$$, MLDataSetupLeftLeg, ll_ids[], ll_unique_id[], ll_slots[], ll_slot_size[], ll_ton[], ll_damage[], ll_range[], ll_heat[], ll_recycle[], ll_num_weap, 10)
+		callback($$ML_CallbackHandler$$, MLDataSetupRightLeg, rl_ids[], rl_unique_id[], rl_slots[], rl_slot_size[], rl_ton[], rl_damage[], rl_range[], rl_heat[], rl_recycle[], rl_num_weap, 10)
+		callback($$ML_CallbackHandler$$, MLDataSetupLeftTorso, lt_ids[], lt_unique_id[], lt_slots[], lt_slot_size[], lt_ton[], lt_damage[], lt_range[], lt_heat[], lt_recycle[], lt_num_weap, 10)
+		callback($$ML_CallbackHandler$$, MLDataSetupRightTorso, rt_ids[], rt_unique_id[], rt_slots[], rt_slot_size[], rt_ton[], rt_damage[], rt_range[], rt_heat[], rt_recycle[], rt_num_weap, 10)
+		callback($$ML_CallbackHandler$$, MLDataSetupCenterTorso, ct_ids[], ct_unique_id[], ct_slots[], ct_slot_size[], ct_ton[], ct_damage[], ct_range[], ct_heat[], ct_recycle[], ct_num_weap, 10)
+		callback($$ML_CallbackHandler$$, MLDataSetupHead, h_ids[], h_unique_id[], h_slots[], h_slot_size[], h_ton[], h_damage[], h_range[], h_heat[], h_recycle[], h_num_weap, 10)
+		callback($$ML_CallbackHandler$$, MLDataSetupSpecial1, s1_ids[], s1_unique_id[], s1_slots[], s1_slot_size[], s1_ton[], s1_damage[], s1_range[], s1_heat[], s1_recycle[], s1_num_weap, 10)
+		callback($$ML_CallbackHandler$$, MLDataSetupSpecial2, s2_ids[], s2_unique_id[], s2_slots[], s2_slot_size[], s2_ton[], s2_damage[], s2_range[], s2_heat[], s2_recycle[], s2_num_weap, 10)
+
+
+		leftarmweapons.num_of_weapons = la_num_weap
+
+		leftarmweapons.location = leftarm_location[mech_id]
+		for int law = 0; law < la_num_weap; law++
+		{
+			leftarmweapons.slot_value[law]		= la_ids[law]
+			leftarmweapons.num_of_slots[law]	= la_slot_size[law]
+			leftarmweapons.slot_type[law]		= la_slots[law]
+			leftarmweapons.unique_id[law]		= la_unique_id[law]
+			leftarmweapons.range[law]			= la_range[law]
+			leftarmweapons.damage[law]			= la_damage[law]
+			leftarmweapons.heat[law]			= la_heat[law]
+			leftarmweapons.recycle[law]			= la_recycle[law]
+			leftarmweapons.zone					= 2
+		}
+		initialize(leftarmweapons)
+
+		rightarmweapons.num_of_weapons = ra_num_weap
+		rightarmweapons.location = rightarm_location[mech_id]
+
+		for int raw = 0; raw < ra_num_weap; raw++
+		{
+			rightarmweapons.slot_value[raw]		= ra_ids[raw]
+			rightarmweapons.num_of_slots[raw]	= ra_slot_size[raw]
+			rightarmweapons.slot_type[raw]		= ra_slots[raw]
+			rightarmweapons.unique_id[raw]		= ra_unique_id[raw]
+			rightarmweapons.range[raw]			= ra_range[raw]
+			rightarmweapons.damage[raw]			= ra_damage[raw]
+			rightarmweapons.heat[raw]			= ra_heat[raw]
+			rightarmweapons.recycle[raw]		= ra_recycle[raw]
+			rightarmweapons.zone				= 3
+		}
+		initialize(rightarmweapons)
+
+		lefttorsoweapons.num_of_weapons = lt_num_weap
+		lefttorsoweapons.location = lefttorso_location[mech_id]
+		for int ltw = 0; ltw < lt_num_weap; ltw++
+		{
+			lefttorsoweapons.slot_value[ltw]	= lt_ids[ltw]
+			lefttorsoweapons.num_of_slots[ltw]	= lt_slot_size[ltw]
+			lefttorsoweapons.slot_type[ltw]		= lt_slots[ltw]
+			lefttorsoweapons.unique_id[ltw]		= lt_unique_id[ltw]
+			lefttorsoweapons.range[ltw]			= lt_range[ltw]
+			lefttorsoweapons.damage[ltw]		= lt_damage[ltw]
+			lefttorsoweapons.heat[ltw]			= lt_heat[ltw]
+			lefttorsoweapons.recycle[ltw]		= lt_recycle[ltw]
+			lefttorsoweapons.zone				= 5
+		}
+		initialize(lefttorsoweapons)
+
+		centertorsoweapons.num_of_weapons = ct_num_weap
+		centertorsoweapons.location = centertorso_location[mech_id]
+		for int ctw = 0; ctw < ct_num_weap; ctw++
+		{
+			centertorsoweapons.slot_value[ctw]	= ct_ids[ctw]
+			centertorsoweapons.num_of_slots[ctw]= ct_slot_size[ctw]
+			centertorsoweapons.slot_type[ctw]	= ct_slots[ctw]
+			centertorsoweapons.unique_id[ctw]	= ct_unique_id[ctw]
+			centertorsoweapons.range[ctw]		= ct_range[ctw]
+			centertorsoweapons.damage[ctw]		= ct_damage[ctw]
+			centertorsoweapons.heat[ctw]		= ct_heat[ctw]
+			centertorsoweapons.recycle[ctw]		= ct_recycle[ctw]
+			centertorsoweapons.zone				= 6
+		}
+		initialize(centertorsoweapons)
+
+		righttorsoweapons.num_of_weapons = rt_num_weap
+		righttorsoweapons.location = righttorso_location[mech_id]
+		for int rtw = 0; rtw < rt_num_weap; rtw++
+		{
+			righttorsoweapons.slot_value[rtw]	= rt_ids[rtw]
+			righttorsoweapons.num_of_slots[rtw] = rt_slot_size[rtw]
+			righttorsoweapons.slot_type[rtw]	= rt_slots[rtw]
+			righttorsoweapons.unique_id[rtw]	= rt_unique_id[rtw]
+			righttorsoweapons.range[rtw]		= rt_range[rtw]
+			righttorsoweapons.damage[rtw]		= rt_damage[rtw]
+			righttorsoweapons.heat[rtw]			= rt_heat[rtw]
+			righttorsoweapons.recycle[rtw]		= rt_recycle[rtw]
+			righttorsoweapons.zone				= 4
+		}
+		initialize(righttorsoweapons)
+
+		headweapons.num_of_weapons = h_num_weap
+		headweapons.location = head_location[mech_id]
+		for int hw = 0; hw < h_num_weap; hw++
+		{
+			headweapons.slot_value[hw]			= h_ids[hw]
+			headweapons.num_of_slots[hw]		= h_slot_size[hw]
+			headweapons.slot_type[hw]			= h_slots[hw]
+			headweapons.unique_id[hw]			= h_unique_id[hw]
+			headweapons.range[hw]				= h_range[hw]
+			headweapons.damage[hw]				= h_damage[hw]
+			headweapons.heat[hw]				= h_heat[hw]
+			headweapons.recycle[hw]				= h_recycle[hw]
+			headweapons.zone					= 7
+		}
+		initialize(headweapons)
+
+		special1weapons.num_of_weapons = s1_num_weap
+		special1weapons.location = special1_location[mech_id]
+		special1weapons.label = special1_label[mech_id]
+		for int s1w = 0; s1w < s1_num_weap; s1w++
+		{
+			special1weapons.slot_value[s1w]		= s1_ids[s1w]
+			special1weapons.num_of_slots[s1w]	= s1_slot_size[s1w]
+			special1weapons.slot_type[s1w]		= s1_slots[s1w]
+			special1weapons.unique_id[s1w]		= s1_unique_id[s1w]
+			special1weapons.range[s1w]			= s1_range[s1w]
+			special1weapons.damage[s1w]			= s1_damage[s1w]
+			special1weapons.heat[s1w]			= s1_heat[s1w]
+			special1weapons.recycle[s1w]		= s1_recycle[s1w]
+			special1weapons.zone				= 8
+		}
+		initialize(special1weapons)
+
+		special2weapons.num_of_weapons = s2_num_weap
+		special2weapons.location = special2_location[mech_id]
+		special2weapons.label = special2_label[mech_id]
+		for int s2w = 0; s2w < s2_num_weap; s2w++
+		{
+			special2weapons.slot_value[s2w]		= s2_ids[s2w]
+			special2weapons.num_of_slots[s2w]	= s2_slot_size[s2w]
+			special2weapons.slot_type[s2w]		= s2_slots[s2w]
+			special2weapons.unique_id[s2w]		= s2_unique_id[s2w]
+			special2weapons.range[s2w]			= s2_range[s2w]
+			special2weapons.damage[s2w]			= s2_damage[s2w]
+			special2weapons.heat[s2w]			= s2_heat[s2w]
+			special2weapons.recycle[s2w]		= s2_recycle[s2w]
+			special2weapons.zone				= 9
+		}
+		initialize(special2weapons)
+
+		activate(o_weaponsdroplistbox)
+		activate(o_groupweaponsbutton)
+		activate(o_stripweaponsbutton)
+		activate(o_weaponslistbox)
+		activate(headweapons)
+		activate(lefttorsoweapons)
+		activate(centertorsoweapons)
+		activate(righttorsoweapons)
+		activate(leftarmweapons)
+		activate(rightarmweapons)
+		activate(special1weapons)
+		activate(special2weapons)
+		activate(o_weapon_pointer)
+		activate(o_weapon_mask)
+ 		activate( o_mechValue	 			 )
+ 		activate( o_value_mechValue	 	 )
+
+
+		mail(1)
+
+		// TURNS OFF GROUP & STRIP BUTTONS WHEN NO WEAPONS ARE MOUNTED
+		callback($$ML_CallbackHandler$$, MLDataGetWeaponGroups, grp_typearray[], grp_id_array[], grp_loc_array[], grp_group1_array[], grp_group2_array[], grp_group3_array[], grp_group4_array[], grp_group5_array[], grp_group6_array[], grp_num_weapons, grp_array_size)
+		if grp_num_weapons > 0
+		{
+			o_groupweaponsbutton.state = 0
+			o_stripweaponsbutton.state = 0
+		}
+		else
+		{
+			o_groupweaponsbutton.state = 3
+			o_stripweaponsbutton.state = 3
+		}
+		initialize(o_groupweaponsbutton)
+		initialize(o_stripweaponsbutton)
+
+		// IF WEAPON LOADOUT CHANGES, THEY WILL BE ASKED TO GROUP THEIR WEAPONS WHEN THEY SAVE OR EXIT
+		parent.grouped		= 0
+	}
+
+	GUI_DEACTIVATE
+	{
+		deactivate(o_weaponsdroplistbox)
+		deactivate(o_groupweaponsbutton)
+		deactivate(o_stripweaponsbutton)
+		deactivate(o_weaponslistbox)
+		deactivate(headweapons)
+		deactivate(lefttorsoweapons)
+		deactivate(centertorsoweapons)
+		deactivate(righttorsoweapons)
+		deactivate(leftarmweapons)
+		deactivate(rightarmweapons)
+		deactivate(special1weapons)
+		deactivate(special2weapons)
+		deactivate(o_weapon_pointer)
+		deactivate(o_weapon_mask)
+ 		deactivate( o_mechValue	)
+ 		deactivate( o_value_mechValue )
+
+	}
+
+	GUI_MAILBOX
+	{
+		if sender == o_groupweaponsbutton
+		{
+			play o_weapons.btnTriggeredSound,1
+			activate(parent.o_overlay)
+			initialize(parent.o_groupweapons)
+			activate(parent.o_groupweapons)
+
+			parent.just_saved = false
+
+			parent.o_restorebutton.state	= 0
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 0
+				initialize(parent.o_savebutton)
+			//}
+		}
+
+		if sender == o_stripweaponsbutton
+		{
+			play o_weapons.btnTriggeredSound,1
+			callback($$ML_CallbackHandler$$, MLRemoveAllSubsystems)
+			activate(this)
+
+			parent.just_saved = false
+
+			parent.o_restorebutton.state	= 0
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 0
+				initialize(parent.o_savebutton)
+			//}
+		}
+
+		if sender == o_weaponslistbox
+		{
+			top_of_list = getmessage()
+		}
+
+		mail(1)
+	}
+}
+
+s_weapon_slot
+{
+	GUI_CREATE
+	{
+		font3d weaponfont = FPATH localize$(IDS_F_ML_BODYPART)
+		int num_of_weapons
+		int slot_value[15]
+		int num_of_slots[15]
+		int slot_type[15]
+		float range[15]
+		float damage[15]
+		float heat[15]
+		float recycle[15]
+		int zone
+		int render_posy
+		string label
+
+		int id = 0
+		int unique_id[15]
+
+		object slots[10]
+	}
+
+	GUI_INIT
+	{
+		render_posy = 0
+
+		int i
+		int k
+		for k = 0; k < num_of_weapons; k++
+		{
+			slots[k]				= s_slots
+			slots[k].location		= location.x,location.y+render_posy, location.z
+			slots[k].id				= k
+			slots[k].zone_id		= zone
+			slots[k].range			= range[k]
+			slots[k].damage			= damage[k]
+			slots[k].heat			= heat[k]
+			slots[k].recycle		= recycle[k]
+
+			if slot_value[k] > 50
+			{
+				slots[k].ammo_slots = true
+			}
+
+			if slot_value[k] != -1		// check to see if it's a valid weapon
+			{
+				slots[k].weapon_pic = MB_GPATH "installed\\weapon_" conv$(slot_value[k]) ".tga",1
+
+				if k == 0
+				{
+					i = 0
+				}
+
+				// set the weapon's correct ID
+				slots[k].unique_id = unique_id[k]
+				i++
+
+				render_posy += getheight(slots[k].weapon_pic)
+			}
+			if slot_value[k] == -1		// check to see if it's an empty slot
+			{
+				if num_of_slots[k] <= 6
+				{
+					slots[k].weapon_pic = MB_GPATH "installed\\weapon_" conv$(slot_value[k]) "_" conv$(num_of_slots[k]) "_" conv$(slot_type[k]) ".tga",1
+				}
+				if num_of_slots[k] > 6
+				{
+					slots[k].weapon_pic = MB_GPATH "installed\\weapon_" conv$(slot_value[k]) "_6_" conv$(slot_type[k]) ".tga",1
+				}
+
+				render_posy += getheight(slots[k].weapon_pic) + 5
+
+				// unused slot have a unique id of -1 for now
+				slots[k].unique_id = -1
+			}
+
+			slots[k].region = 0, 0 to 56, getheight(slots[k].weapon_pic)
+
+			alphamode(slots[k].weapon_pic) = am_alpha_alphainvalpha
+			activate(slots[k])
+		}
+		for k = num_of_weapons; k < 10; k++
+		{
+			slots[k] = s_slots
+			deactivate(slots[k])
+		}
+	}
+
+	GUI_DEACTIVATE
+	{
+		int k
+		for k = 0; k < num_of_weapons; k++
+		{
+			deactivate(slots[k])
+		}
+	}
+
+	GUI_DRAW
+	{
+		if num_of_weapons > 0
+		{
+			print3d_attributes = weaponfont, 0xff000000, 1, 0, 1, 0, 0
+			print3d_margins = location.x + 1, location.y - 16 to location.x + getprint3dwidth(label), location.y + 1
+			print3d_position = location.x + 1, location.y - 16
+			print3d label
+
+			print3d_attributes = weaponfont, 0xffffffff, 1, 0, 1, 0, 0
+			print3d_margins = location.x, location.y - 17 to location.x + getprint3dwidth(label), location.y
+			print3d_position = location.x, location.y - 17
+			print3d label
+		}
+	}
+}
+
+s_slots
+{
+	GUI_CREATE
+	{
+		pane weapon_pic
+		int id
+		int unique_id
+		int zone_id
+		float range
+		float damage
+		float heat
+		float recycle
+
+		int firsttime = false
+
+		dblclick(this, true)
+		int mouse_held = false
+		int held_delay = 0
+
+		int ammo_slots
+		object ammo_box
+
+		int installed_id	= -1
+
+		framerate = 10
+
+		int showinfo = false
+	}
+
+	GUI_INIT
+	{
+		if ammo_slots == true
+		{
+			int tons
+			int rounds_per_ton
+			callback($$ML_CallbackHandler$$, MLDataGetWeaponAmmo, zone_id, unique_id, tons, rounds_per_ton)
+
+			ammo_box				= s_ammo_box
+			ammo_box.location		= location.x + 59, location.y, location.z + 1
+			ammo_box.zone_id		= zone_id
+			ammo_box.id				= installed_id
+			ammo_box.unique_id		= unique_id
+			ammo_box.tons			= tons
+			ammo_box.rounds_per_ton	= rounds_per_ton
+		}
+	}
+
+	GUI_ACTIVATE
+	{
+		if ammo_slots == true
+		{
+			initialize(this)
+			activate(ammo_box)
+		}
+	}
+
+	GUI_DEACTIVATE
+	{
+		if ammo_slots == true
+		{
+			deactivate(ammo_box)
+		}
+	}
+
+	GUI_EXECUTE
+	{
+		if (mouse_held)
+			held_delay++
+
+		// Value of held_delay can be changed if necessary
+		if (held_delay > 2)
+		{
+			int error											= 0
+			parent.parent.o_weapon_pointer.selected_weapon_id	= parent.slot_value[id]
+			parent.parent.o_weapon_mask.removeflag				= 1
+			parent.parent.o_weapon_mask.unique_id				= unique_id
+			parent.parent.o_weapon_mask.zone_id					= zone_id
+			parent.parent.o_weapon_mask.error					= error
+			mouse_held = false
+			held_delay = 0
+		}
+	}
+
+	LBUTTON_UPDATE
+	{
+		mouse_held = false
+
+		if mouse.x <= location.x + 58
+		{
+			if mouse.left == BUTTON_DCLICKED
+			{
+				play o_weapons.btnPressedSound, 1
+
+				int error
+				callback($$ML_CallbackHandler$$, MLRemoveSubsystem, unique_id, zone_id, error)
+				parent.parent.parent.just_saved = false
+
+				parent.parent.parent.o_restorebutton.state	= 0
+				initialize(parent.parent.parent.o_restorebutton)
+				//if ($$m_isCampaign$$ != 1)
+				//{
+					parent.parent.parent.o_savebutton.state		= 0
+					initialize(parent.parent.parent.o_savebutton)
+				//}
+
+
+				activate(parent.parent.parent.o_weapons)
+				mail(1, parent.parent.parent.parent.o_mainui)
+
+				if error == 0
+				{
+					play o_weapons.addWeapon, 1
+				}
+				if error != 0
+				{
+					play o_weapons.notAllowed, 1
+				}
+			}
+
+			if mouse.left == BUTTON_HELD && parent.parent.o_weapon_pointer.selected_weapon_id == -1
+			{
+				mouse_held										= true
+				parent.parent.o_weapon_pointer.mounted_flag		= true
+			}
+
+			if mouse.left == BUTTON_RELEASED
+			{
+				parent.parent.o_weapon_mask.removeflag				= 0
+
+				if unique_id != -1
+				{
+					parent.parent.o_weapon_pointer.mounted_flag			= false
+				}
+				if unique_id == -1 && parent.parent.o_weapon_pointer.mounted_flag == false
+				{
+					if parent.parent.o_weapon_pointer.selected_weapon_id != -1
+					{
+						// begin mektek logic
+						// this code saves the weapon group settings. after the weapon is
+						// added we compare this to the new group settings to figure out
+						// which weapon got added. we will then properly set the group for it
+						int grp_array_size = 30
+						int grp_before_typearray[grp_array_size]
+						int grp_before_id_array[grp_array_size]
+						int grp_before_loc_array[grp_array_size]
+						int grp_before_group1_array[grp_array_size]
+						int grp_before_group2_array[grp_array_size]
+						int grp_before_group3_array[grp_array_size]
+						int grp_before_group4_array[grp_array_size]
+						int grp_before_group5_array[grp_array_size]
+						int grp_before_group6_array[grp_array_size]
+						int grp_before_num_weapons
+
+						callback($$ML_CallbackHandler$$, MLDataGetWeaponGroups, grp_before_typearray[], grp_before_id_array[], grp_before_loc_array[], grp_before_group1_array[], grp_before_group2_array[], grp_before_group3_array[], grp_before_group4_array[], grp_before_group5_array[], grp_before_group6_array[], grp_before_num_weapons, grp_array_size)
+						// end mektek logic
+
+						int error
+						int selected_weapon = parent.parent.o_weapon_pointer.selected_weapon_id
+						callback($$ML_CallbackHandler$$, MLAddSubsystem, selected_weapon, zone_id, error)
+						parent.parent.parent.just_saved = false
+
+						parent.parent.parent.o_restorebutton.state	= 0
+						initialize(parent.parent.parent.o_restorebutton)
+						//if ($$m_isCampaign$$ != 1)
+						//{
+							parent.parent.parent.o_savebutton.state		= 0
+							initialize(parent.parent.parent.o_savebutton)
+						//}
+
+						activate(parent.parent.parent.o_weapons)
+						mail(1, parent.parent.parent.parent.o_mainui)
+
+						if error == 0
+						{
+							play o_weapons.notAllowed, 1
+						}
+						if error != 0
+						{
+							// begin mektek logic to set the default group for the expansion weapons.
+							// the game engine sets them all to 1, this logic finds the id of the
+							// new weapon and sets it to the correct default group based on
+							// weapon type
+							int grp_typearray[grp_array_size]
+							int grp_id_array[grp_array_size]
+							int grp_loc_array[grp_array_size]
+							int grp_group1_array[grp_array_size]
+							int grp_group2_array[grp_array_size]
+							int grp_group3_array[grp_array_size]
+							int grp_group4_array[grp_array_size]
+							int grp_group5_array[grp_array_size]
+							int grp_group6_array[grp_array_size]
+							int grp_num_weapons
+							int i
+							int j
+							int new_id = -1
+							int found
+							int type
+
+							callback($$ML_CallbackHandler$$, MLDataGetWeaponGroups, grp_typearray[], grp_id_array[], grp_loc_array[], grp_group1_array[], grp_group2_array[], grp_group3_array[], grp_group4_array[], grp_group5_array[], grp_group6_array[], grp_num_weapons, grp_array_size)
+							// try to find out which weapon got added, so we can set the default group for it based on its weapons class
+							for i=0; i<grp_num_weapons; i++
+							{
+								found = false
+								for j=0; j<grp_before_num_weapons; j++
+								{
+									if grp_id_array[i]==grp_before_id_array[j]
+									{
+										found = true
+									}
+								}	
+								if found==false
+								{
+									new_id = i	// the one we are looking for
+								}	
+							}
+
+							if new_id != -1
+							{
+								type = grp_typearray[new_id]
+								grp_group1_array[new_id] = 0
+
+								if (type >= FirstBeamID) and (type <= LastBeamID)
+								{
+									grp_group1_array[new_id] = 1
+								}
+								if (type >= FirstProjectileID) and (type <= LastProjectileID)
+								{
+									grp_group2_array[new_id] = 1
+								}
+								if (type >= FirstMissileID) and (type <= LastMissileID)
+								{
+									grp_group3_array[new_id] = 1
+								}
+							}
+
+							callback($$ML_CallbackHandler$$, MLSetAllWeaponGroups, grp_group1_array[], grp_group2_array[], grp_group3_array[], grp_group4_array[], grp_group5_array[], grp_group6_array[], grp_num_weapons)							
+							// end of mektek logic - weapon group for the new weapons should be set
+							// properly now
+
+							play o_weapons.addWeapon, 1
+						}
+					}
+				}
+
+			parent.parent.o_weapon_pointer.selected_weapon_id	= -1
+			}
+		}
+	}
+
+	REGION_ENTERED
+	{
+		if parent.parent.o_weapon_pointer.selected_weapon_id == -1
+		{
+			if parent.slot_value[id] > -1
+			{
+				if exists(@infobox@)
+				{
+					mail(parent.slot_value[id], @infobox@)
+				}
+				showinfo = true
+				parent.parent.showinfo = false
+			}
+			else
+			{
+				parent.parent.showinfo = false
+
+				if exists(@infobox@)
+				{
+					if parent.slot_type[id] == 0
+					{
+						mail(240, @infobox@)
+					}
+					if parent.slot_type[id] == 1
+					{
+						mail(241, @infobox@)
+					}
+					if parent.slot_type[id] == 2
+					{
+						mail(242, @infobox@)
+					}
+					if parent.slot_type[id] == 3
+					{
+						mail(243, @infobox@)
+					}
+				}
+			}
+		}
+	}
+
+	REGION_EXITED
+	{
+		showinfo = false
+	}
+
+	GUI_DRAW
+	{
+		render weapon_pic, location
+	}
+}
+
+s_ammo_box
+{
+	GUI_CREATE
+	{
+		font3d ammofont			= FPATH localize$(IDS_F_ML_AMMO)
+		int help_id = parent.parent.slot_value[parent.id] + 500
+
+		int zone_id
+		int id
+		int unique_id
+		int tons
+		int rounds_per_ton
+		int rounds
+
+		int textcolor
+
+		if (parent.parent.slot_value[parent.id] >= FirstWeaponID) && (parent.parent.slot_value[parent.id] < FirstMissileID)  // Evil
+		{
+			textcolor = packcolor(255, 0, 0, 255)
+		}
+		if (parent.parent.slot_value[parent.id] >= FirstMissileID) && (parent.parent.slot_value[parent.id] < FirstProjectileID)  // Evil
+		{
+			textcolor = packcolor(0, 255, 0, 255)
+		}
+		if parent.parent.slot_value[parent.id] >= FirstProjectileID  // Evil
+		{
+			textcolor = packcolor(255, 255, 0, 255)
+		}
+
+		region = 2, 0 to 29, 24
+	}
+
+	REGION_ENTERED
+	{
+		parent.showinfo = true
+		parent.parent.parent.showinfo = false
+		if exists(@infobox@)
+		{
+			mail(help_id, @infobox@)
+		}
+	}
+
+	REGION_EXITED
+	{
+		parent.showinfo = false
+		if exists(@infobox@)
+		{
+			mail(-1, @infobox@)
+		}
+	}
+
+	GUI_EXECUTE
+	{
+		rounds = tons * rounds_per_ton
+	}
+
+	LBUTTON_UPDATE
+	{
+		if (mouse.left == BUTTON_CLICKED)
+		{
+			if mouse.y > location.y + 12
+			{
+				if mouse.x < location.x + 15
+				{
+					callback($$ML_CallbackHandler$$, MLRemoveWeaponAmmo, zone_id, unique_id)
+					callback($$ML_CallbackHandler$$, MLDataGetWeaponAmmo, zone_id, unique_id, tons, rounds_per_ton)
+
+					mail(1, parent.parent.parent.parent.parent.o_mainui)
+				}
+
+				if mouse.x > location.x + 15
+				{
+					callback($$ML_CallbackHandler$$, MLAddWeaponAmmo, zone_id, unique_id)
+					callback($$ML_CallbackHandler$$, MLDataGetWeaponAmmo, zone_id, unique_id, tons, rounds_per_ton)
+
+					mail(1, parent.parent.parent.parent.parent.o_mainui)
+				}
+
+				play o_weapons.btnPressedSound, 1
+			}
+
+// Fix for ammo box bug, now Save and Restore buttons show up correctly changing ammo.	// mektek
+// beg mektek
+			parent.parent.parent.parent.just_saved = false
+			parent.parent.parent.parent.o_restorebutton.state = 0
+			initialize(parent.parent.parent.parent.o_restorebutton)
+			parent.parent.parent.parent.o_savebutton.state = 0
+			initialize(parent.parent.parent.parent.o_savebutton)
+// end mektek
+
+		}
+	}
+
+	GUI_DRAW
+	{
+		print3d_attributes = ammofont, textcolor, 1, 1, 1, 0, 0, just_center
+		print3d_margins = location.x + 1, location.y to location.x + 29, location.y + 12
+		print3d_position = location.x + 1, location.y + 3
+		print3d rounds
+	}
+}
+
+weapon_pointer
+{
+	GUI_CREATE
+	{
+		int selected_weapon_id	= -1
+		int prev_selected_id	= -1
+		pane selected_weapon_icon
+		int draw				= false
+
+		int mounted_flag		= false
+
+		framerate				= 5
+	}
+
+	GUI_EXECUTE
+	{
+		if selected_weapon_id != prev_selected_id
+		{
+			if selected_weapon_id != -1
+			{
+				selected_weapon_icon = MB_GPATH "weapon_" conv$(selected_weapon_id) ".tga",1
+				alphamode(selected_weapon_icon) = am_alpha_alphainvalpha
+				origin (selected_weapon_icon) = 10,10
+				color (selected_weapon_icon) = 255,255,255,160
+				prev_selected_id = selected_weapon_id
+				draw = true
+			}
+		}
+	}
+
+	GUI_DRAW
+	{
+		if selected_weapon_id != -1 && selected_weapon_id == prev_selected_id && draw == true
+		{
+			location = mouse.x,mouse.y,70
+			render selected_weapon_icon, mouse.x, mouse.y
+		}
+	}
+}
+
+weapon_mask
+{
+	GUI_CREATE
+	{
+		int removeflag	= 0
+		int unique_id	= -1
+		int zone_id		= -1
+		int error		= -1
+
+		region			= 0, 0 to 0,0
+		framerate		= 10
+
+	}
+
+	GUI_EXECUTE
+	{
+		if parent.o_weapon_pointer.selected_weapon_id != -1
+		{
+			region = 0, 0 to getresx(), getresy()
+		}
+		else
+		{
+			region = 0, 0 to 0,0
+		}
+	}
+
+	LBUTTON_UPDATE
+	{
+		pass_on
+		if mouse.left == BUTTON_RELEASED
+		{
+			if removeflag == 1
+			{
+				parent.o_weapon_pointer.selected_weapon_id	= -1
+				callback($$ML_CallbackHandler$$, MLRemoveSubsystem, unique_id, zone_id, error)
+				parent.parent.just_saved = false
+
+				parent.parent.o_restorebutton.state	= 0
+				initialize(parent.parent.o_restorebutton)
+				//if ($$m_isCampaign$$ != 1)
+				//{
+					parent.parent.o_savebutton.state		= 0
+					initialize(parent.parent.o_savebutton)
+				//}
+
+
+				activate(parent.parent.o_weapons)
+				mail(1, parent.parent.parent.o_mainui)
+
+				if error != 0
+				{
+					play o_weapons.notAllowed, 1
+				}
+				if error == 0
+				{
+					play o_weapons.addWeapon, 1
+				}
+
+				removeflag									= 0
+				unique_id									= -1
+				zone_id										= -1
+				error										= -1
+			}
+			if removeflag == 0
+			{
+				parent.o_weapon_pointer.selected_weapon_id	= -1
+			}
+
+			parent.o_weapon_pointer.mounted_flag			= false
+		}
+	}
+}

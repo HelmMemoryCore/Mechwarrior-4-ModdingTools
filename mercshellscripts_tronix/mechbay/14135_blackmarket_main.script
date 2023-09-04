@@ -1,0 +1,2223 @@
+//Mechwarrior: Black Knight
+//Copyright (c) 2001
+//BlackMarket_main.script
+//Scully
+
+#include "Content\\MercsShellScripts\\stddefs.h"
+#include "Content\\MercsShellScripts\\ShellFunctionHeaders.hpp"
+#include "Content\\MercsShellScripts\\MechLabHeaders_MERCS.h"
+#include "Content\\MercsShellScripts\\ScriptStrings.h"
+
+#include "Content\\MercsShellScripts\\buttons.script"
+#include "Content\\MercsShellScripts\\spinbox.script"
+#include "Content\\MercsShellScripts\\editbox.script"
+#include "Content\\MercsShellScripts\\listboxes.script"
+#include "Content\\MercsShellScripts\\mc_listboxes.script"
+#include "Content\\MercsShellScripts\\MechBay\\mc_listboxes_blackMarket.script"
+
+#define ONE_BUTTON_MODE 1
+#define TWO_BUTTON_MODE 2
+#define THREE_BUTTON_MODE 3
+
+main
+{
+	GUI_CREATE
+	{
+		setresource ("ScriptStrings_MERCS.dll")
+		script_run MB_SPATH "infobox.script", 0x1525
+
+
+		int maxitems = 200
+		int MAX_COLUMNS = 4
+
+		// Multicolumn listboxes
+		int MAX_MC_ITEMS = 200			//MAXIMUM NUMBER OF ITEMS LISTED
+		int MAX_MC_COLUMNS = 10
+
+		// Multicolumn checklistbox
+		int MAX_MCCB_ITEMS = 250			//MAXIMUM NUMBER OF ITEMS LISTED
+		int MAX_MCCB_COLUMNS = 10
+
+		// Spinbox
+		int MAX_SPIN_ITEMS = 40			//MAXIMUM NUMBER OF ITEMS LISTED MUST BE SET (for numeric based, set 1)
+
+		object o_mainui = mainui
+		initialize(o_mainui)
+		activate(o_mainui)
+		focus(o_mainui)
+
+		//Sets volume of Background Music
+		int nMusicTmp
+		callback($$Shell_CallbackHandler$$,ShellOptionsGetSliderValue,MWO_MUSICVOLUME,nMusicTmp)
+
+		setvolume (0,nMusicTmp)
+
+		font3d regfont = FPATH localize$(IDS_F_ML_LABEL)
+		font3d boldfont= FPATH localize$(IDS_F_ML_DATA)
+
+
+	}
+
+	GUI_INIT
+	{
+
+
+	}
+
+	GUI_DRAW
+	{
+//		setpencolor(0, 0, 0, 150)
+//		drawrect 11, 527 to 642, 590
+	}
+}
+
+//////////////////////// MAIN UI //////////////////////////////////
+
+mainui
+{
+
+	GUI_CREATE
+	{
+		int mainbuttonx = 650
+		int mainbuttony = 507
+
+		// For weapon stat displays
+		int showinfo
+		int sel_weapon
+		int sel_list_id
+		float salvage_damage[75]
+		float salvage_range[75]
+		float salvage_heat[75]
+		float salvage_weapon_recycle[75]
+		float offering_damage[75]
+		float offering_range[75]
+		float offering_heat[75]
+		float offering_weapon_recycle[75]
+		float market_damage[75]
+		float market_range[75]
+		float market_heat[75]
+		float market_weapon_recycle[75]
+		float acquiring_damage[75]
+		float acquiring_range[75]
+		float acquiring_heat[75]
+		float acquiring_weapon_recycle[75]
+
+		//unable to call initialize from mouse handelers
+		//so this will be checked in execute, and reinitialize
+		//if necessary
+		int reinitializeNeeded = 0
+
+		// Support for repositioning the listboxes when they change
+		int top_of_salvage_list
+		int top_of_offering_list
+		int top_of_acquiring_list
+		int top_of_market_list
+
+		// This may be used later to display an error dialog.
+		object oError
+
+		string itemNames[200]
+
+		sound btnRolloverSound	= APATH "sfx_button7.wav"
+		sound btnPressedSound	= APATH "sfx_button5.wav"
+		sound btnTriggeredSound		= APATH "sfx_button5.wav"
+		sound addWeapon				= APATH "sfx_add_weapon.wav"
+		sound notAllowed			= APATH "sfx_wrongbutton.wav"
+
+		itemNames[0]		= localize$(DNL_FLAMER)
+		itemNames[1]		= localize$(DNL_BMBLAS)
+		itemNames[2]		= localize$(DNL_CERLGL_SHORT)
+		itemNames[3]		= localize$(DNL_CERMDL_SHORT)
+		itemNames[4]		= localize$(DNL_CERSML_SHORT)
+		itemNames[5]		= localize$(DNL_LGLAS)
+		itemNames[6]		= localize$(DNL_MDLAS)
+		itemNames[7]		= localize$(DNL_SMLAS)
+		itemNames[8]		= localize$(DNL_CERPPC_SHORT)
+		itemNames[9]		= localize$(DNL_PPC_SHORT)
+		itemNames[10]	= localize$(DNL_CLGPLS_SHORT)
+		itemNames[11]	= localize$(DNL_CMDPLS_SHORT)
+		itemNames[12]	= localize$(DNL_CSMPLS_SHORT)
+		itemNames[13]	= localize$(DNL_LGPLS)
+		itemNames[14]	= localize$(DNL_MDPLS)
+		itemNames[15]	= localize$(DNL_SMPLS)
+		itemNames[16]	= localize$(DNL_LGXPLS)
+		itemNames[17]	= localize$(DNL_MDXPLS)
+		itemNames[18]	= localize$(DNL_SMXPLS)
+		itemNames[19]	= localize$(DNL_CFLAMER)
+
+		itemNames[51]	= localize$(DNL_LRM5_SHORT)
+		itemNames[52]	= localize$(DNL_LRM10_SHORT)
+		itemNames[53]	= localize$(DNL_LRM15_SHORT)
+		itemNames[54]	= localize$(DNL_LRM20_SHORT)
+		itemNames[55]	= localize$(DNL_CLRM5_SHORT)
+		itemNames[56]	= localize$(DNL_CLRM10_SHORT)
+		itemNames[57]	= localize$(DNL_CLRM15_SHORT)
+		itemNames[58]	= localize$(DNL_CLRM20_SHORT)
+		itemNames[59]	= localize$(DNL_MRM10_SHORT)
+		itemNames[60]	= localize$(DNL_MRM20_SHORT)
+		itemNames[61]	= localize$(DNL_MRM30_SHORT)
+		itemNames[62]	= localize$(DNL_MRM40_SHORT)
+		itemNames[63]	= localize$(DNL_SRM2_SHORT)
+		itemNames[64]	= localize$(DNL_SRM4_SHORT)
+		itemNames[65]	= localize$(DNL_SRM6_SHORT)
+		itemNames[66]	= localize$(DNL_SSRM2_SHORT)
+		itemNames[67]	= localize$(DNL_SSRM4_SHORT)
+		itemNames[68]	= localize$(DNL_SSRM6_SHORT)
+		itemNames[69]	= localize$(DNL_THNDRBLT)
+		itemNames[70]	= localize$(DNL_NARC)
+		itemNames[71]	= localize$(DNL_CNARC)
+		itemNames[72]	= localize$(DNL_FLARE)
+		itemNames[73]	= localize$(DNL_HIGHEXPLOSIVE)
+		itemNames[74]	= localize$(DNL_ARTILLERY)
+		itemNames[75]	= localize$(DNL_SMRM10_SHORT)
+		itemNames[76]	= localize$(DNL_SMRM20_SHORT)
+		itemNames[77]	= localize$(DNL_SMRM30_SHORT)
+		itemNames[78]	= localize$(DNL_SMRM40_SHORT)
+		itemNames[79]	= localize$(DNL_ARROWCLUSTER_SHORT)
+		itemNames[80]	= localize$(DNL_ARROWHEAVY_SHORT)
+
+		itemNames[100]	= localize$(DNL_AC5_SHORT)
+		itemNames[101]	= localize$(DNL_AC10_SHORT)
+		itemNames[102]  = localize$(DNL_AC20_SHORT)
+		itemNames[103]	= localize$(DNL_LBXAC10_SHORT)
+		itemNames[104]	= localize$(DNL_LBXAC20_SHORT)
+		itemNames[105]	= localize$(DNL_CLBXAC10_SHORT)
+		itemNames[106]	= localize$(DNL_CLBXAC20_SHORT)
+		itemNames[107]	= localize$(DNL_UAC2_SHORT)
+		itemNames[108]	= localize$(DNL_UAC5_SHORT)
+		itemNames[109]  = localize$(DNL_UAC10_SHORT)
+		itemNames[110]  = localize$(DNL_UAC20_SHORT)
+		itemNames[111]	= localize$(DNL_CUAC2_SHORT)
+		itemNames[112]	= localize$(DNL_CUAC5_SHORT)
+		itemNames[113]  = localize$(DNL_CUAC10_SHORT)
+		itemNames[114]  = localize$(DNL_CUAC20_SHORT)
+		itemNames[115]	= localize$(DNL_CGAUSS)
+		itemNames[116]	= localize$(DNL_GAUSS)
+		itemNames[117]	= localize$(DNL_LGAUSS)
+		itemNames[118]	= localize$(DNL_LONGTOM)
+		itemNames[119]	= localize$(DNL_CLUSTER_BOMB)
+		itemNames[120]	= localize$(DNL_MG)
+		itemNames[121]	= localize$(DNL_CMG)
+		itemNames[122]	= localize$(DNL_HGAUSS)
+		itemNames[123]	= localize$(DNL_RTXAC2)
+		itemNames[124]	= localize$(DNL_RTXAC5)
+
+
+		itemNames [FirstMechChitID + M_ArcticWolf ] = localize$ (DNL_ARCTICWOLF)
+		itemNames [FirstMechChitID + M_Argus] = localize$ (DNL_ARGUS)
+		itemNames [FirstMechChitID + M_Atlas ] = localize$ (DNL_ATLAS)
+		itemNames [FirstMechChitID + M_Awesome ] = localize$ (DNL_AWESOME)
+		itemNames [FirstMechChitID + M_BlackKnight] = localize$ (DNL_BLACKKNIGHT)
+		itemNames [FirstMechChitID + M_Bushwacker ] = localize$ (DNL_BUSHWACKER)
+		itemNames [FirstMechChitID + M_Catapult ] = localize$ (DNL_CATAPULT)
+		itemNames [FirstMechChitID + M_CauldronBorn ] = localize$ (DNL_CAULDRONBORN)
+		itemNames [FirstMechChitID + M_Chimera] = localize$ (DNL_CHIMERA)
+		itemNames [FirstMechChitID + M_Cougar ] = localize$ (DNL_COUGAR)
+		itemNames [FirstMechChitID + M_Daishi ] = localize$ (DNL_DAISHI)
+		itemNames [FirstMechChitID + M_Dragon ] = localize$ (DNL_DRAGON)
+		itemNames [FirstMechChitID + M_Flea ] = localize$ (DNL_FLEA)
+		itemNames [FirstMechChitID + M_Hellspawn ] = localize$ (DNL_HELLSPAWN)
+		itemNames [FirstMechChitID + M_Highlander ] = localize$ (DNL_HIGHLANDER)
+		itemNames [FirstMechChitID + M_Hunchback ] = localize$ (DNL_HUNCHBACK)
+		itemNames [FirstMechChitID + M_Kodiak ] = localize$ (DNL_KODIAK)
+		itemNames [FirstMechChitID + M_Loki] = localize$ (DNL_LOKI)
+		itemNames [FirstMechChitID + M_Madcat ] = localize$ (DNL_MADCAT)
+		itemNames [FirstMechChitID + M_Madcat_MKII ] = localize$ (DNL_MADCAT2)
+		itemNames [FirstMechChitID + M_Masakari ] = localize$ (DNL_MASAKARI)
+		itemNames [FirstMechChitID + M_Mauler ] = localize$ (DNL_MAULER)
+		itemNames [FirstMechChitID + M_Novacat ] = localize$ (DNL_NOVACAT)
+		itemNames [FirstMechChitID + M_Osiris ] = localize$ (DNL_OSIRIS)
+		itemNames [FirstMechChitID + M_Raven ] = localize$ (DNL_RAVEN)
+		itemNames [FirstMechChitID + M_Ryoken] = localize$ (DNL_RYOKEN)
+		itemNames [FirstMechChitID + M_Shadowcat ] = localize$ (DNL_SHADOWCAT)
+		itemNames [FirstMechChitID + M_Sunder ] = localize$ (DNL_SUNDER)
+		itemNames [FirstMechChitID + M_Thanatos ] = localize$ (DNL_THANATOS)
+		itemNames [FirstMechChitID + M_Thor ] = localize$ (DNL_THOR)
+		itemNames [FirstMechChitID + M_Uller ] = localize$ (DNL_ULLER)
+		itemNames [FirstMechChitID + M_Uziel ] = localize$ (DNL_UZIEL)
+		itemNames [FirstMechChitID + M_Vulture ] = localize$ (DNL_VULTURE)
+		itemNames [FirstMechChitID + M_Wolfhound] = localize$ (DNL_WOLFHOUND)
+		itemNames [FirstMechChitID + M_Zeus ] = localize$ (DNL_ZEUS)
+		itemNames [FirstMechChitID + M_Avatar ] = "Avatar"	// mektek
+		itemNames [FirstMechChitID + M_Warhammer ] = "Warhammer"	// mektek
+		itemNames [FirstMechChitID + M_Strider ] = "Strider"	// mektek
+		itemNames [FirstMechChitID + M_Marauder ] = "Marauder"	// mektek
+		itemNames [FirstMechChitID + M_Bloodasp ] = "Blood Asp"	// mektek
+		itemNames [FirstMechChitID + M_UrbanmechIIC ] = "Urban Mech Clan"	// mektek
+		itemNames [FirstMechChitID + M_Stalker ] = "Stalker"	// mektek
+		itemNames [FirstMechChitID + M_Ares ] = "Ares"	// mektek
+		itemNames [FirstMechChitID + M_Urbanmech ] = "Urban Mech IS"	// mektek
+		itemNames [FirstMechChitID + M_BrcticWolf ] = "BrcticWolf"	// Tronix
+
+
+//Sorting drop list for salvage list
+		int CurrentSalvageList
+		object o_salvagedroplistbox					= s_droplistbox
+		o_salvagedroplistbox.boxFont3d				= FPATH localize$(IDS_F_ML_LABEL)
+		o_salvagedroplistbox.itemHeight				= 23
+		o_salvagedroplistbox.max_displayed			= 8
+		o_salvagedroplistbox.labelFont3d			= FPATH localize$(IDS_F_ML_LABEL)
+		o_salvagedroplistbox.offsetLabel			= 0,-15
+		o_salvagedroplistbox.arrowHeight			= 15
+		o_salvagedroplistbox.location				= 16, 82, 20
+		o_salvagedroplistbox.list_size				= 5
+		o_salvagedroplistbox.label					= localize$(IDS_ML_WP_LIST)
+		o_salvagedroplistbox.offsetLabel			= -1, -17
+		o_salvagedroplistbox.itemWidth				= 269
+		o_salvagedroplistbox.max_displayed			= 5
+		o_salvagedroplistbox.id						= 226
+
+		o_salvagedroplistbox.list_item[0]			= localize$(IDS_ML_BM_LISTALL)
+		o_salvagedroplistbox.list_item[1]			= localize$(IDS_ML_WP_LISTBEAM)
+		o_salvagedroplistbox.list_item[2]			= localize$(IDS_ML_WP_LISTBALLISTIC)
+		o_salvagedroplistbox.list_item[3]			= localize$(IDS_ML_WP_LISTMISSILE)
+		o_salvagedroplistbox.list_item[4]			= localize$(IDS_ML_BM_MECHS)
+
+		initialize(o_salvagedroplistbox)
+		activate(o_salvagedroplistbox)
+
+//The vars to make the call back to get the list of items
+		int ids[75]
+		float trade_value [75]
+		int inventory_count [75]
+		int num_items
+
+		// MAGIC NUMBER!  The maximum size in pixels of any weapon/mech icon that
+		// will be displayed in any list box.  The current value is the size of a
+		// "4-slot" weapon.
+		bitmap_create black = 60,120
+
+///////////////////////   Salvage List Box    /////////////////////////////////////////////
+		callback($$BM_CallbackHandler$$, BMDataSetupSalvageChits, ids[], trade_value[], salvage_damage[], salvage_range[], salvage_heat[], salvage_weapon_recycle[], inventory_count[],num_items,75)
+		object o_salvagelistbox					= s_mc_listbox_blackMarket
+		o_salvagelistbox.id						= 250
+		o_salvagelistbox.location				= 16,108,10
+
+		o_salvagelistbox.boxFont3d					= FPATH localize$(IDS_F_ML_LABEL)		//MUST BE INITIALIZED
+		o_salvagelistbox.itemWidth					= 268												//MUST BE INITIALIZED
+		o_salvagelistbox.itemHeight					= 1
+		o_salvagelistbox.itemHeight_padding			= 5
+
+		o_salvagelistbox.list_size  = num_items
+
+
+		o_salvagelistbox.NUM_OF_COLUMNS				= 4											//MUST BE INITIALIZED
+		o_salvagelistbox.column_header_height		= 20
+		o_salvagelistbox.arrowheight				= 20
+		o_salvagelistbox.max_displayed				= 400
+		o_salvagelistbox.uniform_item_height		= 0
+
+		o_salvagelistbox.labelFont3d				= FPATH localize$(IDS_F_ML_LABEL)		//CAN BE INITIALIZED
+		o_salvagelistbox.offsetLabel				= 0,-18											//CAN BE INITIALIZED offsetLabel of text from button = 0,-25
+		o_salvagelistbox.buttonwidth				= 16												//CAN BE INITIALIZED
+
+		o_salvagelistbox.first_delay				= 10								//time delay value n/60; for the buttons
+		o_salvagelistbox.second_delay				= 3							//time delay value n/60; for the buttons
+
+		o_salvagelistbox.column[0].location.x		= 5
+		o_salvagelistbox.column[1].location.x		= 65
+		o_salvagelistbox.column[2].location.x		= 190
+		o_salvagelistbox.column[3].location.x		= 235
+
+		o_salvagelistbox.column[0].fontcolor		= packcolor(255,0,0,255)
+		o_salvagelistbox.column[1].fontcolor		= packcolor(255,255,255,255)
+		o_salvagelistbox.column[2].fontcolor		= packcolor(255,255,255,255)
+		o_salvagelistbox.column[3].fontcolor		= packcolor(255,255,255,255)
+
+		o_salvagelistbox.offsetx[1]					= 5
+
+		o_salvagelistbox.column[0].icondisplays		= true
+
+		o_salvagelistbox.column[0].numeric			= true
+		o_salvagelistbox.column[2].numeric			= true
+		o_salvagelistbox.column[3].numeric			= true
+
+		o_salvagelistbox.column[0].fontAlignment	= just_left
+		o_salvagelistbox.column[1].fontAlignment	= just_left
+		o_salvagelistbox.column[2].fontAlignment	= just_right
+		o_salvagelistbox.column[3].fontAlignment	= just_center
+
+
+		int counter									= 0
+		int w
+		for w = 0; w < num_items; w++
+		{
+			if ids[w] > -1
+			{
+				o_salvagelistbox.column[0].list_item[counter]	= conv$(ids[w])
+				o_salvagelistbox.column[1].list_item[counter]	= itemnames[ids[w]]
+				o_salvagelistbox.column[2].list_item[counter]	= conv$(trade_value[w])
+				o_salvagelistbox.column[3].list_item[counter]	= conv$(inventory_count[w])
+				o_salvagelistbox.list_order[counter]			= counter
+				counter++
+			}
+			else
+			{
+				o_salvagelistbox.list_size--
+			}
+		}
+
+	//set up the icons, they need to be weapons and Mechs
+		for w =0; w< o_salvagelistbox.list_size; w++
+		{
+			if ids[w]  < FirstMechChitID //it is a weapon
+			{
+				o_salvagelistbox.column[0].list_icon[w] = MB_GPATH "weapon_" o_salvagelistbox.column[0].list_item[w] ".tga",1,volatile
+				alphamode (o_salvagelistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha
+			}
+			else //its a Mech
+			{
+				o_salvagelistbox.column[0].list_icon[w] = MB_GPATH "mech_" conv$(ids[w]- FirstMechChitID) ".tga",1,volatile
+				alphamode (o_salvagelistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha
+			}
+		}
+
+		initialize (o_salvagelistbox)
+		o_salvagelistbox.column[0].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+		o_salvagelistbox.column[1].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+		o_salvagelistbox.column[2].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+		o_salvagelistbox.column[3].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+
+		o_salvagelistbox.column[0].o_header.s_text	= localize$(IDS_ML_ITEM)
+		o_salvagelistbox.column[1].o_header.s_text	= localize$(IDS_ML_WP_NAME)
+		o_salvagelistbox.column[2].o_header.s_text	= localize$(IDS_ML_VALUE)
+		o_salvagelistbox.column[3].o_header.s_text	= "#"
+
+
+
+
+/////////////////////////////   Offering List Box //////////////////////////////////////////////
+
+		callback($$BM_CallbackHandler$$, BMDataSetupOfferingChits, ids[], trade_value[], offering_damage[], offering_range[], offering_heat[], offering_weapon_recycle[], inventory_count[],num_items,75)
+		object o_offeringlistbox					= s_mc_listbox_blackMarket
+		o_offeringlistbox.id						= 251
+		o_offeringlistbox.location					= 302,108,10
+
+		o_offeringlistbox.boxFont3d					= FPATH localize$(IDS_F_ML_LABEL)		//MUST BE INITIALIZED
+		o_offeringlistbox.itemWidth					= 150												//MUST BE INITIALIZED
+		o_offeringlistbox.itemHeight					= 1
+		o_offeringlistbox.itemHeight_padding			= 5
+
+		o_offeringlistbox.list_size  = num_items
+
+
+		o_offeringlistbox.NUM_OF_COLUMNS				= 3										//MUST BE INITIALIZED
+		o_offeringlistbox.column_header_height		= 20
+		o_offeringlistbox.arrowheight				= 20
+		o_offeringlistbox.max_displayed				= 160
+		o_offeringlistbox.uniform_item_height		= 0
+
+		o_offeringlistbox.labelFont3d				= FPATH localize$(IDS_F_ML_LABEL)		//CAN BE INITIALIZED
+		o_offeringlistbox.offsetLabel				= 0,-18											//CAN BE INITIALIZED offsetLabel of text from button = 0,-25
+		o_offeringlistbox.buttonwidth				= 16												//CAN BE INITIALIZED
+
+		o_offeringlistbox.first_delay				= 10								//time delay value n/60; for the buttons
+		o_offeringlistbox.second_delay				= 3							//time delay value n/60; for the buttons
+
+		o_offeringlistbox.column[0].location.x		= 5
+		o_offeringlistbox.column[1].location.x		= 65
+		o_offeringlistbox.column[2].location.x		= 110
+
+		o_offeringlistbox.column[0].fontcolor		= packcolor(255,0,0,255)
+		o_offeringlistbox.column[1].fontcolor		= packcolor(255,255,255,255)
+		o_offeringlistbox.column[2].fontcolor		= packcolor(255,255,255,255)
+
+		o_offeringlistbox.offsetx[1]					= 5
+
+		o_offeringlistbox.column[0].icondisplays		= true
+
+		o_offeringlistbox.column[0].numeric			= true
+		o_offeringlistbox.column[2].numeric			= true
+		o_offeringlistbox.column[3].numeric			= true
+
+		o_offeringlistbox.column[0].fontAlignment	= just_left
+		o_offeringlistbox.column[1].fontAlignment	= just_left
+		o_offeringlistbox.column[2].fontAlignment	= just_right
+		o_offeringlistbox.column[3].fontAlignment	= just_center
+
+
+		counter									= 0
+		for w = 0; w < num_items; w++
+		{
+			if ids[w] > -1
+			{
+				o_offeringlistbox.column[0].list_item[counter]	= conv$(ids[w])
+				o_offeringlistbox.column[1].list_item[counter]	= conv$(trade_value[w])
+				o_offeringlistbox.column[2].list_item[counter]	= conv$(inventory_count[w])
+				o_offeringlistbox.list_order[counter]			= counter
+				counter++
+			}
+			else
+			{
+				o_offeringlistbox.list_size--
+			}
+		}
+
+	//set up the icons, they need to be weapons and Mechs
+		for w =0; w< o_offeringlistbox.list_size; w++
+		{
+			if ids[w]  < FirstMechChitID //it is a weapon
+			{
+				o_offeringlistbox.column[0].list_icon[w] = MB_GPATH "weapon_" o_offeringlistbox.column[0].list_item[w] ".tga",1,volatile
+				alphamode (o_offeringlistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha
+			}
+			else //its a Mech
+			{
+				o_offeringlistbox.column[0].list_icon[w] = MB_GPATH "mech_" conv$(ids[w]- FirstMechChitID) ".tga",1,volatile
+				alphamode (o_offeringlistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha
+			}
+		}
+
+		initialize (o_offeringlistbox)
+		o_offeringlistbox.column[0].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+		o_offeringlistbox.column[1].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+		o_offeringlistbox.column[2].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+
+		o_offeringlistbox.column[0].o_header.s_text	= localize$(IDS_ML_ITEM)
+		o_offeringlistbox.column[1].o_header.s_text	= localize$(IDS_ML_VALUE)
+		o_offeringlistbox.column[2].o_header.s_text	= "#"
+
+
+		string offeringTotal = conv$ ( callback($$BM_CallbackHandler$$,BMGetOfferingValue) )
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//Sorting drop list for black market list
+		int CurrentMarketList
+		object o_marketdroplistbox					= s_droplistbox
+		o_marketdroplistbox.boxFont3d				= FPATH localize$(IDS_F_ML_LABEL)
+		o_marketdroplistbox.itemHeight				= 23
+		o_marketdroplistbox.max_displayed			= 8
+		o_marketdroplistbox.labelFont3d			= FPATH localize$(IDS_F_ML_LABEL)
+		o_marketdroplistbox.offsetLabel			= 0,-15
+		o_marketdroplistbox.arrowHeight			= 15
+		o_marketdroplistbox.location				= 500, 82, 20
+		o_marketdroplistbox.list_size				= 5
+		o_marketdroplistbox.label					= localize$(IDS_ML_WP_LIST)
+		o_marketdroplistbox.offsetLabel			= -1, -17
+		o_marketdroplistbox.itemWidth				= 269
+		o_marketdroplistbox.max_displayed			= 5
+		o_marketdroplistbox.id						= 226
+
+		o_marketdroplistbox.list_item[0]			= localize$(IDS_ML_BM_LISTALL)
+		o_marketdroplistbox.list_item[1]			= localize$(IDS_ML_WP_LISTBEAM)
+		o_marketdroplistbox.list_item[2]			= localize$(IDS_ML_WP_LISTBALLISTIC)
+		o_marketdroplistbox.list_item[3]			= localize$(IDS_ML_WP_LISTMISSILE)
+		o_marketdroplistbox.list_item[4]			= localize$(IDS_ML_BM_MECHS)
+
+		initialize(o_marketdroplistbox)
+		activate(o_marketdroplistbox)
+
+		callback($$BM_CallbackHandler$$, BMDataSetupMarketChits, ids[], trade_value[], market_damage[], market_range[], market_heat[], market_weapon_recycle[], inventory_count[],num_items,75)
+		object o_marketlistbox					= s_mc_listbox_blackMarket
+		o_marketlistbox.id						= 252
+		o_marketlistbox.location				= 500,108,10
+
+		o_marketlistbox.boxFont3d					= FPATH localize$(IDS_F_ML_LABEL)		//MUST BE INITIALIZED
+		o_marketlistbox.itemWidth					= 268												//MUST BE INITIALIZED
+		o_marketlistbox.itemHeight					= 1
+		o_marketlistbox.itemHeight_padding			= 5
+
+		o_marketlistbox.headercolor					= packcolor(90,58,64,255);
+
+		o_marketlistbox.list_size  = num_items
+
+
+		o_marketlistbox.NUM_OF_COLUMNS				= 4											//MUST BE INITIALIZED
+		o_marketlistbox.column_header_height		= 20
+		o_marketlistbox.arrowheight				= 20
+		o_marketlistbox.max_displayed				= 377
+		o_marketlistbox.uniform_item_height		= 0
+
+		o_marketlistbox.labelFont3d				= FPATH localize$(IDS_F_ML_LABEL)		//CAN BE INITIALIZED
+		o_marketlistbox.offsetLabel				= 0,-18											//CAN BE INITIALIZED offsetLabel of text from button = 0,-25
+		o_marketlistbox.buttonwidth				= 16												//CAN BE INITIALIZED
+
+		o_marketlistbox.first_delay				= 10								//time delay value n/60; for the buttons
+		o_marketlistbox.second_delay				= 3							//time delay value n/60; for the buttons
+
+		o_marketlistbox.column[0].location.x		= 5
+		o_marketlistbox.column[1].location.x		= 65
+		o_marketlistbox.column[2].location.x		= 190
+		o_marketlistbox.column[3].location.x		= 235
+
+		o_marketlistbox.column[0].fontcolor		= packcolor(255,0,0,255)
+		o_marketlistbox.column[1].fontcolor		= packcolor(255,255,255,255)
+		o_marketlistbox.column[2].fontcolor		= packcolor(255,255,255,255)
+		o_marketlistbox.column[3].fontcolor		= packcolor(255,255,255,255)
+
+		o_marketlistbox.offsetx[1]					= 5
+
+		o_marketlistbox.column[0].icondisplays		= true
+
+		o_marketlistbox.column[0].numeric			= true
+		o_marketlistbox.column[2].numeric			= true
+		o_marketlistbox.column[3].numeric			= true
+
+		o_marketlistbox.column[0].fontAlignment	= just_left
+		o_marketlistbox.column[1].fontAlignment	= just_left
+		o_marketlistbox.column[2].fontAlignment	= just_right
+		o_marketlistbox.column[3].fontAlignment	= just_center
+
+
+		counter									= 0
+
+		for w = 0; w < num_items; w++
+		{
+			if ids[w] > -1
+			{
+				o_marketlistbox.column[0].list_item[counter]	= conv$(ids[w])
+				o_marketlistbox.column[1].list_item[counter]	= itemNames[ids[w]]
+				o_marketlistbox.column[2].list_item[counter]	= conv$(trade_value[w])
+				o_marketlistbox.column[3].list_item[counter]	= conv$(inventory_count[w])
+				o_marketlistbox.list_order[counter]			= counter
+				counter++
+			}
+			else
+			{
+				o_marketlistbox.list_size--
+			}
+		}
+
+	//set up the icons, they need to be weapons and Mechs
+		for w =0; w< o_marketlistbox.list_size; w++
+		{
+			if ids[w]  < FirstMechChitID //it is a weapon
+			{
+				o_marketlistbox.column[0].list_icon[w] = MB_GPATH "weapon_" o_marketlistbox.column[0].list_item[w] ".tga",1,volatile
+				alphamode (o_marketlistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha
+			}
+			else //its a Mech
+			{
+				o_marketlistbox.column[0].list_icon[w] = MB_GPATH "mech_" conv$(ids[w]- FirstMechChitID) ".tga",1,volatile
+				alphamode (o_marketlistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha
+			}
+		}
+
+		initialize (o_marketlistbox)
+		o_marketlistbox.column[0].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+		o_marketlistbox.column[1].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+		o_marketlistbox.column[2].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+		o_marketlistbox.column[3].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+
+		o_marketlistbox.column[0].o_header.s_text	= localize$(IDS_ML_ITEM)
+		o_marketlistbox.column[1].o_header.s_text	= localize$(IDS_ML_WP_NAME)
+		o_marketlistbox.column[2].o_header.s_text	= localize$(IDS_ML_VALUE)
+		o_marketlistbox.column[3].o_header.s_text	= "#"
+
+///////////////////////////////////////////////////////////////////////////////
+
+		callback($$BM_CallbackHandler$$, BMDataSetupAcquiringChits, ids[], trade_value[], acquiring_damage[], acquiring_range[], acquiring_heat[], acquiring_weapon_recycle[], inventory_count[],num_items,75)
+		object o_acquiringlistbox					= s_mc_listbox_blackMarket
+		o_acquiringlistbox.id						= 253
+		o_acquiringlistbox.location					= 332,325,10
+
+		o_acquiringlistbox.boxFont3d					= FPATH localize$(IDS_F_ML_LABEL)		//MUST BE INITIALIZED
+		o_acquiringlistbox.itemWidth					= 150												//MUST BE INITIALIZED
+		o_acquiringlistbox.itemHeight					= 1
+		o_acquiringlistbox.itemHeight_padding			= 5
+
+		o_acquiringlistbox.headercolor					= packcolor(90,58,64,255);
+
+		o_acquiringlistbox.list_size  = num_items
+
+
+		o_acquiringlistbox.NUM_OF_COLUMNS				= 3										//MUST BE INITIALIZED
+		o_acquiringlistbox.column_header_height		= 20
+		o_acquiringlistbox.arrowheight				= 20
+		o_acquiringlistbox.max_displayed				= 160
+		o_acquiringlistbox.uniform_item_height		= 0
+
+		o_acquiringlistbox.labelFont3d				= FPATH localize$(IDS_F_ML_LABEL)		//CAN BE INITIALIZED
+		o_acquiringlistbox.offsetLabel				= 0,-18											//CAN BE INITIALIZED offsetLabel of text from button = 0,-25
+		o_acquiringlistbox.buttonwidth				= 16												//CAN BE INITIALIZED
+
+		o_acquiringlistbox.first_delay				= 10								//time delay value n/60; for the buttons
+		o_acquiringlistbox.second_delay				= 3							//time delay value n/60; for the buttons
+
+		o_acquiringlistbox.column[0].location.x		= 5
+		o_acquiringlistbox.column[1].location.x		= 65
+		o_acquiringlistbox.column[2].location.x		= 110
+
+		o_acquiringlistbox.column[0].fontcolor		= packcolor(255,0,0,255)
+		o_acquiringlistbox.column[1].fontcolor		= packcolor(255,255,255,255)
+		o_acquiringlistbox.column[2].fontcolor		= packcolor(255,255,255,255)
+
+		o_acquiringlistbox.offsetx[1]					= 5
+
+		o_acquiringlistbox.column[0].icondisplays		= true
+
+		o_acquiringlistbox.column[0].numeric			= true
+		o_acquiringlistbox.column[2].numeric			= true
+		o_acquiringlistbox.column[3].numeric			= true
+
+		o_acquiringlistbox.column[0].fontAlignment	= just_left
+		o_acquiringlistbox.column[1].fontAlignment	= just_left
+		o_acquiringlistbox.column[2].fontAlignment	= just_right
+		o_acquiringlistbox.column[3].fontAlignment	= just_center
+
+
+		counter									= 0
+		for w = 0; w < num_items; w++
+		{
+			if ids[w] > -1
+			{
+				o_acquiringlistbox.column[0].list_item[counter]	= conv$(ids[w])
+				o_acquiringlistbox.column[1].list_item[counter]	= conv$(trade_value[w])
+				o_acquiringlistbox.column[2].list_item[counter]	= conv$(inventory_count[w])
+				o_acquiringlistbox.list_order[counter]			= counter
+				counter++
+			}
+			else
+			{
+				o_acquiringlistbox.list_size--
+			}
+		}
+
+
+		//set up the icons, they need to be weapons and Mechs
+		for w =0; w< o_acquiringlistbox.list_size; w++
+		{
+			if ids[w]  < FirstMechChitID //it is a weapon
+			{
+				o_acquiringlistbox.column[0].list_icon[w] = MB_GPATH "weapon_" o_acquiringlistbox.column[0].list_item[w] ".tga",1,volatile
+				alphamode (o_acquiringlistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha
+			}
+			else //its a Mech
+			{
+				o_acquiringlistbox.column[0].list_icon[w] = MB_GPATH "mech_" conv$(ids[w]- FirstMechChitID) ".tga",1,volatile
+				alphamode (o_acquiringlistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha
+			}
+		}
+
+		initialize (o_acquiringlistbox)
+		o_acquiringlistbox.column[0].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+		o_acquiringlistbox.column[1].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+		o_acquiringlistbox.column[2].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+
+		o_acquiringlistbox.column[0].o_header.s_text	= localize$(IDS_ML_ITEM)
+		o_acquiringlistbox.column[1].o_header.s_text	= localize$(IDS_ML_VALUE)
+		o_acquiringlistbox.column[2].o_header.s_text	= "#"
+
+		string acquiringTotal = conv$ (callback($$BM_CallbackHandler$$, BMGetAcquiringValue))
+
+//the Black MArket item pointer
+	object o_item_pointer = item_pointer
+	o_item_pointer.location = 0,0,200
+	deactivate (o_item_pointer)
+
+//The item mask, a region that lies under the back ground to take messages
+	object o_drop_mask = drop_mask
+	o_drop_mask.location = 0,0,30
+	o_drop_mask.region   = 0,0 to 0,0
+	deactivate (o_drop_mask)
+
+	//drop mask for the offering list box
+	object o_offering_mask = offering_mask
+	o_offering_mask.location = 302,108,40
+	o_offering_mask.region = 0,0 to 0,0
+	deactivate (o_offering_mask)
+
+	object o_acquiring_mask = acquiring_mask
+	o_acquiring_mask.location = 332,325,40
+	o_acquiring_mask.region = 0,0 to 0,0
+	deactivate (o_acquiring_mask)
+
+	//The trade Button
+		object o_tradebutton		= s_multistatepane
+		o_tradebutton.file			= WPATH "button_reg_138x23_3state.tga"
+		o_tradebutton.total_states	= 3
+		o_tradebutton.text			= localize$ (IDS_ML_TRADE)
+		o_tradebutton.location		= mainbuttonx, mainbuttony + 30, 10
+		o_tradebutton.gFont3d		= FPATH localize$(IDS_F_ML_BUTTON)
+		o_tradebutton.id			= 302
+		initialize (o_tradebutton)
+		deactivate (o_tradebutton)
+
+	//The trade button black so that when the trade is invalid, it will cover the trade button
+		object o_tradebutton_block = region_block
+		o_tradebutton_block.location = mainbuttonx, mainbuttony + 30,40
+		o_tradebutton_block.region = o_tradebutton.region
+		o_tradebutton_block.id = 303
+		initialize (o_tradebutton_block)
+		deactivate (o_tradebutton_block)
+
+
+	//Restore button
+		object o_restorebutton			= s_multistatepane
+		o_restorebutton.file			= WPATH "button_reg_138x23_3state.tga"
+		o_restorebutton.total_states	= 3
+		o_restorebutton.text			= localize$(IDS_ML_BM_CLEARALL)
+		o_restorebutton.location		= mainbuttonx, mainbuttony, 10
+		o_restorebutton.gFont3d			= FPATH localize$(IDS_F_ML_BUTTON)
+		o_restorebutton.id				= 305
+		initialize(o_restorebutton)
+
+		// Restore button starts out disabled
+		o_restorebutton.state			= 3
+
+		object o_exitbutton				= s_multistatepane
+		o_exitbutton.file				= WPATH "button_reg_138x23_3state.tga"
+		o_exitbutton.total_states		= 3
+		o_exitbutton.text				= localize$(IDS_GN_CLOSE)
+		o_exitbutton.location			= mainbuttonx, mainbuttony + 60, 10
+		o_exitbutton.gFont3d			= FPATH localize$(IDS_F_ML_BUTTON)
+		o_exitbutton.id					= 313
+		initialize(o_exitbutton)
+
+		//roll over text regions
+		object o_SalvageRollOver	= region_block
+		o_SalvageRollOver.location = 83,34,50
+		o_SalvageRollOver.region_width  = 151
+		o_SalvageRollOver.region_height = 26
+		o_SalvageRollOver.id = 306
+		initialize (o_SalvageRollOver)
+		
+		object o_SellRollOver	= region_block
+		o_SellRollOver.location = 302,82,50
+		o_SellRollOver.region_width  = 60
+		o_SellRollOver.region_height = 25
+		o_SellRollOver.id = 307
+		initialize (o_SellRollOver)
+
+		object o_SellTotalRollOver	= region_block
+		o_SellTotalRollOver.location = 401,82,50
+		o_SellTotalRollOver.region_width  = 70
+		o_SellTotalRollOver.region_height = 25
+		o_SellTotalRollOver.id = 308
+		initialize (o_SellTotalRollOver)
+
+		object o_AcquireRollOver	= region_block
+		o_AcquireRollOver.location = 581,34,50
+		o_AcquireRollOver.region_width  = 150
+		o_AcquireRollOver.region_height = 26
+		o_AcquireRollOver.id = 309
+		initialize (o_AcquireRollOver)
+
+		object o_BuyRollOver	= region_block
+		o_BuyRollOver.location = 332,299,50
+		o_BuyRollOver.region_width  = 60
+		o_BuyRollOver.region_height = 25
+		o_BuyRollOver.id = 310
+		initialize (o_BuyRollOver)
+
+		object o_BuyTotalRollOver	= region_block
+		o_BuyTotalRollOver.location = 430,299,50
+		o_BuyTotalRollOver.region_width  = 70
+		o_BuyTotalRollOver.region_height = 25
+		o_BuyTotalRollOver.id = 311
+		initialize (o_BuyTotalRollOver)
+
+		framerate = 10
+
+		
+	}
+
+	GUI_EXECUTE
+	{
+		if CurrentSalvageList != o_salvagedroplistbox.nselected
+		{
+			// Kill all list box buttons
+			for w = 0; w < o_salvagelistbox.list_size; w++
+			{
+				kill o_salvagelistbox.list_button[w]
+			}
+			if o_salvagedroplistbox.nselected == 0
+			{
+				callback ($$BM_CallbackHandler$$, BMDataSetupSalvageChits, ids[], trade_value[], salvage_damage[], salvage_range[], salvage_heat[], salvage_weapon_recycle[], inventory_count[],num_items,75)
+			}
+			if o_salvagedroplistbox.nselected == 1
+			{
+				callback ($$BM_CallbackHandler$$, BMDataSetupBeamWeaponSalvageChits, ids[], trade_value[], salvage_damage[], salvage_range[], salvage_heat[], salvage_weapon_recycle[], inventory_count[],num_items,75)
+			}
+			if o_salvagedroplistbox.nselected == 2
+			{
+				callback ($$BM_CallbackHandler$$, BMDataSetupBallisticWeaponSalvageChits, ids[], trade_value[], salvage_damage[], salvage_range[], salvage_heat[], salvage_weapon_recycle[], inventory_count[],num_items,75)
+			}
+			if o_salvagedroplistbox.nselected == 3
+			{
+				callback ($$BM_CallbackHandler$$, BMDataSetupMissileWeaponSalvageChits, ids[], trade_value[], salvage_damage[], salvage_range[], salvage_heat[], salvage_weapon_recycle[], inventory_count[],num_items,75)
+			}
+			if o_salvagedroplistbox.nselected == 4
+			{
+				callback ($$BM_CallbackHandler$$, BMDataSetupMechSalvageChits, ids[], trade_value[], salvage_damage[], salvage_range[], salvage_heat[], salvage_weapon_recycle[], inventory_count[],num_items,75)
+			}
+
+			CurrentSalvageList = o_salvagedroplistbox.nselected
+			reinitializeNeeded = 1
+		}
+		else
+		if CurrentMarketList != o_marketdroplistbox.nselected
+		{
+			// Kill all list box buttons
+			for w = 0; w < o_marketlistbox.list_size; w++
+			{
+				kill o_marketlistbox.list_button[w]
+			}
+			if o_marketdroplistbox.nselected == 0
+			{
+				callback ($$BM_CallbackHandler$$, BMDataSetupMarketChits, ids[], trade_value[], market_damage[], market_range[], market_heat[], market_weapon_recycle[], inventory_count[],num_items,75)
+			}
+			if o_marketdroplistbox.nselected == 1
+			{
+				callback ($$BM_CallbackHandler$$, BMDataSetupBeamWeaponMarketChits, ids[], trade_value[], market_damage[], market_range[], market_heat[], market_weapon_recycle[], inventory_count[],num_items,75)
+			}
+			if o_marketdroplistbox.nselected == 2
+			{
+				callback ($$BM_CallbackHandler$$, BMDataSetupBallisticWeaponMarketChits, ids[], trade_value[], market_damage[], market_range[], market_heat[], market_weapon_recycle[], inventory_count[],num_items,75)
+			}
+			if o_marketdroplistbox.nselected == 3
+			{
+				callback ($$BM_CallbackHandler$$, BMDataSetupMissileWeaponMarketChits, ids[], trade_value[], market_damage[], market_range[], market_heat[], market_weapon_recycle[], inventory_count[],num_items,75)
+			}
+			if o_marketdroplistbox.nselected == 4
+			{
+				callback ($$BM_CallbackHandler$$, BMDataSetupMechMarketChits, ids[], trade_value[], market_damage[], market_range[], market_heat[], market_weapon_recycle[], inventory_count[],num_items,75)
+			}
+
+			CurrentMarketList = o_marketdroplistbox.nselected
+			reinitializeNeeded = 1
+		}
+
+			//if a reinitialize is needed, do it
+		if (reinitializeNeeded ==1)
+		{
+			
+			reinitializeNeeded = 0;
+			initialize (this)
+		}
+	}	
+
+	GUI_INIT
+	{
+		int top_of_salvage_before		= top_of_salvage_list
+		int top_of_offering_before		= top_of_offering_list
+		int top_of_acquiring_before		= top_of_acquiring_list
+		int top_of_market_before		= top_of_market_list
+
+		// Start with the restore button disabled
+		o_restorebutton.state	= 3
+
+		////////////////  Do the lists /////////////////////////////////
+		spew "Init Black Market"
+
+		if o_salvagedroplistbox.nselected == 0
+		{
+			callback ($$BM_CallbackHandler$$, BMDataSetupSalvageChits, ids[], trade_value[], salvage_damage[], salvage_range[], salvage_heat[], salvage_weapon_recycle[], inventory_count[],num_items,75)
+		}
+		if o_salvagedroplistbox.nselected == 1
+		{
+			callback ($$BM_CallbackHandler$$, BMDataSetupBeamWeaponSalvageChits, ids[], trade_value[], salvage_damage[], salvage_range[], salvage_heat[], salvage_weapon_recycle[], inventory_count[],num_items,75)
+		}
+		if o_salvagedroplistbox.nselected == 2
+		{
+			callback ($$BM_CallbackHandler$$, BMDataSetupBallisticWeaponSalvageChits, ids[], trade_value[], salvage_damage[], salvage_range[], salvage_heat[], salvage_weapon_recycle[], inventory_count[],num_items,75)
+		}
+		if o_salvagedroplistbox.nselected == 3
+		{
+			callback ($$BM_CallbackHandler$$, BMDataSetupMissileWeaponSalvageChits, ids[], trade_value[], salvage_damage[], salvage_range[], salvage_heat[], salvage_weapon_recycle[], inventory_count[],num_items,75)
+		}
+		if o_salvagedroplistbox.nselected == 4
+		{
+			callback ($$BM_CallbackHandler$$, BMDataSetupMechSalvageChits, ids[], trade_value[], salvage_damage[], salvage_range[], salvage_heat[], salvage_weapon_recycle[], inventory_count[],num_items,75)
+		}
+
+		if (num_items == 0)
+		{
+			
+			for w =0; w<o_salvagelistbox.list_size; w++
+			{
+				kill o_salvagelistbox.list_button[w]
+			}
+			o_salvagelistbox.list_size =0
+		}
+		else
+		{
+			o_salvagelistbox.list_size = num_items
+			for w=0; w<num_items; w++
+			{
+				o_salvagelistbox.column [0].list_item [w] = conv$(ids[w])
+				o_salvagelistbox.column [1].list_item [w] = itemNames [ids[w]]
+				o_salvagelistbox.column [2].list_item [w] = conv$ (trade_value[w])
+				o_salvagelistbox.column [3].list_item [w] = conv$ (inventory_count[w])
+				o_salvagelistbox.list_order[w] = w
+			}
+		
+
+		}
+		for w =0; w< o_salvagelistbox.list_size; w++
+		{
+			if ids[w]  < FirstMechChitID //it is a weapon
+			{
+				o_salvagelistbox.column[0].list_icon[w] = MB_GPATH "weapon_" o_salvagelistbox.column[0].list_item[w] ".tga",1,volatile
+				alphamode (o_salvagelistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha
+			}
+			else //its a Mech
+			{
+						
+				o_salvagelistbox.column[0].list_icon[w] = MB_GPATH "mech_" conv$(ids[w]- FirstMechChitID) ".tga",1,volatile
+				alphamode (o_salvagelistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha	
+			}
+		}	
+
+		//initialize the list box if we are on the right tab
+		
+		initialize (o_salvagelistbox)
+
+		if (num_items != 0)
+		{
+			if num_items < top_of_salvage_before
+			{
+				mail(-4, num_items, o_salvagelistbox)
+			}
+			else
+			{
+				mail(-4, top_of_salvage_before, o_salvagelistbox)
+			}
+		}
+
+		o_salvagelistbox.column[0].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_salvagelistbox.column[1].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_salvagelistbox.column[2].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_salvagelistbox.column[3].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+
+		o_salvagelistbox.column[0].o_header.s_text = localize$(IDS_ML_ITEM)
+		o_salvagelistbox.column[1].o_header.s_text = localize$(IDS_ML_WP_NAME)
+		o_salvagelistbox.column[2].o_header.s_text = localize$(IDS_ML_VALUE)
+		o_salvagelistbox.column[3].o_header.s_text = "#"		
+
+		// Because the icons have been changed since our last 
+		// initialize() call on o_salvagelistbox
+		// this mail message is to refresh the weapon list box to
+		// avoid the clipping problem at the bottom of the list box
+		mail(-1, o_salvagelistbox)
+		///////////////////////////////// ///////////////////////////////////////
+		callback ($$BM_CallbackHandler$$, BMDataSetupOfferingChits, ids[], trade_value[], offering_damage[], offering_range[], offering_heat[], offering_weapon_recycle[], inventory_count[],num_items,75)
+
+		if (num_items == 0)
+		{
+			
+			for w =0; w<o_offeringlistbox.list_size; w++
+			{
+				kill o_offeringlistbox.list_button[w]
+			}
+			o_offeringlistbox.list_size =0
+		}
+		else
+		{
+			o_offeringlistbox.list_size = num_items
+			for w=0; w<num_items; w++
+			{
+				o_offeringlistbox.column [0].list_item [w] = conv$(ids[w])
+				o_offeringlistbox.column [1].list_item [w] = conv$ (trade_value[w])
+				o_offeringlistbox.column [2].list_item [w] = conv$ (inventory_count[w])
+				o_offeringlistbox.list_order[w] = w
+			}
+
+		
+			o_restorebutton.state = 0
+
+		}
+		for w =0; w< o_offeringlistbox.list_size; w++
+		{
+			if ids[w]  < FirstMechChitID //it is a weapon
+			{
+				o_offeringlistbox.column[0].list_icon[w] = MB_GPATH "weapon_" o_offeringlistbox.column[0].list_item[w] ".tga",1,volatile
+				alphamode (o_offeringlistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha
+			}
+			else //its a Mech
+			{
+
+				o_offeringlistbox.column[0].list_icon[w] = MB_GPATH "mech_" conv$(ids[w]- FirstMechChitID) ".tga",1,volatile
+				alphamode (o_offeringlistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha	
+			}
+		}	
+
+		initialize (o_offeringlistbox)
+
+		if (num_items != 0)
+		{
+			if num_items < top_of_offering_before
+			{
+				mail(-4, num_items, o_offeringlistbox)
+			}
+			else
+			{
+				mail(-4, top_of_offering_before, o_offeringlistbox)
+			}
+		}
+
+		o_offeringlistbox.column[0].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_offeringlistbox.column[1].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_offeringlistbox.column[2].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		
+
+		o_offeringlistbox.column[0].o_header.s_text = localize$(IDS_ML_ITEM)
+		o_offeringlistbox.column[1].o_header.s_text = localize$(IDS_ML_VALUE)
+		o_offeringlistbox.column[2].o_header.s_text = "#"		
+
+		offeringTotal = conv$ ( callback($$BM_CallbackHandler$$,BMGetOfferingValue) )
+
+		// Because the icons have been changed since our last 
+		// initialize() call on o_offeringlistbox
+		// this mail message is to refresh the weapon list box to
+		// avoid the clipping problem at the bottom of the list box
+		mail(-1, o_offeringlistbox)
+
+
+		////////////////////////////////////////////////
+		if o_marketdroplistbox.nselected == 0
+		{
+			callback ($$BM_CallbackHandler$$, BMDataSetupMarketChits, ids[], trade_value[], market_damage[], market_range[], market_heat[], market_weapon_recycle[], inventory_count[],num_items,75)
+		}
+		if o_marketdroplistbox.nselected == 1
+		{
+			callback ($$BM_CallbackHandler$$, BMDataSetupBeamWeaponMarketChits, ids[], trade_value[], market_damage[], market_range[], market_heat[], market_weapon_recycle[], inventory_count[],num_items,75)
+		}
+		if o_marketdroplistbox.nselected == 2
+		{
+			callback ($$BM_CallbackHandler$$, BMDataSetupBallisticWeaponMarketChits, ids[], trade_value[], market_damage[], market_range[], market_heat[], market_weapon_recycle[], inventory_count[],num_items,75)
+		}
+		if o_marketdroplistbox.nselected == 3
+		{
+			callback ($$BM_CallbackHandler$$, BMDataSetupMissileWeaponMarketChits, ids[], trade_value[], market_damage[], market_range[], market_heat[], market_weapon_recycle[], inventory_count[],num_items,75)
+		}
+		if o_marketdroplistbox.nselected == 4
+		{
+			callback ($$BM_CallbackHandler$$, BMDataSetupMechMarketChits, ids[], trade_value[], market_damage[], market_range[], market_heat[], market_weapon_recycle[], inventory_count[],num_items,75)
+		}
+
+		if (num_items == 0)
+		{
+
+			for w =0; w<o_marketlistbox.list_size; w++
+			{
+				kill o_marketlistbox.list_button[w]
+			}
+			o_marketlistbox.list_size =0
+		}
+		else
+		{
+			o_marketlistbox.list_size = num_items
+			for w=0; w<num_items; w++
+			{
+				o_marketlistbox.column [0].list_item [w] = conv$(ids[w])
+				o_marketlistbox.column [1].list_item [w] = itemNames [ids[w]]
+				o_marketlistbox.column [2].list_item [w] = conv$ (trade_value[w])
+				o_marketlistbox.column [3].list_item [w] = conv$ (inventory_count[w])
+				o_marketlistbox.list_order[w] = w
+			}
+		
+
+		}
+		for w =0; w< o_marketlistbox.list_size; w++
+		{
+			if ids[w]  < FirstMechChitID //it is a weapon
+			{
+				o_marketlistbox.column[0].list_icon[w] = MB_GPATH "weapon_" o_marketlistbox.column[0].list_item[w] ".tga",1,volatile
+				alphamode (o_marketlistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha
+			}
+			else //its a Mech
+			{
+
+				o_marketlistbox.column[0].list_icon[w] = MB_GPATH "mech_" conv$(ids[w]- FirstMechChitID) ".tga",1,volatile
+				alphamode (o_marketlistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha	
+			}
+		}	
+
+		initialize (o_marketlistbox)
+
+		if (num_items != 0)
+		{
+			if num_items < top_of_market_before
+			{
+				mail(-4, num_items, o_marketlistbox)
+			}
+			else
+			{
+				mail(-4, top_of_market_before, o_marketlistbox)
+			}
+		}
+
+		o_marketlistbox.column[0].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_marketlistbox.column[1].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_marketlistbox.column[2].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_marketlistbox.column[3].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+
+		o_marketlistbox.column[0].o_header.s_text = localize$(IDS_ML_ITEM)
+		o_marketlistbox.column[1].o_header.s_text = localize$(IDS_ML_WP_NAME)
+		o_marketlistbox.column[2].o_header.s_text = localize$(IDS_ML_VALUE)
+		o_marketlistbox.column[3].o_header.s_text = "#"		
+
+		// Because the icons have been changed since our last 
+		// initialize() call on o_marketlistbox
+		// this mail message is to refresh the weapon list box to
+		// avoid the clipping problem at the bottom of the list box
+		mail(-1, o_marketlistbox)
+		///////////////////////////////// 
+
+		callback ($$BM_CallbackHandler$$, BMDataSetupAcquiringChits, ids[], trade_value[], acquiring_damage[], acquiring_range[], acquiring_heat[], acquiring_weapon_recycle[], inventory_count[],num_items,75)
+
+		if (num_items == 0)
+		{
+
+			for w =0; w<o_acquiringlistbox.list_size; w++
+			{
+				kill o_acquiringlistbox.list_button[w]
+			}
+			o_acquiringlistbox.list_size =0
+		}
+		else
+		{
+			o_acquiringlistbox.list_size = num_items
+			for w=0; w<num_items; w++
+			{
+				o_acquiringlistbox.column [0].list_item [w] = conv$(ids[w])
+				o_acquiringlistbox.column [1].list_item [w] = conv$ (trade_value[w])
+				o_acquiringlistbox.column [2].list_item [w] = conv$ (inventory_count[w])
+				o_acquiringlistbox.list_order[w] = w
+			}
+
+			o_restorebutton.state = 0
+		
+
+		}
+		for w =0; w< o_acquiringlistbox.list_size; w++
+		{
+			if ids[w]  < FirstMechChitID //it is a weapon
+			{
+				o_acquiringlistbox.column[0].list_icon[w] = MB_GPATH "weapon_" o_acquiringlistbox.column[0].list_item[w] ".tga",1,volatile
+				alphamode (o_acquiringlistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha
+			}
+			else //its a Mech
+			{
+
+				o_acquiringlistbox.column[0].list_icon[w] = MB_GPATH "mech_" conv$(ids[w]- FirstMechChitID) ".tga",1,volatile
+				alphamode (o_acquiringlistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha	
+			}
+		}	
+
+		//initialize the list box if we are on the right tab
+
+		initialize (o_acquiringlistbox)
+
+		if (num_items != 0)
+		{
+			if num_items < top_of_acquiring_before
+			{
+				mail(-4, num_items, o_acquiringlistbox)
+			}
+			else
+			{
+				mail(-4, top_of_acquiring_before, o_acquiringlistbox)
+			}
+		}
+
+		o_acquiringlistbox.column[0].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_acquiringlistbox.column[1].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_acquiringlistbox.column[2].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		
+
+		o_acquiringlistbox.column[0].o_header.s_text = localize$(IDS_ML_ITEM)
+		o_acquiringlistbox.column[1].o_header.s_text = localize$(IDS_ML_VALUE)
+		o_acquiringlistbox.column[2].o_header.s_text = "#"		
+
+		acquiringTotal = conv$ (callback($$BM_CallbackHandler$$, BMGetAcquiringValue))
+
+		// Because the icons have been changed since our last 
+		// initialize() call on o_acquiringlistbox
+		// this mail message is to refresh the weapon list box to
+		// avoid the clipping problem at the bottom of the list box
+		mail(-1, o_acquiringlistbox)
+
+		//cover the trade button if a trade cannot be made
+		if ( callback($$BM_CallbackHandler$$, BMIsTradeValid) == 1)
+		{
+			//trade not valid
+			o_tradebutton.state = 0
+			deactivate (o_tradebutton_block)
+		}
+		else
+		{
+			//trade valid
+			o_tradebutton.state = 3
+			o_tradebutton_block.region = o_tradebutton.region
+			activate (o_tradebutton_block)
+		}
+
+	}
+
+	GUI_ACTIVATE
+	{
+		// Start with the restore button disabled
+		o_restorebutton.state	= 3
+
+		//activate the items
+		if o_salvagedroplistbox.nselected == 0
+		{
+			callback ($$BM_CallbackHandler$$, BMDataSetupSalvageChits, ids[], trade_value[], salvage_damage[], salvage_range[], salvage_heat[], salvage_weapon_recycle[], inventory_count[],num_items,75)
+		}
+		if o_salvagedroplistbox.nselected == 1
+		{
+			callback ($$BM_CallbackHandler$$, BMDataSetupBeamWeaponSalvageChits, ids[], trade_value[], salvage_damage[], salvage_range[], salvage_heat[], salvage_weapon_recycle[], inventory_count[],num_items,75)
+		}
+		if o_salvagedroplistbox.nselected == 2
+		{
+			callback ($$BM_CallbackHandler$$, BMDataSetupBallisticWeaponSalvageChits, ids[], trade_value[], salvage_damage[], salvage_range[], salvage_heat[], salvage_weapon_recycle[], inventory_count[],num_items,75)
+		}
+		if o_salvagedroplistbox.nselected == 3
+		{
+			callback ($$BM_CallbackHandler$$, BMDataSetupMissileWeaponSalvageChits, ids[], trade_value[], salvage_damage[], salvage_range[], salvage_heat[], salvage_weapon_recycle[], inventory_count[],num_items,75)
+		}
+		if o_salvagedroplistbox.nselected == 4
+		{
+			callback ($$BM_CallbackHandler$$, BMDataSetupMechSalvageChits, ids[], trade_value[], salvage_damage[], salvage_range[], salvage_heat[], salvage_weapon_recycle[], inventory_count[],num_items,75)
+		}
+	
+		if (num_items == 0)
+		{
+			for ( w=0; w<o_salvagelistbox.list_size; w++)
+			{
+				kill o_salvagelistbox.list_button[w]
+			}
+			o_salvagelistbox.list_size =0
+		}
+		else
+		{
+			o_salvagelistbox.list_size = num_items
+			for w =0; w< num_items; w++
+			{
+				o_salvagelistbox.column[0].list_item [w] = conv$(ids[w])
+				o_salvagelistbox.column[1].list_item [w] = itemNames [ids[w]]
+				o_salvagelistbox.column[2].list_item [w] = conv$(trade_value[w])
+				o_salvagelistbox.column[3].list_item [w] = conv$(inventory_count[w])
+			}
+		}
+		for w =0; w< o_salvagelistbox.list_size; w++
+		{
+			if ids[w]  < FirstMechChitID //it is a weapon
+			{
+				o_salvagelistbox.column[0].list_icon[w] = MB_GPATH "weapon_" o_salvagelistbox.column[0].list_item[w] ".tga",1,volatile
+				alphamode (o_salvagelistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha
+			}
+			else //its a Mech
+			{
+				o_salvagelistbox.column[0].list_icon[w] = MB_GPATH "mech_" conv$(ids[w]- FirstMechChitID) ".tga",1,volatile
+				alphamode (o_salvagelistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha	 
+			}
+		}	
+
+		initialize (o_salvagelistbox)
+			
+		
+		o_salvagelistbox.column[0].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_salvagelistbox.column[1].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_salvagelistbox.column[2].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_salvagelistbox.column[3].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+
+		o_salvagelistbox.column[0].o_header.s_text = localize$(IDS_ML_ITEM)
+		o_salvagelistbox.column[1].o_header.s_text = localize$(IDS_ML_WP_NAME)
+		o_salvagelistbox.column[2].o_header.s_text = localize$(IDS_ML_VALUE)
+		o_salvagelistbox.column[3].o_header.s_text = "#"
+
+		// Because the icons have been changed since our last 
+		// initialize() call on o_salvagelistbox
+		// this mail message is to refresh the weapon list box to
+		// avoid the clipping problem at the bottom of the list box
+		mail(-1, o_salvagelistbox)		
+////////////////////////////////////////////////////////////////////////
+		callback ($$BM_CallbackHandler$$, BMDataSetupOfferingChits, ids[], trade_value[], offering_damage[], offering_range[], offering_heat[], offering_weapon_recycle[], inventory_count[],num_items,75)
+	
+		if (num_items == 0)
+		{
+			for ( w=0; w<o_offeringlistbox.list_size; w++)
+			{
+				kill o_offeringlistbox.list_button[w]
+			}
+			o_offeringlistbox.list_size =0
+		}
+		else
+		{
+			o_offeringlistbox.list_size = num_items
+			for w =0; w< num_items; w++
+			{
+				o_offeringlistbox.column[0].list_item [w] = conv$(ids[w])
+				o_offeringlistbox.column[1].list_item [w] = conv$(trade_value[w])
+				o_offeringlistbox.column[2].list_item [w] = conv$(inventory_count[w])
+			}
+			o_restorebutton.state = 0
+		}
+		for w =0; w< o_offeringlistbox.list_size; w++
+		{
+			if ids[w]  < FirstMechChitID //it is a weapon
+			{
+				o_offeringlistbox.column[0].list_icon[w] = MB_GPATH "weapon_" o_offeringlistbox.column[0].list_item[w] ".tga",1,volatile
+				alphamode (o_offeringlistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha
+			}
+			else //its a Mech
+			{
+				o_offeringlistbox.column[0].list_icon[w] = MB_GPATH "mech_" conv$(ids[w]- FirstMechChitID) ".tga",1,volatile
+				alphamode (o_offeringlistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha	 
+			}
+		}	
+
+		initialize (o_offeringlistbox)
+			
+		o_offeringlistbox.column[0].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_offeringlistbox.column[1].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_offeringlistbox.column[2].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+
+		o_offeringlistbox.column[0].o_header.s_text = localize$(IDS_ML_ITEM)
+		o_offeringlistbox.column[1].o_header.s_text = localize$(IDS_ML_VALUE)
+		o_offeringlistbox.column[2].o_header.s_text = "#"
+
+		offeringTotal = conv$ ( callback($$BM_CallbackHandler$$,BMGetOfferingValue) )
+
+		// Because the icons have been changed since our last 
+		// initialize() call on o_offeringlistbox
+		// this mail message is to refresh the weapon list box to
+		// avoid the clipping problem at the bottom of the list box
+		mail(-1, o_offeringlistbox)		
+
+
+/////////////////////////////////////////////////////////////
+		//activate the items
+		if o_marketdroplistbox.nselected == 0
+		{
+			callback ($$BM_CallbackHandler$$, BMDataSetupMarketChits, ids[], trade_value[], market_damage[], market_range[], market_heat[], market_weapon_recycle[], inventory_count[],num_items,75)
+		}
+		if o_marketdroplistbox.nselected == 1
+		{
+			callback ($$BM_CallbackHandler$$, BMDataSetupBeamWeaponMarketChits, ids[], trade_value[], market_damage[], market_range[], market_heat[], market_weapon_recycle[], inventory_count[],num_items,75)
+		}
+		if o_marketdroplistbox.nselected == 2
+		{
+			callback ($$BM_CallbackHandler$$, BMDataSetupBallisticWeaponMarketChits, ids[], trade_value[], market_damage[], market_range[], market_heat[], market_weapon_recycle[], inventory_count[],num_items,75)
+		}
+		if o_marketdroplistbox.nselected == 3
+		{
+			callback ($$BM_CallbackHandler$$, BMDataSetupMissileWeaponMarketChits, ids[], trade_value[], market_damage[], market_range[], market_heat[], market_weapon_recycle[], inventory_count[],num_items,75)
+		}
+		if o_marketdroplistbox.nselected == 4
+		{
+			callback ($$BM_CallbackHandler$$, BMDataSetupMechMarketChits, ids[], trade_value[], market_damage[], market_range[], market_heat[], market_weapon_recycle[], inventory_count[],num_items,75)
+		}
+	
+		if (num_items == 0)
+		{
+			for ( w=0; w<o_marketlistbox.list_size; w++)
+			{
+				kill o_marketlistbox.list_button[w]
+			}
+			o_marketlistbox.list_size =0
+		}
+		else
+		{
+			o_marketlistbox.list_size = num_items
+			for w =0; w< num_items; w++
+			{
+				o_marketlistbox.column[0].list_item [w] = conv$(ids[w])
+				o_marketlistbox.column[1].list_item [w] = itemNames [ids[w]]
+				o_marketlistbox.column[2].list_item [w] = conv$(trade_value[w])
+				o_marketlistbox.column[3].list_item [w] = conv$(inventory_count[w])
+			}
+		}
+		for w =0; w< o_marketlistbox.list_size; w++
+		{
+			if ids[w]  < FirstMechChitID //it is a weapon
+			{
+				o_marketlistbox.column[0].list_icon[w] = MB_GPATH "weapon_" o_marketlistbox.column[0].list_item[w] ".tga",1,volatile
+				alphamode (o_marketlistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha
+			}
+			else //its a Mech
+			{
+				o_marketlistbox.column[0].list_icon[w] = MB_GPATH "mech_" conv$(ids[w]- FirstMechChitID) ".tga",1,volatile
+				alphamode (o_marketlistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha	 
+			}
+		}	
+
+		initialize (o_marketlistbox)
+
+		o_marketlistbox.column[0].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_marketlistbox.column[1].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_marketlistbox.column[2].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_marketlistbox.column[3].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+
+		o_marketlistbox.column[0].o_header.s_text = localize$(IDS_ML_ITEM)
+		o_marketlistbox.column[1].o_header.s_text = localize$(IDS_ML_WP_NAME)
+		o_marketlistbox.column[2].o_header.s_text = localize$(IDS_ML_VALUE)
+		o_marketlistbox.column[3].o_header.s_text = "#"
+
+		// Because the icons have been changed since our last 
+		// initialize() call on o_marketlistbox
+		// this mail message is to refresh the weapon list box to
+		// avoid the clipping problem at the bottom of the list box
+		mail(-1, o_marketlistbox)
+
+//////////////////////////////
+				callback ($$BM_CallbackHandler$$, BMDataSetupAcquiringChits, ids[], trade_value[], acquiring_damage[], acquiring_range[], acquiring_heat[], acquiring_weapon_recycle[], inventory_count[],num_items,75)
+	
+		if (num_items == 0)
+		{
+			for ( w=0; w<o_acquiringlistbox.list_size; w++)
+			{
+				kill o_acquiringlistbox.list_button[w]
+			}
+			o_acquiringlistbox.list_size =0
+		}
+		else
+		{
+			o_acquiringlistbox.list_size = num_items
+			for w =0; w< num_items; w++
+			{
+				o_acquiringlistbox.column[0].list_item [w] = conv$(ids[w])
+				o_acquiringlistbox.column[1].list_item [w] = conv$(trade_value[w])
+				o_acquiringlistbox.column[2].list_item [w] = conv$(inventory_count[w])
+			}
+			o_restorebutton.state = 0
+		}
+		for w =0; w< o_acquiringlistbox.list_size; w++
+		{
+			if ids[w]  < FirstMechChitID //it is a weapon
+			{
+				o_acquiringlistbox.column[0].list_icon[w] = MB_GPATH "weapon_" o_acquiringlistbox.column[0].list_item[w] ".tga",1,volatile
+				alphamode (o_acquiringlistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha
+			}
+			else //its a Mech
+			{
+				o_acquiringlistbox.column[0].list_icon[w] = MB_GPATH "mech_" conv$(ids[w]- FirstMechChitID) ".tga",1,volatile
+				alphamode (o_acquiringlistbox.column[0].list_icon[w]) = am_alpha_alphainvalpha	 
+			}
+		}	
+
+		
+		initialize (o_acquiringlistbox)
+			
+		
+		o_acquiringlistbox.column[0].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_acquiringlistbox.column[1].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+		o_acquiringlistbox.column[2].o_header.f_font = FPATH localize$(IDS_F_ML_LABEL)
+
+		o_acquiringlistbox.column[0].o_header.s_text = localize$(IDS_ML_ITEM)
+		o_acquiringlistbox.column[1].o_header.s_text = localize$(IDS_ML_VALUE)
+		o_acquiringlistbox.column[2].o_header.s_text = "#"
+
+		acquiringTotal = conv$ (callback($$BM_CallbackHandler$$, BMGetAcquiringValue))
+
+		// Because the icons have been changed since our last 
+		// initialize() call on o_acquiringlistbox
+		// this mail message is to refresh the weapon list box to
+		// avoid the clipping problem at the bottom of the list box
+		mail(-1, o_acquiringlistbox)	
+
+
+
+
+		activate (o_salvagelistbox)
+		activate (o_offeringlistbox)
+		activate (o_marketlistbox)
+		activate (o_acquiringlistbox)
+	
+		activate (o_item_pointer)
+		activate (o_drop_mask)
+		activate (o_offering_mask)
+		activate (o_acquiring_mask)
+
+		activate (o_SalvageRollOver)
+
+		activate (o_tradebutton)
+		if ( callback($$BM_CallbackHandler$$, BMIsTradeValid) == 1)
+		{
+			//trade not valid
+			o_tradebutton.state = 0
+			deactivate (o_tradebutton_block)
+		}
+		else
+		{
+			//trade valid
+			o_tradebutton.state = 3
+			activate (o_tradebutton_block)
+		}
+
+		mail(1)
+	}
+
+	GUI_DEACTIVATE
+	{
+
+		deactivate (o_tradebutton)
+		deactivate (o_tradebutton_block)
+		deactivate (o_salvagelistbox)
+		deactivate (o_offeringlistbox)
+		deactivate (o_marketlistbox)
+		deactivate (o_acquiringlistbox)
+
+		deactivate (o_item_pointer)
+		deactivate (o_drop_mask)
+		deactivate (o_offering_mask)
+		deactivate (o_acquiring_mask)
+
+		deactivate (o_InventoryTitleRollOver)
+
+	}
+
+	GUI_DRAW
+	{
+		// Darken the info box
+		setpencolor(0, 0, 0, 150)
+		drawrect 11, 527 to 642, 590
+
+		// Draw the darkened background and frame around the controls.
+		setpencolor(0,0,0,150)
+		drawrect 10,27 to 790,490
+		drawrect 10,491 to 319,514
+
+		setpencolor(255,255,255,255)
+		drawline 10,27 to 10,515
+		drawline 11,27 to 790,27
+
+		setpencolor(189,186,206,255)
+		drawline 11,27 to 11,515
+		drawline 11,514 to 319,514
+		drawline 318,514 to 318,490
+		drawline 318,490 to 791,490
+		drawline 790,489 to 790,26
+		drawline 790,28 to 11,28
+
+		setpencolor(115,117,115,255)
+		drawline 319,514 to 319,491
+
+		// Draw background boxes for various strings that are printed below.
+		setpencolor(68,68,85,255)
+		drawrect 83,34 to 233,59 // SALVAGE_LABEL
+		drawrect 302,82 to 362,106 // OFFERING_LABEL
+		drawrect 400,82 to 469,106 // offeringTotal
+
+		setpencolor(90,58,64,255)
+		drawrect 581,34 to 730,59 // MARKET_LABEL
+		drawrect 332,299 to 392,323 // ACQUIRING_LABEL
+		drawrect 430,299 to 499,323 // acquiringTotal
+
+		// Draw frames around boxes.  The frames need to be two pixels thick,
+		// which requires two drawframe calls per box.
+		setpencolor(189,186,206,255);
+		drawframe 83,34 to 233,59 // SALVAGE_LABEL
+		drawframe 84,35 to 232,58 // SALVAGE_LABEL
+		drawframe 302,82 to 362,106 // OFFERING_LABEL
+		drawframe 303,83 to 361,105 // OFFERING_LABEL
+		drawframe 400,82 to 469,106 // offeringTotal
+		drawframe 401,83 to 468,105 // offeringTotal
+		drawframe 581,34 to 730,59 // MARKET_LABEL
+		drawframe 582,35 to 729,58 // MARKET_LABEL
+		drawframe 332,299 to 392,323 // ACQUIRING_LABEL
+		drawframe 333,300 to 391,322 // ACQUIRING_LABEL
+		drawframe 430,299 to 499,323 // acquiringTotal
+		drawframe 431,300 to 498,322 // acquiringTotal
+
+		print3d_attributes = boldfont, 0xffff7200, 1, 1, 1, 0, 0
+		print3d_margins = 10, 5 to 324, 50
+		print3d_position = 10, 5
+		print3d localize$(IDS_ML_BLACK_MARKET)
+
+		print3d_attributes = boldfont, 0xffffffff, 1, 1, 1, 0, 0, just_center
+		print3d_margins = 88,35 to 228,57
+		print3d_position = 88, 37
+		print3d localize$(IDS_ML_SALVAGE_LABEL)
+
+		print3d_attributes = boldfont, 0xffffffff, 1, 1, 1, 0, 0, just_center
+		print3d_margins = 586,35 to 725,57
+		print3d_position = 586, 37
+		print3d localize$(IDS_ML_MARKET_LABEL)
+
+		print3d_attributes = boldfont, 0xffffffff, 1, 1, 1, 0, 0, just_center
+		print3d_margins = 302,83 to 362,103
+		print3d_position = 302, 85
+		print3d localize$(IDS_ML_OFFERING_LABEL)
+
+		print3d_attributes = boldfont, 0xffffffff, 1, 1, 1, 0, 0, just_right
+		print3d_margins = 400,83 to 460,103
+		print3d_position = 400, 85
+		print3d offeringTotal
+
+		print3d_attributes = boldfont, 0xffffffff, 1, 1, 1, 0, 0, just_center
+		print3d_margins = 332,300 to 392,320
+		print3d_position = 332, 302
+		print3d localize$(IDS_ML_ACQUIRING_LABEL)
+
+		print3d_attributes = boldfont, 0xffffffff, 1, 1, 1, 0, 0, just_right
+		print3d_margins = 430,300 to 490,320
+		print3d_position = 430, 302
+		print3d acquiringTotal
+
+		// WEAPON INFO STUFF
+		if showinfo == true
+		{
+			setpencolor(0xaaffffff)
+			drawline 175, 535 to 175, 581
+
+			print3d_attributes	= regfont, 0xffff7200, 1, 1, 1, 0, 0, just_right
+			print3d_margins		= 100, 526 to 170, 587
+
+			print3d_position	= 100, 529
+			if (sel_list_id == 250)
+			{
+				print3d salvage_range[sel_weapon]
+			}
+			else
+			if (sel_list_id == 251)
+			{
+				print3d offering_range[sel_weapon]
+			}
+			else
+			if (sel_list_id == 252)
+			{
+				print3d market_range[sel_weapon]
+			}
+			else
+			if (sel_list_id == 253)
+			{
+				print3d acquiring_range[sel_weapon]
+			}
+
+			print3d_position	= 100, 545
+			if (sel_list_id == 250)
+			{
+				print3d salvage_damage[sel_weapon]
+			}
+			else
+			if (sel_list_id == 251)
+			{
+				print3d offering_damage[sel_weapon]
+			}
+			else
+			if (sel_list_id == 252)
+			{
+				print3d market_damage[sel_weapon]
+			}
+			else
+			if (sel_list_id == 253)
+			{
+				print3d acquiring_damage[sel_weapon]
+			}
+
+			print3d_position	= 100, 559
+			if (sel_list_id == 250)
+			{
+				print3d salvage_heat[sel_weapon]
+			}
+			else
+			if (sel_list_id == 251)
+			{
+				print3d offering_heat[sel_weapon]
+			}
+			else
+			if (sel_list_id == 252)
+			{
+				print3d market_heat[sel_weapon]
+			}
+			else
+			if (sel_list_id == 253)
+			{
+				print3d acquiring_heat[sel_weapon]
+			}
+
+			print3d_position	= 100, 573
+			if (sel_list_id == 250)
+			{
+				print3d salvage_weapon_recycle[sel_weapon]
+			}
+			else
+			if (sel_list_id == 251)
+			{
+				print3d offering_weapon_recycle[sel_weapon]
+			}
+			else
+			if (sel_list_id == 252)
+			{
+				print3d market_weapon_recycle[sel_weapon]
+			}
+			else
+			if (sel_list_id == 253)
+			{
+				print3d acquiring_weapon_recycle[sel_weapon]
+			}
+
+			print3d_attributes	= regfont, 0xffff7200, 1, 1, 1, 0, 0
+			print3d_margins		= 15, 524 to 150, 585
+			print3d_position	= 15, 529
+			print3d localize$(IDS_ML_WEAPONRANGE_INFO)
+			print3d_position	= 15, 545
+			print3d localize$(IDS_ML_WEAPONDAMAGE_INFO)
+			print3d_position	= 15, 559
+			print3d localize$(IDS_ML_WEAPONHEAT_INFO)
+			print3d_position	= 15, 573
+			print3d localize$(IDS_ML_WEAPONRECYCLE_INFO)
+		}
+	}
+
+	
+	GUI_MAILBOX
+	{
+		if (sender == o_exitbutton)
+		{
+			play btnTriggeredSound,1
+			unfocus 
+			if exists(@infobox@)
+			{
+				script_end "infobox.script"
+			}
+
+			callback($$BM_CallbackHandler$$, BMExit)
+			
+			//you want to go back to the Mech Lab
+			callback($$Shell_CallbackHandler$$, ShellInitCampaignMechLab)
+			@SHELL@currentScreen = MECHBAY_SCREEN
+
+		}
+
+		if (sender == o_tradebutton)
+		{
+			play btnTriggeredSound,1
+			int tradeExecuted = callback ($$BM_CallbackHandler$$, BMExecuteTrade)
+			if (tradeExecuted == 0)
+			{
+				play notAllowed,1	
+			}
+			else
+			{
+				play addWeapon,1
+			}
+			initialize (this)
+
+
+		}
+
+		if (sender == o_restorebutton)
+		{
+			play btnTriggeredSound,1
+			callback ($$BM_CallbackHandler$$, BMRestore)
+			initialize (this)
+		}
+
+		if sender == o_salvagelistbox
+		{
+			top_of_salvage_list = getmessage()
+		}
+
+		if sender == o_offeringlistbox
+		{
+			top_of_offering_list = getmessage()
+		}
+
+		if sender == o_acquiringlistbox
+		{
+			top_of_acquiring_list = getmessage()
+		}
+
+		if sender == o_marketlistbox
+		{
+			top_of_market_list = getmessage()
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+item_pointer
+{
+	GUI_CREATE
+	{
+		int selected_item_id	= -1
+		int prev_selected_id	= -1
+		pane selected_item_icon
+		int		originListID  //sets what list the pointer cam off of
+		int draw				= false
+		framerate				= 5
+	}
+
+	GUI_EXECUTE
+	{
+		if selected_item_id != prev_selected_id
+		{
+			if selected_item_id != -1
+			{
+				if (selected_item_id < FirstMechChitID)
+				{
+					selected_item_icon = MB_GPATH "weapon_" conv$(selected_item_id) ".tga",1
+				}
+				else
+				{
+					selected_item_icon = MB_GPATH "mech_" conv$(selected_item_id -FirstMechChitID) ".tga",1
+				}
+
+
+				alphamode(selected_item_icon) = am_alpha_alphainvalpha
+				origin (selected_item_icon) = 10,10
+				color (selected_item_icon) = 255,255,255,160
+				prev_selected_id = selected_item_id
+				draw = true
+			}
+		}
+	}
+
+	GUI_DRAW
+	{
+		if selected_item_id != -1 && selected_item_id == prev_selected_id && draw == true
+		{
+			location = mouse.x,mouse.y,70
+			render selected_item_icon, mouse.x, mouse.y
+		}
+	}
+}
+
+
+
+//////////////////////////////////////////////////////////////////
+//This mask will cover the screen when the pointer is being dragged 
+//if the pointer is released on the drop mask, it will clear the pointer
+//also, if the pointer's origin was in the offering or acquiring lists
+//then it will be removed from that list and placed back on the original 
+drop_mask
+{
+	GUI_CREATE
+	{
+	
+		region		= 0,0 to 0,0
+		framerate	= 10
+		sound addWeapon				= APATH "sfx_add_weapon.wav"
+	}
+	
+	GUI_EXECUTE
+	{
+		if parent.o_item_pointer.selected_item_id != -1
+		{
+			region = 0,0 to getresx(), getresy()
+		}
+		else
+		{
+			region = 0,0 to 0,0
+		}
+		
+	}
+
+	LBUTTON_UPDATE
+	{
+
+		if mouse.left == BUTTON_RELEASED
+		{
+			//see if the pointer cam from the offering or acquiring list
+			//if so, it should be moved back to it original list
+
+			if parent.o_item_pointer.originListID == parent.o_offeringlistbox.id
+			{
+				callback ($$BM_CallbackHandler$$, BMCancelOfferForTrade,parent.o_item_pointer.selected_item_id) 
+				play addWeapon,1
+			}
+			if parent.o_item_pointer.originListID == parent.o_acquiringlistbox.id
+			{
+				callback ($$BM_CallbackHandler$$, BMCancelAcquireForTrade, parent.o_item_pointer.selected_item_id)
+				play addWeapon,1
+			}
+
+			parent.o_item_pointer.selected_item_id = -1;
+			initialize (parent)			
+		}
+		else
+		{
+			pass_on
+		}
+	}
+}
+
+////////  offering mask  /////////
+offering_mask
+{
+	GUI_CREATE
+	{
+		region = 0,0 to 0,0
+		framerate = 10
+		sound addWeapon				= APATH "sfx_add_weapon.wav"
+	}
+	
+	GUI_EXECUTE
+	{
+		if ((parent.o_item_pointer.selected_item_id != -1) &&  ( parent.o_item_pointer.originListID == parent.o_salvagelistbox.id))
+		{
+			region = o_offeringlistbox.region
+
+		}
+		else
+		{
+			region = 0,0 to 0,0
+		}
+	}
+
+	LBUTTON_UPDATE
+	{
+		int handled = 0
+		int isLastMech = 0
+		if mouse.left == BUTTON_RELEASED
+		{
+			//see if it was comming from the salvage list box, and if so, move the item to the offering list
+			if 	( parent.o_item_pointer.originListID == parent.o_salvagelistbox.id)
+			{
+				callback ($$BM_CallbackHandler$$, BMOfferItemForTrade,parent.o_item_pointer.selected_item_id,isLastMech) 
+				if (isLastMech == 1)
+				{
+					oError	= o_bm_ErrorScreen
+					oError.location = 0,0,250
+					oError.error_header	= LOCALIZE$(IDS_ERROR_BM_LASTMECH)
+					oError.error_message= LOCALIZE$(IDS_ERROR_BM_LASTMECH_MSG)
+					initialize(oError)
+					activate(oError)
+				}
+				else
+				{
+					play addWeapon,1
+				}
+			}					
+			parent.o_item_pointer.selected_item_id = -1
+			initialize (parent)
+			handled =1
+		}
+		
+		if handled != 1 
+		{
+			pass_on
+		}
+	}
+}
+
+
+acquiring_mask
+{
+	GUI_CREATE
+	{
+		region = 0,0 to 0,0
+		framerate = 10
+		sound addWeapon				= APATH "sfx_add_weapon.wav"
+	}
+
+	GUI_EXECUTE
+	{
+		if ((parent.o_item_pointer.selected_item_id != -1) && (parent.o_item_pointer.originListID == parent.o_marketlistbox.id))
+		{
+			region = o_acquiringlistbox.region
+		}
+		else
+		{
+			region = 0,0 to 0,0
+		}
+	}
+
+	LBUTTON_UPDATE
+	{
+		int handled = 0
+		if mouse.left == BUTTON_RELEASED
+		{
+			//see if it was coming from the market box
+			if (parent.o_item_pointer.originListID == parent.o_marketlistbox.id)
+			{
+				callback ($$BM_CallbackHandler$$, BMAcquireItemForTrade, parent.o_item_pointer.selected_item_id)
+				play addWeapon,1
+			}
+			parent.o_item_pointer.selected_item_id = -1
+			initialize (parent)
+			handled = 1
+		}
+		if handled != 1
+		{
+			pass_on
+		}
+
+	}
+
+}
+
+
+region_block
+{
+	GUI_CREATE
+	{
+		int region_width
+		int region_height
+		int id
+
+		region = 0,0 to 0,0
+	}
+
+	GUI_INIT
+	{
+		region = 0, 0 to region_width,region_height
+	}
+
+	REGION_ENTERED
+	{
+		mail(id, @infobox@)
+	}
+
+	REGION_EXITED
+	{
+		mail(-1, @infobox@)
+	}
+}
+
+o_bm_ErrorScreen
+{
+	GUI_CREATE
+	{
+		// use the whole region
+		location				= 0, 0, 500
+		region					= 0, 0 to getresx(), getresy()
+
+		Font3d gHeaderFont3d	= FPATH localize$(IDS_F_GEN_SCREEN_TITLE)
+		Font3d gFont3d			= FPATH localize$(IDS_F_GEN_DESCRIPTION)
+
+		int initialized = false
+		int extended_size = 0
+		pane gFrame
+
+		framerate				= 30
+
+		sound btnTriggeredSound = APATH "sfx_button5.wav"
+
+		// These three variables below MUST BE INITIALIZED
+		string error_header		= localize$(IDS_GN_ERROR)
+		string error_message	= ""
+		string buttonText
+
+		// default text message for button
+		buttonText = localize$(IDS_GN_OK)
+
+		// button object
+		object mbutton
+
+		// variables for fading in and out
+		int alpha_val = 5
+		int fadeout = false
+	}
+
+	GUI_INIT
+	{
+		// set up button object
+		mbutton = s_multistatepane
+		mbutton.file = WPATH "button_reg_138x23_3state.tga"
+		mbutton.total_states = 3
+		mbutton.id = 0
+		mbutton.text = buttonText
+
+		if (extended_size == 0)
+		{
+			gFrame = GPATH "dialog_350x250.tga"
+
+			// set up the location of button object and then initialize
+			mbutton.location = getresx() / 2 - 71, (getresy() / 2) + 72, location.z + 20
+			initialize(mbutton)
+		}
+		else
+		{
+			gFrame = GPATH "dialog_500x300.tga"
+
+			// set up the location of button object and then initialize
+			mbutton.location = getresx() / 2 - 71, (getresy() / 2) + 90, location.z + 20
+			initialize(mbutton)
+		}
+
+		initialized = true
+	}
+
+	GUI_ACTIVATE
+	{
+		activate(mbutton)
+		focus(mbutton)
+	}
+
+	GUI_DEACTIVATE
+	{
+		deactivate(mbutton)
+	}
+
+	GUI_EXECUTE
+	{
+		if fadeout == true
+		{
+			// Fading out(Exiting)
+			if alpha_val > 0
+			{
+				alpha_val = alpha_val - 5
+				if alpha_val <= 0
+				{
+					alpha_val = 0
+					deactivate(this)
+				}
+			}
+		}
+		else 
+		{
+			// Fading in(Entering)
+			if alpha_val < 150
+			{
+				alpha_val += 5
+				if alpha_val >= 150
+				{
+					alpha_val = 150
+				}
+			}
+		}
+	}
+
+	GUI_DRAW
+	{
+		// fade in or fade out
+		setpencolor(0, 0, 0, alpha_val)
+		drawrect 0, 0 to getresx(), getresy()
+
+		// Redraw the frame if we are not fading out(exiting)
+		if ((initialized) && (fadeout == false))
+		{
+			color (gframe) = packcolor(255, 255, 255, alpha_val)
+			if (extended_size == 0)
+			{
+				render gframe, getresx() / 2 - 175, getresy() / 2 - 125
+
+				// Header
+			 	print3d_attributes	= gHeaderFont3d,0xffffffff,1,0,1,0,0,2
+				print3d_margins		= getresx() / 2 - 175, (getresy() / 2) - 118  to getresx() / 2 + 175, getresy() / 2 - 50
+				print3d_position	= getresx() / 2 - 175, (getresy() / 2) - 118
+				print3d error_header
+
+			 	print3d_attributes	= gFont3d,0xffffffff,1,1,1,0,0,0
+				print3d_margins		= (getresx() / 2) - 145, getresy() / 2 - 75 to getresx() / 2 + 145, getresy() / 2 + 75
+				print3d_position	= (getresx() / 2) - 145, getresy() / 2 - 75
+				print3d error_message
+			}
+			else
+			{
+				render gframe, getresx() / 2 - 250, getresy() / 2 - 150
+
+				// Header
+			 	print3d_attributes	= gHeaderFont3d,0xffffffff,1,0,1,0,0,2
+				print3d_margins		= getresx() / 2 - 185, (getresy() / 2) - 140  to getresx() / 2 + 175, getresy() / 2 - 80
+				print3d_position	= getresx() / 2 - 185, (getresy() / 2) - 140
+				print3d error_header
+
+			 	print3d_attributes	= gFont3d,0xffffffff,1,-1,1,0,0,0
+				print3d_margins		= (getresx() / 2) - 225, getresy() / 2 - 100 to getresx() / 2 + 225, getresy() / 2 + 85
+				print3d_position	= (getresx() / 2) - 225, getresy() / 2 - 100
+				print3d error_message
+			}
+		}
+	}
+
+	GUI_MAILBOX
+	{
+		// deactivate this object
+		if (sender == mbutton)
+		{
+			play btnTriggeredSound,1
+
+			// Tell this script to fade out and deactivate all its objects	
+			fadeout = true
+			deactivate(mbutton)
+		}
+	}
+}

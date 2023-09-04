@@ -1,0 +1,1 @@
+java -jar BinaryPatcher_1.0.jar -rootDir "D:\mw-core\core - source.mw4" -infoFile "statInfo.json" -format csv getStats

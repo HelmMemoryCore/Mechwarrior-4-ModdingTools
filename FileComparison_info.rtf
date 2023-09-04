@@ -1,0 +1,330 @@
+{\rtf1\ansi\ansicpg1252\deff0{\fonttbl{\f0\fswiss\fcharset0 Arial;}}
+{\colortbl ;\red0\green0\blue128;\red0\green0\blue255;\red0\green128\blue128;\red255\green0\blue0;}
+{\*\generator Msftedit 5.41.15.1507;}\viewkind4\uc1\pard\cf1\lang1033\f0\fs20 NOTES:\par
+1. We can certainly make some very cool GUI changes I never really did here... including better arrangment of information in the mech bay.\cf2\par
+\par
+\par
+\par
+*** IN ALL OF PROPS, the only changes are in folders "mechs" and "mercshellscripts"\par
+\pard\qc\b\fs36 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\par
+\\mercsshellscripts\\mechbay\b0\fs20\par
+\pard\par
+C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\armor.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\armor.script\par
+\cf0 Appears to have specific entries regarding head_bar,  right_arm_bar, left_arm_bar, right_torso_bar, center_torso_bar, left_torso_bar, rear_torso_bar, right_leg_bar, left_leg_bar.\par
+\par
+It also contains info on the substitution of parent.mech_id with mech_id2, so that mektek's mechs would retain the "parent" id of the mech they derived from.\par
+\par
+Also contains the Armor buttons Mektek Added to reduce armor quickly.\par
+\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\blackmarket_main.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\blackmarket_main.script\par
+\cf0\par
+Contains changes to add mektek mechs.\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\chassis.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\chassis.script\par
+\par
+\cf0 Contains changes to add mektek mechs.\par
+Contains modifications to the camo -- camodroplist to add custom camo names\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\freemarket.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\freemarket.script\par
+\par
+\par
+\cf0 changes to add multiple weapons.\par
+NOTED: Weapons appear to be numbered according to a range in the array 0 to 50 = LASER / BEAM weps, 51-99 Missiles, NARCS, maybe others...\par
+\par
+I will have to look at the array index constants known as\cf3 :W_CapPPC, W_HeavyLargeLaser, W_HeavyMediumLaser, W_ISRM2, W_RL20, W_ATM6M, W_ATM12M, W_ATM6E, W_ATM12E, W_MiniGauss, W_Napalm, W_LongTomTracer, W_ThumperTracer, W_Thumper, W_ClanLightMGun, W_LAC5, W_HVAC2, W_HVAC5, W_HVAC10, W_HVAC20\par
+\cf0\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\infobox.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\infobox.script\par
+\cf0\par
+Contains text descriptions of 9 new mechs added.\par
+Contains an index called temp_mech_id[375]\par
+ versus\par
+\cf3 int max_mech_index = 377\tab // mektek // change this when adding new mechs!\par
+int temp_mech_id[max_mech_index+1]\par
+\cf0\par
+\cf4 (have to figure out why the index only increaed by 2 versus 9 or so...)\par
+\par
+the temp_mech_id[i++] appears to have mektek mechs interspersed in the array versus addended... I am not 100% sure why...\par
+the chassis_tech[  ] array has the exact chassis ID number associated with it.  ***\par
+chassis_tech[xxx] gets assigned = localize$(DNL_CLAN) or localize$(DNL_INNERSPHERE)\par
+\par
+ALSO contains Tonnage assignments:\cf1  I am not sure if these are merely assignments for text purposes versus actual assignments.\par
+\cf4\tab tonnage[0]\tab\tab    = 40 \tab // Arctic Wolf\par
+\par
+ALSO contains top_speed assignments:\par
+\tab top_speed[0]\tab    \tab = 121   // Arctic Wolf\par
+\par
+ALSO contains infomessage[xxx] assignments for weapons... \par
+\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\marketmulticolumnlistbox.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\marketmulticolumnlistbox.script\par
+\par
+\cf0 Changes to: \tab mechChitInfoIDs [FirstMechChitID + M_Avatar\tab\tab   ]=  369\tab // mektek\par
+to list Mektek mechs.\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\mc_listboxes_weapon.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\mc_listboxes_weapon.script\cf0\par
+\par
+\par
+contains a change by mektek to change functionality to the way weapons are selected?  \par
+\cf3 // begin mektek - if clause added - only works now if you selected all weaponws\par
+\tab\tab\tab if parent.parent.o_weaponsdroplistbox.nselected == 0\tab // mektek condition added\par
+\cf0\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\mechbay_main.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\mechbay_main.script\cf0\par
+\par
+\par
+changes to add mech_name[   ]  to list new mektek mechs., also some functioanlity based on campaign versus non-campaign.\par
+\par
+Also it appears that here is the location for how mech info is revealed.. ie we are in the mechbay.\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\weapons.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\weapons.script\cf0\par
+\par
+contains additions for weapons added by mektek.  Such as including an iterator max called \cf3 LastWeaponID\cf0 .\par
+A rehash of code for weapon_names[xxx]\par
+\par
+Also, seems here we have \tab head_location[0], lefttorso_location[0], centertorso_location[0], righttorso_location[0], leftarm_location[0], rightarm_location[0], special1_location[0], special2_location,  as well as \tab special1_label, special2_label\par
+\par
+some code to "reject weps" by mektek for beam, ballistic, missiles in several areas: \cf3 ids[w] = -1\tab // reject it \par
+\par
+\cf0 Also added was some code by mektek to add weapons to pre-made weapons groups if they already belonged in a group. (nice)\par
+\cf3 // this code saves the weapon group settings. after the weapon is\par
+// added we compare this to the new group settings to figure out\par
+// which weapon got added. we will then properly set the group for it\par
+\tab int grp_array_size = 30\par
+and code for \par
+/ Fix for ammo box bug, now Save and Restore buttons show up correctly changing ammo.\tab // mektek\par
+// beg mektek\par
+\tab\tab\tab parent.parent.parent.parent.just_saved = false\par
+\tab\tab\tab parent.parent.parent.parent.o_restorebutton.state = 0\par
+\tab\tab\tab initialize(parent.parent.parent.parent.o_restorebutton)\par
+\tab\tab\tab parent.parent.parent.parent.o_savebutton.state = 0\par
+\tab\tab\tab initialize(parent.parent.parent.parent.o_savebutton)\par
+// end mektek\par
+\cf0 ...\par
+\par
+\par
+\pard\qc\cf2\fs32 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\par
+\\mercsshellscripts\\multiplayer\par
+\pard\cf0\fs20\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\buildrestriction.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\buildrestriction.script\cf0\par
+\par
+Minor changes to include the LastMechID info, szChassis[xxx] for Mech names, nChassisID[M_Avatar]       \tab = M_Avatar, for mech ID\par
+A change to a list maximum: \tab\cf3 int List_max = 128\tab // mektek\par
+\par
+\cf0 A change to how a list was ordered\cf3 : //for (i=FirstMechID; i<(LastMechID - FirstMechID + 1); i++)\tab\par
+\tab\tab\tab\tab\tab for (i=FirstMechID; i<=LastMechID; i++)\tab // mektek\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\hostgame1.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\hostgame1.script\par
+\cf3\tab o_frame.screen_name\tab\tab = localize$(IDS_MP_HG_TITLE) " " MEKTEK_VERSION\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\hostlobbymission.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\hostlobbymission.script\par
+\cf0 changes to Timer values for how long a game lasts.\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\hostlobbyserver.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\hostlobbyserver.script\par
+\cf0\par
+szChassis[M_Avatar] \tab = "Avatar"\tab // mektek, another change to mech list names... \par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\listofgames.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\listofgames.script\par
+\par
+\cf0 version info.\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\multicolumnlist.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\multicolumnlist.script\par
+\cf0\par
+version info\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\multiplayerconsole.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\multiplayerconsole.script\par
+\cf0\par
+version info\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\skins_listbox.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\skins_listbox.script\par
+\cf0\par
+? unused variable change? \cf3 float handleheight = 15\tab // added by mektek\par
+\cf2\par
+\par
+\pard\qc\b\fs36 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\b0\fs20\par
+\pard\par
+\par
+C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\callsign.h\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\callsign.h\par
+\par
+\cf0 has the bot names for randomized bot name creation.\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\campaignscreen.script\cf0\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\campaignscreen.script\par
+\par
+\cf0 version info\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\cinema_credits.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\cinema_credits.script\par
+\par
+\cf0 version info\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\commandcenter.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\commandcenter.script\par
+\par
+\cf0 version info\cf2\par
+\cf0\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\instantaction.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\instantaction.script\cf0\par
+\par
+\cf2\par
+\cf0 version info, oddly commented out mektek code...making zero net changes.\cf2\par
+\par
+\par
+C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mainmenu.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mainmenu.script\par
+\cf0\par
+version info, main menu changes to buttons and order.  Also a call to run "Content\\\\MercShellScripts\\\\Mods.script"\par
+\cf2\par
+C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechlabheaders_mercs.h\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechlabheaders_mercs.h\par
+\par
+\cf0 has all the constants for: The "Zones" for LL, RL, LA, RA, RT, LT, CT, HUD, S1, S2 (not rear odd) \par
+Call Back IDs for lots of cool functions... \par
+AND Mech IDs *** \par
+\cf3 /Mech IDs\par
+// NOTE: IF YOU CHANGE THESE, YOU MUST ALSO CHANGE THE CONSTANTS IN MWCONST.ABI!!!\par
+//       YOU MUST ALSO CHANGE THE CHASSIS LOOKUP TABLE IN MECH.HPP/MECH.CPP\par
+\cf1 *** So, here is the offical area for adding new mech IDs, and also WEP IDS, subsystem ids (ECM, LAMS, AMS, etc..), \par
+Slot IDs for Empty, Missile, projectile, Beam, and Omni., Armor slots locations IDS, Armor type IDs\par
+Internal structure IDs for Internal Standard, and Internal EndoSteel. IS tech and also Clan tech ID values\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\netlobby.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\netlobby.script\par
+\cf0\par
+version info, some wierd BS way of showing the chassis type in the netlobby of enemy players mech chassis, also\par
+a lits of mechs added to the game: \cf3 chassis_names[M_Avatar] = \tab "Avatar"\tab // mektek \par
+\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\netscore.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\netscore.script\par
+\par
+\cf0 version info\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\openingcinema.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\openingcinema.script\par
+\cf0\par
+The intro movies and what not...\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\options.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\options.script\par
+\par
+\cf0 version info\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\pauseoptions.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\pauseoptions.script\par
+\par
+\cf0 version info\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\pauseoptionsmodal.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\pauseoptionsmodal.script\par
+\par
+\cf0 version info\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\pilotentry.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\pilotentry.script\par
+\par
+\cf0 version info\par
+\cf2\par
+C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\postmission.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\postmission.script\par
+\par
+\cf0 version info\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\premission.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\premission.script\cf0\par
+\par
+version info\cf2\par
+\par
+C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\scriptstrings.h\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\scriptstrings.h\par
+\par
+\cf0 thousands of defines for what apears to be strings, and also a addon\cf2 : \cf3 #include "Content\\\\MercsShellScripts\\\\mekpak_version.script"\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\solarispre.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\solarispre.script\par
+\par
+\cf0 version info\cf2\par
+\par
+C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\starsystem.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\starsystem.script\par
+\par
+\cf0 version info\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\weaponnames.h\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\weaponnames.h\par
+\par
+\par
+\b Constants for Weapon names are here... ***\par
+\b0\par
+\par
+\pard\qc\fs32 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\\par
+_props.mw4\\mechs\par
+\par
+\pard *** has mechnames.animscript files for each mech... very interesting.\par
+\fs20\par
+C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_core.mw4\\effects\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_core.mw4\\effects\par
+\par
+\cf0 contains changes / additions for the weps that were added by mektek.\cf2\par
+\par
+\par
+C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_core.mw4\\tables\\mechchassistable.mpt\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_core.mw4\\tables\\mechchassistable.mpt\par
+\par
+\cf0 *** hold important info on the mech's \cf2 .data\par
+\cf0  probably related to mech ID and the order of entry., includes the new mechs!!!!\par
+Need to go thru this with Hex Editor.\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_core.mw4\\tables\\mechchassistable.tbl\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_core.mw4\\tables\\mechchassistable.tbl\par
+\cf0  \cf2\par
+\cf0 *** hold important info on the mech's \cf2 .data (very similar to .mpt of same name)\par
+\cf0 probably related to mech ID and the order of entry., includes the new mechs!!!!\par
+Need to go thru this with Hex Editor.\cf2\par
+\par
+\par
+\par
+\par
+C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_core.mw4\\tables\\mechtable.mpt\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_core.mw4\\tables\\mechtable.mpt\par
+\par
+\cf0 *** hold important info on the mech's \cf2 .instance  (very similar to .tbl of same name)\par
+\cf0 , probably related to mech ID and the order of entry., includes the new mechs!!!!\par
+Need to go thru this with Hex Editor.\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_core.mw4\\tables\\mechtable.tbl\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_core.mw4\\tables\\mechtable.tbl\par
+\par
+\cf0 *** hold important info on the mech's \cf2 .instance\cf0\par
+, probably related to mech ID and the order of entry., includes the new mechs!!!!\par
+Need to go thru this with Hex Editor.\par
+\cf2\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\par
+\cf0\par
+\par
+}
+ 

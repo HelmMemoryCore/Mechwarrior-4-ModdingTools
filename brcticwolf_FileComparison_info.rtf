@@ -1,0 +1,933 @@
+{\rtf1\ansi\ansicpg1252\deff0{\fonttbl{\f0\fswiss\fcharset0 Arial;}{\f1\fnil\fcharset0 Courier New;}}
+{\colortbl ;\red0\green0\blue128;\red0\green0\blue255;\red0\green128\blue128;\red255\green0\blue0;\red0\green128\blue0;\red0\green255\blue0;}
+{\*\generator Msftedit 5.41.15.1507;}\viewkind4\uc1\pard\cf1\lang1033\f0\fs20 NOTES:\par
+1. We can certainly make some very cool GUI changes I never really did here... including better arrangment of information in the mech bay.\cf2\par
+\par
+\par
+\par
+*** IN ALL OF PROPS, the only changes are in folders "mechs" and "mercshellscripts"\par
+\pard\qc\b\fs36 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\par
+\\mercsshellscripts\\mechbay\b0\fs20\par
+\pard\par
+C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\armor.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\armor.script\par
+\cf0 Appears to have specific entries regarding head_bar,  right_arm_bar, left_arm_bar, right_torso_bar, center_torso_bar, left_torso_bar, rear_torso_bar, right_leg_bar, left_leg_bar.\par
+\par
+It also contains info on the substitution of parent.mech_id with mech_id2, so that mektek's mechs would retain the "parent" id of the mech they derived from.\par
+\par
+Also contains the Armor buttons Mektek Added to reduce armor quickly.\par
+\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\blackmarket_main.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\blackmarket_main.script\par
+\cf0\par
+Contains changes to add mektek mechs.\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\chassis.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\chassis.script\par
+\par
+\cf0 Contains changes to add mektek mechs.\par
+Contains modifications to the camo -- camodroplist to add custom camo names\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\freemarket.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\freemarket.script\par
+\par
+\par
+\cf0 changes to add multiple weapons.\par
+NOTED: Weapons appear to be numbered according to a range in the array 0 to 50 = LASER / BEAM weps, 51-99 Missiles, NARCS, maybe others...\par
+\par
+I will have to look at the array index constants known as\cf3 :W_CapPPC, W_HeavyLargeLaser, W_HeavyMediumLaser, W_ISRM2, W_RL20, W_ATM6M, W_ATM12M, W_ATM6E, W_ATM12E, W_MiniGauss, W_Napalm, W_LongTomTracer, W_ThumperTracer, W_Thumper, W_ClanLightMGun, W_LAC5, W_HVAC2, W_HVAC5, W_HVAC10, W_HVAC20\par
+\cf0\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\infobox.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\infobox.script\par
+\cf0\par
+Contains text descriptions of 9 new mechs added.\par
+Contains an index called temp_mech_id[375]\par
+ versus\par
+\cf3 int max_mech_index = 377\tab // mektek // change this when adding new mechs!\par
+int temp_mech_id[max_mech_index+1]\par
+\cf0\par
+\cf4 (have to figure out why the index only increaed by 2 versus 9 or so...)\par
+\par
+the temp_mech_id[i++] appears to have mektek mechs interspersed in the array versus addended... I am not 100% sure why...\par
+the chassis_tech[  ] array has the exact chassis ID number associated with it.  ***\par
+chassis_tech[xxx] gets assigned = localize$(DNL_CLAN) or localize$(DNL_INNERSPHERE)\par
+\par
+ALSO contains Tonnage assignments:\cf1  I am not sure if these are merely assignments for text purposes versus actual assignments.\par
+\cf4\tab tonnage[0]\tab\tab    = 40 \tab // Arctic Wolf\par
+\par
+ALSO contains top_speed assignments:\par
+\tab top_speed[0]\tab    \tab = 121   // Arctic Wolf\par
+\par
+ALSO contains infomessage[xxx] assignments for weapons... \par
+\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\marketmulticolumnlistbox.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\marketmulticolumnlistbox.script\par
+\par
+\cf0 Changes to: \tab mechChitInfoIDs [FirstMechChitID + M_Avatar\tab\tab   ]=  369\tab // mektek\par
+to list Mektek mechs.\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\mc_listboxes_weapon.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\mc_listboxes_weapon.script\cf0\par
+\par
+\par
+contains a change by mektek to change functionality to the way weapons are selected?  \par
+\cf3 // begin mektek - if clause added - only works now if you selected all weaponws\par
+\tab\tab\tab if parent.parent.o_weaponsdroplistbox.nselected == 0\tab // mektek condition added\par
+\cf0\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\mechbay_main.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\mechbay_main.script\cf0\par
+\par
+\par
+changes to add mech_name[   ]  to list new mektek mechs., also some functioanlity based on campaign versus non-campaign.\par
+\par
+Also it appears that here is the location for how mech info is revealed.. ie we are in the mechbay.\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\weapons.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\weapons.script\cf0\par
+\par
+contains additions for weapons added by mektek.  Such as including an iterator max called \cf3 LastWeaponID\cf0 .\par
+A rehash of code for weapon_names[xxx]\par
+\par
+Also, seems here we have \tab head_location[0], lefttorso_location[0], centertorso_location[0], righttorso_location[0], leftarm_location[0], rightarm_location[0], special1_location[0], special2_location,  as well as \tab special1_label, special2_label\par
+\par
+some code to "reject weps" by mektek for beam, ballistic, missiles in several areas: \cf3 ids[w] = -1\tab // reject it \par
+\par
+\cf0 Also added was some code by mektek to add weapons to pre-made weapons groups if they already belonged in a group. (nice)\par
+\cf3 // this code saves the weapon group settings. after the weapon is\par
+// added we compare this to the new group settings to figure out\par
+// which weapon got added. we will then properly set the group for it\par
+\tab int grp_array_size = 30\par
+and code for \par
+/ Fix for ammo box bug, now Save and Restore buttons show up correctly changing ammo.\tab // mektek\par
+// beg mektek\par
+\tab\tab\tab parent.parent.parent.parent.just_saved = false\par
+\tab\tab\tab parent.parent.parent.parent.o_restorebutton.state = 0\par
+\tab\tab\tab initialize(parent.parent.parent.parent.o_restorebutton)\par
+\tab\tab\tab parent.parent.parent.parent.o_savebutton.state = 0\par
+\tab\tab\tab initialize(parent.parent.parent.parent.o_savebutton)\par
+// end mektek\par
+\cf0 ...\par
+\par
+\par
+\pard\qc\cf2\fs32 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\par
+\\mercsshellscripts\\multiplayer\par
+\pard\cf0\fs20\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\buildrestriction.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\buildrestriction.script\cf0\par
+\par
+Minor changes to include the LastMechID info, szChassis[xxx] for Mech names, nChassisID[M_Avatar]       \tab = M_Avatar, for mech ID\par
+A change to a list maximum: \tab\cf3 int List_max = 128\tab // mektek\par
+\par
+\cf0 A change to how a list was ordered\cf3 : //for (i=FirstMechID; i<(LastMechID - FirstMechID + 1); i++)\tab\par
+\tab\tab\tab\tab\tab for (i=FirstMechID; i<=LastMechID; i++)\tab // mektek\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\hostgame1.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\hostgame1.script\par
+\cf3\tab o_frame.screen_name\tab\tab = localize$(IDS_MP_HG_TITLE) " " MEKTEK_VERSION\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\hostlobbymission.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\hostlobbymission.script\par
+\cf0 changes to Timer values for how long a game lasts.\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\hostlobbyserver.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\hostlobbyserver.script\par
+\cf0\par
+szChassis[M_Avatar] \tab = "Avatar"\tab // mektek, another change to mech list names... \par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\listofgames.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\listofgames.script\par
+\par
+\cf0 version info.\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\multicolumnlist.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\multicolumnlist.script\par
+\cf0\par
+version info\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\multiplayerconsole.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\multiplayerconsole.script\par
+\cf0\par
+version info\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\skins_listbox.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\skins_listbox.script\par
+\cf0\par
+? unused variable change? \cf3 float handleheight = 15\tab // added by mektek\par
+\cf2\par
+\par
+\pard\qc\b\fs36 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\b0\fs20\par
+\pard\par
+\par
+C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\callsign.h\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\callsign.h\par
+\par
+\cf0 has the bot names for randomized bot name creation.\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\campaignscreen.script\cf0\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\campaignscreen.script\par
+\par
+\cf0 version info\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\cinema_credits.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\cinema_credits.script\par
+\par
+\cf0 version info\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\commandcenter.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\commandcenter.script\par
+\par
+\cf0 version info\cf2\par
+\cf0\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\instantaction.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\instantaction.script\cf0\par
+\par
+\cf2\par
+\cf0 version info, oddly commented out mektek code...making zero net changes.\cf2\par
+\par
+\par
+C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mainmenu.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mainmenu.script\par
+\cf0\par
+version info, main menu changes to buttons and order.  Also a call to run "Content\\\\MercShellScripts\\\\Mods.script"\par
+\cf2\par
+C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechlabheaders_mercs.h\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechlabheaders_mercs.h\par
+\par
+\cf0 has all the constants for: The "Zones" for LL, RL, LA, RA, RT, LT, CT, HUD, S1, S2 (not rear odd) \par
+Call Back IDs for lots of cool functions... \par
+AND Mech IDs *** \par
+\cf3 /Mech IDs\par
+// NOTE: IF YOU CHANGE THESE, YOU MUST ALSO CHANGE THE CONSTANTS IN MWCONST.ABI!!!\par
+//       YOU MUST ALSO CHANGE THE CHASSIS LOOKUP TABLE IN MECH.HPP/MECH.CPP\par
+\cf1 *** \cf4 So, here is the offical area for adding new mech IDs,\cf1  and also WEP IDS, subsystem ids (ECM, LAMS, AMS, etc..), \par
+Slot IDs for Empty, Missile, projectile, Beam, and Omni., Armor slots locations IDS, Armor type IDs\par
+Internal structure IDs for Internal Standard, and Internal EndoSteel. IS tech and also Clan tech ID values\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\netlobby.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\netlobby.script\par
+\cf0\par
+version info, some wierd BS way of showing the chassis type in the netlobby of enemy players mech chassis, also\par
+a lits of mechs added to the game: \cf3 chassis_names[M_Avatar] = \tab "Avatar"\tab // mektek \par
+\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\netscore.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\netscore.script\par
+\par
+\cf0 version info\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\openingcinema.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\openingcinema.script\par
+\cf0\par
+The intro movies and what not...\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\options.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\options.script\par
+\par
+\cf0 version info\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\pauseoptions.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\pauseoptions.script\par
+\par
+\cf0 version info\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\pauseoptionsmodal.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\pauseoptionsmodal.script\par
+\par
+\cf0 version info\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\pilotentry.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\pilotentry.script\par
+\par
+\cf0 version info\par
+\cf2\par
+C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\postmission.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\postmission.script\par
+\par
+\cf0 version info\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\premission.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\premission.script\cf0\par
+\par
+version info\cf2\par
+\par
+C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\scriptstrings.h\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\scriptstrings.h\par
+\par
+\cf0 thousands of defines for what apears to be strings, and also a addon\cf2 : \cf3 #include "Content\\\\MercsShellScripts\\\\mekpak_version.script"\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\solarispre.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\solarispre.script\par
+\par
+\cf0 version info\cf2\par
+\par
+C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\starsystem.script\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\starsystem.script\par
+\par
+\cf0 version info\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_props.mw4\\mercsshellscripts\\weaponnames.h\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\weaponnames.h\par
+\par
+\par
+\b Constants for Weapon names are here... ***\par
+\b0\par
+\par
+\pard\qc\fs32 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\\par
+_props.mw4\\mechs\par
+\par
+\pard *** has mechnames.animscript files for each mech... very interesting.\par
+\fs20\par
+C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_core.mw4\\effects\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_core.mw4\\effects\par
+\par
+\cf0 contains changes / additions for the weps that were added by mektek.\cf2\par
+\par
+\par
+C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_core.mw4\\tables\\mechchassistable.mpt\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_core.mw4\\tables\\mechchassistable.mpt\par
+\par
+\cf0 *** hold important info on the mech's \cf2 .data\par
+\cf0  probably related to mech ID and the order of entry., includes the new mechs!!!!\par
+Need to go thru this with Hex Editor.\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_core.mw4\\tables\\mechchassistable.tbl\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_core.mw4\\tables\\mechchassistable.tbl\par
+\cf0  \cf2\par
+\cf0 *** hold important info on the mech's \cf2 .data (very similar to .mpt of same name)\par
+\cf0 probably related to mech ID and the order of entry., includes the new mechs!!!!\par
+Need to go thru this with Hex Editor.\cf2\par
+\par
+\par
+\par
+\par
+C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_core.mw4\\tables\\mechtable.mpt\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_core.mw4\\tables\\mechtable.mpt\par
+\par
+\cf0 *** hold important info on the mech's \cf2 .instance  (very similar to .tbl of same name)\par
+\cf0 , probably related to mech ID and the order of entry., includes the new mechs!!!!\par
+Need to go thru this with Hex Editor.\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_PR1\\RESOURCE\\_core.mw4\\tables\\mechtable.tbl\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_core.mw4\\tables\\mechtable.tbl\par
+\par
+\cf0 *** hold important info on the mech's \cf2 .instance\cf0\par
+, probably related to mech ID and the order of entry., includes the new mechs!!!!\par
+Need to go thru this with Hex Editor.\par
+\cf2\par
+\par
+\par
+___________________________________________________________________________________________________________\par
+\par
+\par
+\par
+\par
+\cf4 *** Search on M_Avatar (helps to locate all regions where mech changes might be needed)\par
+\cf2 Processing file : C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechweight.script\par
+\par
+\cf0\f1\tab\tab\cf3 mechWeightClassString[M_Avatar]\tab\tab = IDS_ML_CH_HEAVY\tab\tab // Avatar\tab // mektek\par
+\tab\tab mechWeightClassString[M_Warhammer]\tab\tab = IDS_ML_CH_HEAVY\tab\tab // Warhammer\tab // mektek\par
+\tab\tab mechWeightClassString[M_Strider]\tab\tab = IDS_ML_CH_MEDIUM\tab\tab // Strider\tab // mektek\par
+\tab\tab mechWeightClassString[M_Marauder]\tab\tab = IDS_ML_CH_HEAVY\tab\tab // Marauder\tab // mektek\par
+\tab\tab mechWeightClassString[M_Bloodasp]\tab\tab = IDS_ML_CH_ASSAULT\tab\tab // mektek\par
+\tab\tab mechWeightClassString[M_UrbanmechIIC]\tab\tab = IDS_ML_CH_LIGHT\tab\tab // Warhammer\tab // mektek\par
+\tab\tab mechWeightClassString[M_Stalker]\tab\tab = IDS_ML_CH_ASSAULT\tab\tab // mektek\par
+\tab\tab mechWeightClassString[M_Ares]\tab\tab = IDS_ML_CH_HEAVY\tab\tab // mektek\par
+\tab\tab mechWeightClassString[M_Urbanmech]\tab\tab = IDS_ML_CH_LIGHT\tab\tab // Warhammer\tab // mektek\par
+\tab\tab\cf4 mechWeightClassString[\f0 M_BrcticWolf\f1 ]\tab\tab = IDS_ML_CH_MEDIUM\tab\tab // Mechstorm\par
+\cf3\par
+\tab\tab\par
+\cf0\tab\tab mechWeightClassArray[M_Avatar]\tab\tab = WC_HEAVY\tab\tab\tab // Avatar\tab // mektek\par
+\tab\tab mechWeightClassArray[M_Warhammer]\tab = WC_HEAVY\tab\tab // Warhammer\tab // mektek\par
+\tab\tab mechWeightClassArray[M_Strider]\tab\tab = WC_MEDIUM\tab\tab\tab // Strider\tab // mektek\par
+\tab\tab mechWeightClassArray[M_Marauder]\tab = WC_HEAVY\tab\tab\tab // Madcat\tab // mektek\par
+\tab\tab mechWeightClassArray[M_Bloodasp]\tab = WC_ASSAULT\tab\tab\tab // mektek\par
+\tab\tab mechWeightClassArray[M_UrbanmechIIC]\tab = WC_LIGHT\tab\tab\tab // Urban Mech\tab // mektek\par
+\tab\tab mechWeightClassArray[M_Stalker]\tab\tab = WC_ASSAULT\tab\tab\tab // mektek\par
+\tab\tab mechWeightClassArray[M_Ares]\tab\tab = WC_HEAVY\tab\tab\tab // mektek\par
+\tab\tab mechWeightClassArray[M_Urbanmech]\tab = WC_LIGHT\tab\tab\tab // Urban Mech\tab // mektek\par
+\cf4\tab\tab mechWeightClassArray[\f0 M_BrcticWolf\f1 ]\tab = WC_MEDIUM\tab\tab\tab // Mechstorm\cf0\par
+\cf3\par
+\par
+\f0\par
+\cf2\par
+\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\buildrestriction.script\par
+\tab\tab\cf3 szChassis[M_Avatar]          \tab = "Avatar"\tab // mektek\par
+\tab\tab szChassis[M_Warhammer]         \tab = "Warhammer"\tab // mektek\par
+\tab\tab szChassis[M_Strider]          \tab = "Strider"\tab // mektek\par
+\tab\tab szChassis[M_Marauder]          \tab = "Marauder"\tab // mektek\par
+\tab\tab szChassis[M_Bloodasp]          \tab = "Blood Asp"\tab // mektek\par
+\tab\tab szChassis[M_UrbanmechIIC]       = "Urban Mech Clan"\tab // mektek\par
+\tab\tab szChassis[M_Stalker]          \tab = "Stalker"\tab // mektek\par
+\tab\tab szChassis[M_Ares]          \tab = "Ares"\tab // mektek\par
+\tab\tab szChassis[M_Urbanmech]       \tab = "Urban Mech IS"\tab // mektek\par
+\cf4 *** need to add:\cf3\par
+\cf2\par
+\cf4\tab\tab szChassis[M_BrcticWolf]       \tab = "Arctic Wolf II"\tab // Mechstorm\par
+\par
+AND\par
+\par
+\par
+\tab\tab\cf3 nChassisID[M_Avatar]       \tab = M_Avatar\tab // mektek\par
+\tab\tab nChassisID[M_Warhammer]       \tab = M_Warhammer\tab // mektek\par
+\tab\tab nChassisID[M_Strider]       \tab = M_Strider\tab // mektek\par
+\tab\tab nChassisID[M_Marauder]        \tab = M_Marauder\tab // mektek\par
+\tab\tab nChassisID[M_Bloodasp]        \tab = M_Bloodasp\tab // mektek\par
+\tab\tab nChassisID[M_UrbanmechIIC]       = M_UrbanmechIIC\tab // mektek\par
+\tab\tab nChassisID[M_Stalker]       \tab = M_Stalker\tab // mektek\par
+\tab\tab nChassisID[M_Ares]       \tab = M_Ares\tab // mektek\par
+\tab\tab nChassisID[M_Urbanmech]       \tab = M_Urbanmech\tab // mektek\par
+\cf4\tab\tab nChassisID[M_BrcticWolf]       \tab = M_BrcticWolf\tab // Mechstorm\par
+\par
+\par
+\cf2 C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\multiplayer\\hostlobbyserver.script\par
+\par
+\tab\tab\cf3 string szChassis[LastMechID + 1]\par
+\tab\tab for (i = 0; i < LastMSMechID + 1; i++)\tab // mektek added (-1) (see below)\par
+\tab\tab\{\par
+\tab\tab\tab szChassis[i]\tab = localize$(DNL_ARCTICWOLF + i)\par
+\tab\tab\}\par
+\par
+\tab\tab szChassis[M_Avatar] \tab = "Avatar"\tab // mektek\par
+\tab\tab szChassis[M_Warhammer] \tab = "Warhammer"\tab // mektek\par
+\tab\tab szChassis[M_Strider] \tab = "Strider"\tab // mektek\par
+\tab\tab szChassis[M_Marauder] \tab = "Marauder"\tab // mektek\par
+\tab\tab szChassis[M_Bloodasp] \tab = "Blood Asp"\tab // mektek\par
+\tab\tab szChassis[M_UrbanmechIIC] \tab = "Urban Mech Clan"\tab // mektek\par
+\tab\tab szChassis[M_Stalker] \tab = "Stalker"\tab // mektek\par
+\tab\tab szChassis[M_Ares] \tab = "Ares"\tab // mektek\par
+\tab\tab szChassis[M_Urbanmech] \tab = "Urban Mech IS"\tab // mektek\par
+\cf2\tab\tab\cf4 szChassis[M_BrcticWolf]       \tab = "Arctic Wolf II"\tab // Mechstorm\par
+\cf2\par
+\par
+\par
+C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechlabheaders_mercs.h\par
+\par
+\cf3\tab\tab #define LastMSMechID\tab\tab 43\tab //mektek\par
+\par
+\tab\tab #define\tab M_Avatar\tab\tab 44\tab // mektek\par
+\tab\tab #define\tab M_Warhammer\tab\tab 45\tab // mektek\par
+\tab\tab #define\tab M_Strider\tab\tab 46\tab // mektek\par
+\tab\tab #define\tab M_Marauder\tab\tab 47\tab // mektek\par
+\tab\tab #define\tab M_Bloodasp\tab\tab 48\tab // mektek\par
+\tab\tab #define\tab M_Ares\tab\tab\tab 49\tab // mektek\par
+\tab\tab #define\tab M_Stalker\tab\tab 50\tab // mektek\par
+\tab\tab #define\tab M_UrbanmechIIC\tab\tab 51\tab // mektek\par
+\tab\tab #define\tab M_Urbanmech\tab\tab 52\tab // mektek\par
+\tab\tab\cf4 #define\tab M_BrcticWolf\tab\tab 53\tab // Mechstorm\par
+\cf3\par
+\tab\tab\cf4 //\cf3  #define LastMechID \tab\tab M_Urbanmech\tab // mektek\cf4  // Mechstorm\par
+\tab\tab\cf3  #define LastMechID \tab\tab\cf4 M_BrcticWolf \cf3\tab\cf4 // Mechstorm\par
+\cf3\par
+\tab\tab #define NoMechID \tab\tab LastMechID + 1 //This is used for the stack sprites in the campaign screen...//mektek\par
+\tab\tab #define M_CameraShip LastMechID+1\par
+\tab\tab #define EmptyMechID LastMechID+2\par
+\cf2\par
+Processing file : C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\netlobby.script\par
+\par
+\cf0\f1\tab\tab\cf3 mechlist[43]\tab =  "IS Assault"\tab\tab // zeus\par
+\tab\tab mechlist[M_Avatar]\tab = "Camera Ship"\tab // mektek\par
+\tab\tab mechlist[M_Warhammer]\tab = "unknown"\tab // mektek\par
+\tab\tab mechlist[M_Strider]\tab = "unknown"\tab // mektek\par
+\tab\tab mechlist[M_Marauder]\tab = "unknown"\tab // mektek\par
+\tab\tab mechlist[M_Bloodasp]\tab = "unknown"\tab // mektek\par
+\tab\tab mechlist[M_UrbanmechIIC] = "unknown"\tab // mektek\par
+\tab\tab mechlist[M_Stalker]\tab = "unknown"\tab // mektek\par
+\tab\tab mechlist[M_Ares]\tab = "unknown"\tab // mektek\par
+\tab\tab\cf4 mechlist[\f0 M_BrcticWolf\f1 ]\tab = "unknown"\tab // Mechstorm\cf3\par
+\par
+\tab\tab mechlist[M_CameraShip]\tab =  localize$(IDS_MP_LOBBY_CAMERA)\par
+\tab\tab mechlist[EmptyMechID]\tab =  localize$(IDS_MP_LOBBY_NONE)\par
+\par
+\par
+\tab\tab // Chasis String array\par
+\tab\tab string chassis_names[LastMechID + 1 ]\par
+\tab\tab for (i = 0; i < LastMSMechID + 1 ; i++)\tab // mektek (was LastMechID + 1)\par
+\tab\tab\{\par
+\tab\tab\tab chassis_names[i] = localize$(DNL_ARCTICWOLF + i)\par
+\tab\tab\}\par
+\tab\tab chassis_names[M_Avatar] = \tab "Avatar"\tab // mektek \par
+\tab\tab chassis_names[M_Warhammer] = \tab "Warhammer"\tab // mektek \par
+\tab\tab chassis_names[M_Strider] = \tab "Strider"\tab // mektek \par
+\tab\tab chassis_names[M_Marauder] = \tab "Marauder"\tab // mektek \par
+\tab\tab chassis_names[M_Bloodasp] = \tab "Blood Asp"\tab // mektek \par
+\tab\tab chassis_names[M_UrbanmechIIC] = \tab "Urban Mech"\tab // mektek \par
+\tab\tab chassis_names[M_Stalker] = \tab "Stalker"\tab // mektek \par
+\tab\tab chassis_names[M_Ares] = \tab "Ares"\tab // mektek \par
+\tab\tab\cf4 chassis_names[\f0 M_BrcticWolf\f1 ] = \tab "Arctic Wolf II"\tab // Mechstorm \par
+\cf3\par
+\par
+\tab\tab object build_weapons = build_weapon_names\par
+\tab\}\par
+\par
+\f0\par
+\cf2 Processing file : C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\armor.script\par
+\tab\tab\par
+\tab\tab\cf3\f1 head_bar[43]\tab = 560,180,10\tab\tab\tab\tab // Zeus\par
+\tab\tab head_bar[M_Avatar]\tab = 560,150,10\tab\tab\tab\tab // Avatar\tab // mektek\par
+\tab\tab head_bar[M_Warhammer]\tab = 570,150,10\tab\tab\tab\tab // Warhammer\tab // mektek\par
+\tab\tab head_bar[M_Strider]\tab = 565,260,10\tab\tab\tab\tab // Strider\tab // mektek\par
+\tab\tab head_bar[M_Bloodasp]\tab = 575,140,10\tab\tab\tab\tab // mektek\par
+\tab\tab head_bar[M_Marauder]\tab = 565,180,10\tab\tab\tab\tab // Marauder\tab // mektek\par
+\tab\tab head_bar[M_UrbanmechIIC]\tab = 565,260,10\tab\tab\tab\tab // Urban Mech\tab // mektek\par
+\tab\tab head_bar[M_Stalker]\tab = 575,170,10\tab\tab\tab\tab // mektek\par
+\tab\tab head_bar[M_Ares] \tab = 560,250,10\tab\tab\tab\tab // \par
+\tab\tab head_bar[M_Urbanmech]\tab = 565,260,10\tab\tab\tab\tab // Urban Mech\tab // mektek\par
+\tab\tab\cf4 head_bar[\f0 M_BrcticWolf\f1 ]\tab = 570,290,10\tab\tab\tab\tab // Arctic Wolf II\tab // Mechstorm\cf3\par
+\tab\tab head_bar[NoMechID]\tab = 560,100,10\par
+\cf2\f0\par
+\cf0\f1\tab\tab\cf3 right_arm_bar[43]= 490,280,10       \tab\tab // Zeus\par
+\tab\tab right_arm_bar[M_Avatar]= 435,250,10       \tab\tab // Avatar\tab // mektek\par
+\tab\tab right_arm_bar[M_Warhammer]= 430,280,10       \tab\tab // Warhammer\tab // mektek\par
+\tab\tab right_arm_bar[M_Strider]= 480,280,10       \tab\tab // Strider\tab // mektek\par
+\tab\tab right_arm_bar[M_Marauder]= 450,240,10       \tab\tab // Marauder\tab // mektek\par
+\tab\tab right_arm_bar[M_Bloodasp]= 460,240,10\tab\tab\tab\tab // mektek\par
+\tab\tab right_arm_bar[M_UrbanmechIIC]= 470,310,10       \tab\tab // Urban Mech\tab // mektek\par
+\tab\tab right_arm_bar[M_Stalker]= 460,180,10       \tab\tab // mektek\par
+\tab\tab right_arm_bar[M_Ares] = 460,280,10       \tab\tab // \par
+\tab\tab right_arm_bar[M_Urbanmech]= 470,310,10       \tab\tab // Urban Mech\tab // mektek\par
+\tab\tab\cf4 right_arm_bar[\f0 M_BrcticWolf\f1 ]= 460,280,10       \tab\tab // Arctic Wolf II\tab // Mechstorm\par
+\cf3\tab\tab right_arm_bar[NoMechID]= 500,150,10\par
+\cf0\f0\par
+\cf3\f1\tab\tab left_arm_bar[43]\tab = 630,280,10    \tab\tab // Zeus\par
+\tab\tab left_arm_bar[M_Avatar]\tab = 690,250,10    \tab\tab // Avatar\tab // mektek\par
+\tab\tab left_arm_bar[M_Warhammer]\tab = 690,280,10    \tab\tab // Warhammer\tab // mektek\par
+\tab\tab left_arm_bar[M_Strider]\tab = 635,280,10    \tab\tab // Strider\tab // mektek\par
+\tab\tab left_arm_bar[M_Marauder]\tab = 675,240,10    \tab\tab // Marauder\tab // mektek\par
+\tab\tab left_arm_bar[M_Bloodasp]\tab = 660,240,10\tab\tab\tab // mektek\par
+\tab\tab left_arm_bar[M_UrbanmechIIC]\tab = 650,310,10    \tab\tab // Urban Mech\tab // mektek\par
+\tab\tab left_arm_bar[M_Stalker]\tab = 660,180,10    \tab\tab // mektek\par
+\tab\tab left_arm_bar[M_Ares] \tab = 640,280,10    \tab\tab // \par
+\tab\tab left_arm_bar[M_Urbanmech]\tab = 650,310,10    \tab\tab // Urban Mech\tab // mektek\par
+\cf4\tab\tab left_arm_bar[\f0 M_BrcticWolf\f1 ]\tab = 660,280,10    \tab\tab // Arctic Wolf II\tab // Mechstorm\cf0\par
+\tab\cf3\tab left_arm_bar[NoMechID]\tab = 640,150,10\par
+\par
+\tab\tab right_torso_bar[43]\tab = 525,250,10    \tab\tab // zeus\par
+\tab\tab right_torso_bar[M_Avatar]\tab = 500,220,10    \tab\tab // Avatar\tab // mektek\par
+\tab\tab right_torso_bar[M_Warhammer]\tab = 520,220,10    \tab\tab // Warhammer\tab // mektek\par
+\tab\tab right_torso_bar[M_Strider]\tab = 530,290,10    \tab\tab // Strider\tab // mektek\par
+\tab\tab right_torso_bar[M_Marauder]\tab = 525,240,10    \tab\tab // Marauder\tab // mektek\par
+\tab\tab right_torso_bar[M_Bloodasp]\tab = 515,180,10\tab\tab\tab // mektek\par
+\tab\tab right_torso_bar[M_UrbanmechIIC]\tab = 530,310,10    \tab\tab // Urban Mech\tab // mektek\par
+\tab\tab right_torso_bar[M_Stalker]\tab = 515,200,10    \tab\tab // mektek\par
+\tab\tab right_torso_bar[M_Ares] \tab = 525,270,10    \tab\tab // \par
+\tab\tab right_torso_bar[M_Urbanmech]\tab = 530,310,10    \tab\tab // Urban Mech\tab // mektek\par
+\cf4\tab\tab right_torso_bar[\f0 M_BrcticWolf\f1 ]\tab = 510,250,10    \tab\tab // Arctic Wolf II\tab // Mechstorm\par
+\cf3\tab\tab right_torso_bar[NoMechID]\tab = 530,200,10\par
+\par
+\cf0\tab\tab\cf3 center_torso_bar[43]= 575,230,10    \tab\tab // zeus\par
+\tab\tab center_torso_bar[M_Avatar]= 575,220,10    \tab\tab // Avatar\tab // mektek\par
+\tab\tab center_torso_bar[M_Warhammer]= 575,260,10    \tab\tab // Warhammer\tab // mektek\par
+\tab\tab center_torso_bar[M_Strider]= 575,310,10    \tab\tab // Strider\tab // mektek\par
+\tab\tab center_torso_bar[M_Marauder]= 575,180,10    \tab\tab // Marauder\tab // mektek\par
+\tab\tab center_torso_bar[M_Bloodasp]= 580,210,10\tab\tab\tab // mektek\par
+\tab\tab center_torso_bar[M_UrbanmechIIC]= 575,300,10    \tab\tab // Urban Mech\tab // mektek\par
+\tab\tab center_torso_bar[M_Stalker]= 580,260,10    \tab\tab // mektek\par
+\tab\tab center_torso_bar[M_Ares] = 575,290,10    \tab\tab // \par
+\tab\tab center_torso_bar[M_Urbanmech]= 575,300,10    \tab\tab // Urban Mech\tab // mektek\par
+\cf4\tab\tab center_torso_bar[\f0 M_BrcticWolf\f1 ]= 575,220,10    \tab\tab // Arctic Wolf II\tab // Mechstorm\par
+\cf3\tab\tab center_torso_bar[NoMechID]= 580,200,10\par
+\par
+\par
+\tab\tab left_torso_bar[43]= 600,250,10      \tab\tab // zeus\par
+\tab\tab left_torso_bar[M_Avatar]= 630,220,10      \tab\tab // Avatar\tab // mektek\par
+\tab\tab left_torso_bar[M_Warhammer]= 610,220,10      \tab\tab // Warhammer\tab // mektek\par
+\tab\tab left_torso_bar[M_Strider]= 605,290,10      \tab\tab // Strider\tab // mektek\par
+\tab\tab left_torso_bar[M_Marauder]= 605,240,10      \tab\tab // Marauder\tab // mektek\par
+\tab\tab left_torso_bar[M_Bloodasp]= 615,180,10\tab\tab\tab\tab // mektek\par
+\tab\tab left_torso_bar[M_UrbanmechIIC]= 605,310,10      \tab\tab // Urban Mech\tab // mektek\par
+\tab\tab left_torso_bar[M_Stalker]= 615,200,10      \tab\tab // mektek\par
+\tab\tab left_torso_bar[M_Ares] = 605,270,10      \tab\tab // \par
+\tab\tab left_torso_bar[M_Urbanmech]= 605,310,10      \tab\tab // Urban Mech\tab // mektek\par
+\tab\tab\cf4 left_torso_bar[\f0 M_BrcticWolf\f1 ]= 615,250,10      \tab\tab // Arctic Wolf II\tab // Mechstorm\par
+\cf3\tab\tab left_torso_bar[NoMechID]= 610,200,10\par
+\par
+\tab\tab rear_torso_bar[43]= 555,240,10      \tab\tab // zeus\par
+\tab\tab rear_torso_bar[M_Avatar]= 550,220,10      \tab\tab // Avatar\tab // mektek\par
+\tab\tab rear_torso_bar[M_Warhammer]= 555,270,10      \tab\tab // Warhammer\tab // mektek\par
+\tab\tab rear_torso_bar[M_Strider]= 555,320,10 \tab      \tab\tab // Strider\tab // mektek\par
+\tab\tab rear_torso_bar[M_Marauder]= 555,260,10      \tab\tab // Marauder\tab // mektek\par
+\tab\tab rear_torso_bar[M_Bloodasp]= 560,220,10\tab\tab\tab\tab // mektek\par
+\tab\tab rear_torso_bar[M_UrbanmechIIC]= 555,310,10      \tab\tab // Urban Mech\tab // mektek\par
+\tab\tab rear_torso_bar[M_Stalker]= 560,270,10      \tab\tab // mektek\par
+\tab\tab rear_torso_bar[M_Ares] = 555,300,10      \tab\tab // \par
+\tab\tab rear_torso_bar[M_Urbanmech]= 555,310,10      \tab\tab // Urban Mech\tab // mektek\par
+\cf4\tab\tab rear_torso_bar[\f0 M_BrcticWolf\f1 ]= 555,310,10      \tab\tab // Arctic Wolf II\tab // Mechstorm\par
+\cf3\tab\tab rear_torso_bar[NoMechID]= 555,230,10\par
+\par
+\tab\tab\par
+\tab\tab right_leg_bar[M_Avatar]= 480,370,10       \tab\tab // Avatar\tab // mektek\par
+\tab\tab right_leg_bar[M_Warhammer]= 480,350,10       \tab\tab // Warhammer\tab // mektek\par
+\tab\tab right_leg_bar[M_Strider]= 490,390,10       \tab\tab // Strider\tab // mektek\par
+\tab\tab right_leg_bar[M_Marauder]= 490,350,10       \tab\tab // Marauder\tab // mektek\par
+\tab\tab right_leg_bar[M_Bloodasp]= 470,350,10\tab\tab\tab\tab // mektek\par
+\tab\tab right_leg_bar[M_UrbanmechIIC]= 500,390,10       \tab\tab // Urban Mech\tab // mektek\par
+\tab\tab right_leg_bar[M_Stalker]= 480,350,10       \tab\tab // mektek\par
+\tab\tab right_leg_bar[M_Ares] = 505,370,10       \tab\tab // \par
+\tab\tab right_leg_bar[M_Urbanmech]= 500,390,10       \tab\tab // Urban Mech\tab // mektek\par
+\cf4\tab\tab right_leg_bar[\f0 M_BrcticWolf\f1 ]= 500,380,10       \tab\tab // Arctic Wolf II\tab // Mechstorm\par
+\cf3\tab\tab right_leg_bar[NoMechID]= 500,350,10\par
+\par
+\f0\par
+\f1\tab\tab left_leg_bar[43]= 600,370,10        \tab\tab // zeus\par
+\tab\tab left_leg_bar[M_Avatar]= 650,370,10        \tab\tab // Avatar\tab // mektek\par
+\tab\tab left_leg_bar[M_Warhammer]= 655,350,10        \tab\tab // Warhammer\tab // mektek\par
+\tab\tab left_leg_bar[M_Strider]= 620,390,10        \tab\tab // Strider\tab // mektek\par
+\tab\tab left_leg_bar[M_Marauder]= 630,350,10        \tab\tab // Marauder\tab // mektek\par
+\tab\tab left_leg_bar[M_Bloodasp]= 650,350,10\tab\tab\tab\tab // mektek\par
+\tab\tab left_leg_bar[M_UrbanmechIIC]= 625,390,10        \tab\tab // Urban Mech\tab // mektek\par
+\tab\tab left_leg_bar[M_Stalker]= 640,350,10        \tab\tab // mektek\par
+\tab\tab left_leg_bar[M_Ares] = 620,370,10        \tab\tab // \par
+\tab\tab left_leg_bar[M_Urbanmech]= 625,390,10        \tab\tab // Urban Mech\tab // mektek\par
+\cf4\tab\tab left_leg_bar[\f0 M_BrcticWolf\f1 ]= 625,390,10        \tab\tab // Arctic Wolf II\tab // Mechstorm\par
+\cf0\tab\cf3\tab left_leg_bar[NoMechID]= 640,350,10\cf0\par
+\cf3\f0\par
+\cf2 Processing file : C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\blackmarket_main.script\cf3\par
+\tab\tab\par
+\par
+\tab\tab\f1 itemNames [FirstMechChitID + M_Avatar ] = "Avatar"\tab // mektek\par
+\tab\tab itemNames [FirstMechChitID + M_Warhammer ] = "Warhammer"\tab // mektek\par
+\tab\tab itemNames [FirstMechChitID + M_Strider ] = "Strider"\tab // mektek\par
+\tab\tab itemNames [FirstMechChitID + M_Marauder ] = "Marauder"\tab // mektek\par
+\tab\tab itemNames [FirstMechChitID + M_Bloodasp ] = "Blood Asp"\tab // mektek\par
+\tab\tab itemNames [FirstMechChitID + M_UrbanmechIIC ] = "Urban Mech Clan"\tab // mektek\par
+\tab\tab itemNames [FirstMechChitID + M_Stalker ] = "Stalker"\tab // mektek\par
+\tab\tab itemNames [FirstMechChitID + M_Ares ] = "Ares"\tab // mektek\par
+\tab\tab itemNames [FirstMechChitID + M_Urbanmech ] = "Urban Mech IS"\tab // mektek\par
+\cf4\tab\tab itemNames [FirstMechChitID + \f0 M_BrcticWolf\f1 ] = "Arctic Wolf II"\tab // Mechstorm\par
+\par
+\par
+\cf2 Processing file : C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\chassis.script\cf3\par
+\par
+\tab\tab chassis_tech[43]\tab = localize$(DNL_INNERSPHERE)    //zeus\par
+\tab\tab chassis_tech[M_Avatar]\tab = localize$(DNL_INNERSPHERE)    //Avatar\tab // mektek\par
+\tab\tab chassis_tech[M_Warhammer]\tab = localize$(DNL_INNERSPHERE)    //Warhammer\tab // mektek\par
+\tab\tab chassis_tech[M_Strider]\tab = localize$(DNL_INNERSPHERE)    //Strider\tab // mektek\par
+\tab\tab chassis_tech[M_Marauder]\tab = localize$(DNL_INNERSPHERE)           // mektek\par
+\tab\tab chassis_tech[M_Bloodasp]\tab = localize$(DNL_CLAN)\tab         // mektek\par
+\tab\tab chassis_tech[M_UrbanmechIIC]\tab = localize$(DNL_CLAN)    //Clan Urban Mech\tab // mektek\par
+\tab\tab chassis_tech[M_Stalker]\tab = localize$(DNL_INNERSPHERE)    // mektek\par
+\tab\tab chassis_tech[M_Ares]\tab = localize$(DNL_CLAN)\tab         // mektek\par
+\tab\tab chassis_tech[M_Urbanmech]\tab = localize$(DNL_INNERSPHERE)    //Clan Urban Mech\tab // mektek\par
+\cf4\tab\tab chassis_tech[\f0 M_BrcticWolf\f1 ]\tab = localize$(DNL_CLAN)    //Clan \tab // Arctic Wolf II\tab // Mechstorm\par
+\cf3\par
+\cf2 Processing file : C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\freemarket.script\cf3\par
+\par
+\cf5\f0\par
+\tab\cf3\tab\f1 itemNames [FirstMechChitID + M_Zeus ] = localize$ (DNL_ZEUS)\par
+\tab\tab itemNames [FirstMechChitID + M_Avatar ] = "Avatar"\tab // mektek\par
+\tab\tab itemNames [FirstMechChitID + M_Warhammer ] = "Warhammer"\tab // mektek\par
+\tab\tab itemNames [FirstMechChitID + M_Strider ] = "Strider"\tab // mektek\par
+\tab\tab itemNames [FirstMechChitID + M_Marauder ] = "Marauder"\tab // mektek\par
+\tab\tab itemNames [FirstMechChitID + M_Bloodasp ] = "Blood Asp"\tab // mektek\par
+\tab\tab itemNames [FirstMechChitID + M_UrbanmechIIC ] = "Urban Mech Clan"\tab // mektek\par
+\tab\tab itemNames [FirstMechChitID + M_Stalker ] = "Stalker"\tab // mektek\par
+\tab\tab itemNames [FirstMechChitID + M_Ares ] = "Ares"\tab // mektek\par
+\tab\tab itemNames [FirstMechChitID + M_Urbanmech ] = "Urban Mech IS"\tab // mektek\par
+\cf4\tab\tab itemNames [FirstMechChitID + \f0 M_BrcticWolf\f1 ] = "Arctic Wolf II"\tab // Arctic Wolf II\tab // Mechstorm\par
+\cf3\f0\par
+\par
+\cf2 Processing file : C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\infobox.script\par
+***\par
+\cf0\f1\tab\tab\cf3\par
+\f0\par
+\cf2\par
+\cf3\f1 string avatar_description = "The Avatar is patterned after Vulture Omnimechs recovered after the Battle of Luthien in the Draconins Combine. While maintaining a resemblance to its parent design, the Avatar is 10 tons heavier, slower and tends to carry a more diverse mix of weapons than a Clan mech. "\par
+\tab\tab string bloodasp_description = "First created by Clan Star Adder as an insult to their enemies, Clan Blood Spirit, the Blood Asp is a capable Omnimech able to mount a large number of heavy weapons such as ER PPC or Gauss. The heavy weapons load and extensive electronics make it a match for any other assault mech in production."\par
+\tab\tab string stalker_description = "This battle proven Inner Sphere Battlemech carries a mix of large and medium lasers along with LRM's and SRM's. This heavy weapon load is capable of tearing apart an enemy mech with ease, but all the weapons come with the cost of low heat dissipation. "\par
+\tab\tab string warhammer_description = "This mech has been in use for centuries by militaries throughout the Inner Sphere and beyond. Carrying a diverse array of weapons featuring a pair of PPC's, this mech is able to engage enemy mechs at all ranges equally. It is a little slow compared to some newer designs, but it's heavy armor more than makes up for it's lower speed."\par
+\tab\tab string marauder_description = "First developed near the end of the First Star League, the Marauder served with distinction through the Succession Wars between the great Houses of the Inner Sphere. Partially redesigned with recovered technology just before the Clan Invasion, this mech mounts multiple direct fire weapons such as PPC's, Lasers and Autocannon."\par
+\tab\tab string strider_description = "Another Omnimech created by the Draconis Combine. The Strider is a fast mech that works best countering other fast mechs or performing 'Hit and Run' attacks on slower mechs with its missiles."\par
+\tab\tab string urbanmech_description = "Looking like a trash can with legs, this mech is a specialty design intended for urban combat. While slow on the ground, this mech mounts jump jets that give it good mobility and allow it to use it surprisingly heavy weapons to good effect."\par
+\tab\tab string urbanmech_iic_description = "The Clan version of the Inner Sphere Urbanmech. The Clan version is faster, but cannot carry as large a weapons load as the mech originated from."\par
+\tab\tab string ares_description = "The Ares Class Omnimech is a deadly new Omnimech being fielded by Clan Jade Falcon. The Ares was designed to win trials as well as battles, and so it excels at duels. Strangely enough, the Novacats captured the prototype during a trial of possession, and are currently manufacturing the Ares (called the Lion by Novacat warriors) at their main factory on Irece."\par
+\tab\tab\cf4 string \f0 BrcticWolf\f1 _description = "The Arctic Wolf II, is a prototype design stolen from a clan manurfacturing lab.  The plant was destroyed and the prototypes are in the hands of an elite force. The current loadout of the mech is classified..."\par
+\par
+\cf3\par
+\cf6\par
+\cf1 //*** I dont really know if this "mailthis" code is important when we change a mech, there does not seem to be any changes to it... we need to keep an eye on this... -- Mack\par
+\cf6\tab\tab int mailthis[150]\par
+\tab\tab mailthis[0] = 0\par
+\tab\tab mailthis[1] = 1\par
+\cf3\par
+\par
+\par
+\tab\tab mailthis[113] = 54\par
+\tab\tab mailthis[114] = 55\par
+\tab\tab mailthis[115] = 56\par
+\par
+\tab\tab\cf4 //\cf3  int max_mech_index = 377\tab // mektek // change this when adding new mechs!\par
+\tab\tab\cf4 int max_mech_index = 378\tab // Mechstorm // change this when adding new mechs!\par
+\cf3\tab\tab int temp_mech_id[max_mech_index+1]\par
+\par
+\par
+\cf0   \cf3  \tab\tab\cf4 // Appears to be ordered alphabetically -- Mechstorm\par
+\cf3             // this data will be altered below so this is redundant.\par
+            //\par
+\tab\tab\tab\tab //full set of 'Mechs\par
+\tab\tab\tab\tab i = 325\par
+\tab\tab\tab\tab temp_mech_id[i++]\tab = M_ArcticWolf\tab  // Arctic Wolf\par
+\tab\tab\tab\cf4\tab temp_mech_id[i++]\tab = \f0 M_BrcticWolf\tab\f1\tab  // Arctic Wolf II // Mechstorm\cf3\par
+\tab\tab\tab\tab temp_mech_id[i++]\tab = M_Ares\tab\tab     // mektek\par
+\tab\tab\tab\tab temp_mech_id[i++]\tab = M_Argus\tab\tab     // argus\par
+\par
+\par
+\tab\tab\cf4\par
+\tab\tab\cf3 //full set of 'Mechs\par
+\tab\tab\tab\tab i = 325\par
+\tab\tab\tab\tab temp_mech_id[i++]\tab = M_ArcticWolf\tab  // Arctic Wolf\par
+\tab\tab\tab\tab\cf4 temp_mech_id[i++]\tab = \f0 M_BrcticWolf\tab\f1\tab  // Arctic Wolf II // Mechstorm\par
+\cf3\tab\tab\tab\tab temp_mech_id[i++]\tab = M_Ares\tab\tab     // mektek\par
+\tab\tab\tab\tab temp_mech_id[i++]\tab = M_Argus\tab\tab     // argus\par
+\tab\tab\tab\tab temp_mech_id[i++]\tab = M_Atlas\tab\tab     // atlas\par
+\tab\tab\tab\tab temp_mech_id[i++]\tab = M_Avatar\tab\tab // avatar\tab // mektek\par
+\tab\tab\tab\tab temp_mech_id[i++]\tab = M_Awesome\tab      // awesome\par
+\cf4\par
+\cf3\par
+\cf0\tab\tab\cf3 chassis_tech[43]\tab = localize$(DNL_INNERSPHERE)    //zeus\par
+\tab\tab chassis_tech[M_Avatar]\tab = localize$(DNL_INNERSPHERE)    //avatar\tab // mektek\par
+\tab\tab chassis_tech[M_Warhammer]\tab = localize$(DNL_INNERSPHERE)    \tab //warhammer\tab // mektek\par
+\tab\tab chassis_tech[M_Strider]\tab = localize$(DNL_INNERSPHERE)    //strider\tab // mektek\par
+\tab\tab chassis_tech[M_Marauder]\tab = localize$(DNL_INNERSPHERE)    //marauder\tab // mektek\par
+\tab\tab chassis_tech[M_Bloodasp]\tab = localize$(DNL_CLAN)\tab\tab     // mektek\par
+\tab\tab chassis_tech[M_UrbanmechIIC]\tab = localize$(DNL_CLAN)\tab\tab     //urban mech\tab // mektek\par
+\tab\tab chassis_tech[M_Stalker]\tab = localize$(DNL_INNERSPHERE)    \tab // mektek\par
+\tab\tab chassis_tech[M_Ares]\tab = localize$(DNL_CLAN)    \tab // mektek\par
+\tab\tab chassis_tech[M_Urbanmech]\tab = localize$(DNL_INNERSPHERE)\tab\tab     //urban mech\tab // mektek\par
+\tab\tab\cf4 chassis_tech[\f0 M_BrcticWolf\f1 ]\tab = localize$(DNL_CLAN)\tab\tab     // Arctic Wolf II\tab // Mechstorm\par
+\par
+\cf0\tab\tab\cf3 tonnage[43]\tab\tab    = 80\tab\tab // zeus\par
+\tab\tab tonnage[M_Avatar]\tab\tab    = 70\tab\tab // avatar\tab // mektek\par
+\tab\tab tonnage[M_Warhammer]\tab\tab    = 70\tab\tab // warhammer\tab // mektek\par
+\tab\tab tonnage[M_Strider]\tab\tab    = 40\tab\tab // strider\tab // mektek\par
+\tab\tab tonnage[M_Marauder]\tab\tab    = 75\tab\tab // marauder\tab // mektek\par
+\tab\tab tonnage[M_Bloodasp]\tab\tab    = 90\tab\tab // mektek\par
+\tab\tab tonnage[M_UrbanmechIIC]\tab\tab    = 30\tab\tab // urban mech\tab // mektek\par
+\tab\tab tonnage[M_Stalker]\tab\tab    = 85\tab\tab // mektek\par
+\tab\tab tonnage[M_Ares]\tab\tab    = 60\tab\tab // mektek\par
+\tab\tab tonnage[M_Urbanmech]\tab\tab    = 30\tab\tab // urban mech\tab // mektek\par
+\tab\tab\cf4 tonnage[\f0 M_BrcticWolf\f1 ]\tab\tab    = 40\tab\tab // Arctic Wolf II\tab // Mechstorm\par
+\cf3\par
+\tab\tab top_speed[43]\tab   \tab = 90\tab // Zeus\par
+\tab\tab top_speed[M_Avatar]\tab   \tab = 104   // Avatar\tab // mektek\par
+\tab\tab top_speed[M_Warhammer]\tab   \tab = 105\tab // Warhammer\tab // mektek\par
+\tab\tab top_speed[M_Strider]\tab   \tab = 112\tab // Strider\tab // mektek\par
+\tab\tab top_speed[M_Marauder]\tab   \tab = 95   // mektek\par
+\tab\tab top_speed[M_Bloodasp]\tab   \tab = 90   // mektek\par
+\tab\tab top_speed[M_UrbanmechIIC]\tab   = 78\tab // Urban Mech\tab // mektek\par
+\tab\tab top_speed[M_Stalker]\tab   \tab = 76\tab // mektek\par
+\tab\tab top_speed[M_Ares]\tab    \tab = 124   // \par
+\tab\tab top_speed[M_Urbanmech]\tab   = 78\tab // Urban Mech\tab // mektek\par
+\tab\cf4\tab top_speed[\f0 M_BrcticWolf\f1 ]\tab   = 121\tab // Arctic Wolf II\tab // Mechstorm\par
+\cf0\par
+***this appears to be alphabetized?\par
+\tab\tab\cf3 if ((useClanPak) && (useISPak) && (!inBlackMarket))\par
+\tab\tab\tab\tab\{\par
+\tab\tab\tab\tab\tab // note: as of 9/5/02 this block and the "if (inBlackMarket)" block below are identical\par
+\tab\tab\tab\tab\tab i = 325\par
+\tab\tab\tab\tab     temp_mech_id[i++]\tab = M_ArcticWolf\tab  // Arctic Wolf\par
+\tab\tab\tab\tab     \cf4 temp_mech_id[i++]\tab = \f0 M_BrcticWolf\f1\tab  \tab\tab // Arctic Wolf II\tab // Mechstorm\par
+\cf3\tab\tab\tab\tab     temp_mech_id[i++]\tab = M_Ares\tab\tab      // argus\par
+\tab\tab\tab\tab     temp_mech_id[i++]\tab = M_Argus\tab\tab      // argus\par
+\tab\tab\tab\tab     temp_mech_id[i++]\tab = M_Atlas\tab\tab      // atlas\par
+\tab\tab\tab\tab     temp_mech_id[i++]\tab = M_Avatar\tab\tab      // avatar // mektek\par
+\tab\tab\tab\tab     temp_mech_id[i++]\tab = M_Awesome\tab      // awesome\par
+\par
+\cf0\tab\tab\tab\tab\tab\cf3 i = 325\par
+\tab\tab\tab\tab     infomessage[i++]  = localize$(DNL_ARCTICWOLF) "\\n" localize$(IDS_ML_ARCTICWOLF_INFO)\par
+\cf4\tab\tab\tab\tab     infomessage[i++]  = "Arctic Wolf II" "\\n" \f0 BrcticWolf\f1 _description\tab // Arctic Wolf II\tab // Mechstorm\cf3\par
+\tab\tab\tab\tab     infomessage[i++]  = "Ares" "\\n"ares_description\tab // mektek\par
+\tab\tab\tab\tab     infomessage[i++]  = localize$(DNL_ARGUS) "\\n" localize$(IDS_ML_ARGUS_INFO)\par
+\tab\tab\tab\tab     infomessage[i++]  = localize$(DNL_ATLAS) "\\n" localize$(IDS_ML_ATLAS_INFO)\par
+\tab\tab\tab\tab     infomessage[i++]  = "Avatar" "\\n" avatar_description \tab // mektek\par
+\tab\tab\tab\tab     infomessage[i++]  = localize$(DNL_AWESOME) "\\n" localize$(IDS_ML_AWESOME_INFO)\par
+\tab\tab\tab\tab     infomessage[i++]  = localize$(DNL_BLACKKNIGHT) "\\n" localize$(IDS_ML_BLACKKNIGHT_INFO)\par
+\tab\tab\tab\tab     infomessage[i++]  = "Blood Asp" "\\n" bloodasp_description\tab // mektek\par
+\par
+\tab\tab\tab\tab else\par
+\tab\tab\tab\tab if ((useClanPak) && (!useISPak) && (!inBlackMarket))\par
+\tab\tab\tab\tab\{\par
+\tab\tab\tab\tab\tab i = 325\par
+\tab\tab\tab\tab     temp_mech_id[i++]\tab = M_ArcticWolf\tab  // Arctic Wolf\par
+\tab\tab\tab\tab\cf4     temp_mech_id[i++]\tab = \f0 M_BrcticWolf  \f1\tab  // Arctic Wolf II\tab // Mechstorm\par
+\cf3\tab\tab\tab\tab     temp_mech_id[i++]\tab = M_Ares\tab\tab      // mektek\par
+\tab\tab\tab\tab     temp_mech_id[i++]\tab = M_Argus\tab\tab      // argus\par
+\tab\tab\tab\tab     temp_mech_id[i++]\tab = M_Atlas\tab\tab      // atlas\par
+\par
+\cf0\tab\tab\tab\tab\tab\cf3 i = 325\par
+\tab\tab\tab\tab     infomessage[i++]  = localize$(DNL_ARCTICWOLF) "\\n" localize$(IDS_ML_ARCTICWOLF_INFO)\par
+\cf4\tab\tab\tab           infomessage[i++]  = "Arctic Wolf II" "\\n" \f0 BrcticWolf\f1 _description\tab // Arctic Wolf II\tab // Mechstorm\cf3\par
+\tab\tab\tab\tab     infomessage[i++]  = "Ares" "\\n"ares_description\tab // mektek\par
+\tab\tab\tab\tab     infomessage[i++]  = localize$(DNL_ARGUS) "\\n" localize$(IDS_ML_ARGUS_INFO)\par
+\par
+\f0\par
+\tab\tab\tab\tab\cf0\f1\par
+\tab\tab\tab\tab\cf3 else\par
+\tab\tab\tab\tab if ((!useClanPak) && (useISPak) && (!inBlackMarket))\par
+\tab\tab\tab\tab\{\par
+\tab\tab\tab\tab\tab i = 325\par
+ \tab\tab\tab\tab     \cf4 temp_mech_id[i++]\tab = \f0 M_BrcticWolf  \f1\tab  // Arctic Wolf II\tab // Mechstorm\par
+\cf3\tab\tab\tab\tab     temp_mech_id[i++]\tab = M_Ares\tab\tab      // mektek\par
+\tab\tab\tab\tab     temp_mech_id[i++]\tab = M_Argus\tab\tab      // argus\par
+\tab\tab\tab\tab     temp_mech_id[i++]\tab = M_Atlas\tab\tab      // atlas\par
+\f0\par
+\f1\tab\tab\tab\tab\tab i = 325\par
+\tab\tab\tab\tab     \cf4 infomessage[i++]  = "Arctic Wolf II" "\\n" \f0 BrcticWolf\f1 _description\tab // Arctic Wolf II\tab // Mechstorm\cf3\par
+\tab\tab\tab\tab     infomessage[i++]  = "Ares" "\\n"ares_description\tab // mektek\par
+\tab\tab\tab\tab     infomessage[i++]  = localize$(DNL_ARGUS) "\\n" localize$(IDS_ML_ARGUS_INFO)\par
+\tab\tab\tab\tab     infomessage[i++]  = localize$(DNL_ATLAS) "\\n" localize$(IDS_ML_ATLAS_INFO)\par
+\f0\par
+\par
+\par
+\cf1 *** not sure what is going on here, clearly mektek planned ot use these in blackmarket, and then commented them out...\par
+for now we will do the same\cf3 .\par
+\par
+\par
+\tab\tab\tab\tab\tab\f1 else\par
+\tab\tab\tab\tab if (inBlackMarket)\par
+\tab\tab\tab\tab\{\par
+\tab\tab\tab\tab\tab i = 325\par
+\tab\tab\tab\tab     temp_mech_id[i++]\tab = M_ArcticWolf\tab  // Arctic Wolf\par
+\cf0\tab\tab\tab\tab     //temp_mech_id[i++]\tab = \cf4\f0 M_BrcticWolf  \cf0\f1\tab  \cf4 // Arctic Wolf II\tab // Mechstorm\cf3\par
+\tab\tab\tab\tab     //temp_mech_id[i++]\tab = M_Ares\tab\tab      // mektek\par
+\tab\tab\tab\tab     temp_mech_id[i++]\tab = M_Argus\tab\tab      // argus\par
+\f0\par
+\f1\tab\tab\tab\tab\tab i = 325\par
+\tab\tab\tab\tab     infomessage[i++]  = localize$(DNL_ARCTICWOLF) "\\n" localize$(IDS_ML_ARCTICWOLF_INFO)\par
+\cf4\tab\tab\tab\tab     //infomessage[i++]  = "Arctic Wolf II" "\\n" \f0 BrcticWolf\f1 _description\tab // Arctic Wolf II\tab // Mechstorm\cf3\par
+\tab\tab\tab\tab     //infomessage[i++]  = "Ares" "\\n"ares_description\tab // mektek\par
+\tab\tab\tab\tab     infomessage[i++]  = localize$(DNL_ARGUS) "\\n" localize$(IDS_ML_ARGUS_INFO)\par
+\f0\par
+\par
+\cf0\f1\tab\tab\tab\cf3\tab\tab else // no pack\par
+\tab\tab\tab\tab\{\par
+\tab\tab\tab\tab\tab i = 325\par
+\cf0\tab\tab\tab\tab     \cf4 temp_mech_id[i++]\tab = \f0 M_BrcticWolf  \f1\tab  // Arctic Wolf II\tab // Mechstorm\par
+\cf0\tab\tab\tab\tab     \cf3 temp_mech_id[i++]\tab = M_Ares\tab\tab      // mektek\par
+\tab\tab\tab\tab     temp_mech_id[i++]\tab = M_Argus\tab\tab      // argus\par
+\tab\tab\tab\tab     temp_mech_id[i++]\tab = M_Atlas\tab\tab      // atlas\par
+\f0\par
+\cf0\f1\tab\tab\tab\tab\tab\cf3 i = 325\par
+\tab\cf0\tab\tab\tab     \cf4 infomessage[i++]  = "Arctic Wolf II" "\\n" \f0 BrcticWolf\f1 _description\tab // Arctic Wolf II\tab // Mechstorm\cf0\par
+\tab\tab\tab\tab     \cf3 infomessage[i++]  = "Ares" "\\n"ares_description\tab // mektek\par
+\tab\tab\tab\tab     infomessage[i++]  = localize$(DNL_ARGUS) "\\n" localize$(IDS_ML_ARGUS_INFO)\par
+\tab\tab\tab\tab     infomessage[i++]  = localize$(DNL_ATLAS) "\\n" localize$(IDS_ML_ATLAS_INFO)\par
+\f0\par
+\par
+\cf2 Processing file : C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\marketmulticolumnlistbox.script\par
+\cf3\par
+\cf0\f1\tab\tab\cf3 mechChitInfoIDs [FirstMechChitID + M_Stalker\tab   ]=  375\tab // mektek\par
+\tab\tab mechChitInfoIDs [FirstMechChitID + M_Ares\tab   ]=  376\tab // mektek\par
+\tab\tab mechChitInfoIDs [FirstMechChitID + M_Urbanmech\tab   ]=  377\tab // mektek\par
+\cf4\tab\tab mechChitInfoIDs [FirstMechChitID + \f0 M_BrcticWolf  \f1\tab   ]=  378\tab // Arctic Wolf II\tab // Mechstorm\par
+\cf3\par
+\cf1\b\tab *** regarding the\cf3\b0  mechChitInfoIDs \cf1 array, I don't see how this is safely bounded... ie total index size.\par
+Clearly also, there is room to save a LOT of repetitive tasks here, by making certain programming changes for all these lists.\par
+\par
+\tab\par
+\cf3\f0\par
+\cf2 Processing file : C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\mechbay_main.script\cf3\par
+\cf1 *** seems this is slightly out of arrangement, I made a minor positional change.  And put the Mechstorm addition. (probably just organizational)\cf3\par
+\par
+\cf0\f1\tab\tab\cf3 mech_name[M_Ares]\tab = "Ares"\tab // mektek\par
+\tab\tab mech_name[M_Urbanmech]\tab = "Urban Mech IS"\tab // mektek\par
+\tab\tab\cf4 mech_name[\f0 M_BrcticWolf ]\f1  \tab\tab = "Arctic Wolf II" // Mechstorm\par
+\cf3\tab\tab\cf4 mech_name[LastMechID] \tab\tab = localize$(IDS_ML_NA_INFO)\tab // mektek\par
+\cf3\tab\tab mech_name[NoMechID] \tab\tab = localize$(IDS_ML_NA_INFO)\tab // mektek\par
+\par
+\par
+\cf1 *** Again here is another area of code, I am not sure about why Mektek has to do it this way?  Guess I will find out soon...\cf3\par
+ \par
+\cf0\tab\tab\cf3 if(equal$(Left$(o_chassis.mech_name[mech_selected], 4), "Ares"))\tab //\par
+\tab\tab\tab\tab\{\par
+\tab\tab\tab\tab\tab mech_id = M_Ares\par
+\tab\tab\tab\tab\}\par
+\cf4\tab\tab if(equal$(Left$(o_chassis.mech_name[mech_selected], 14), "Arctic Wolf II"))\tab // The number is the String Length of Arctic Wolf II // Mechstorm\par
+\tab\tab\tab\tab\{\par
+\tab\tab\tab\tab\tab mech_id = \f0 M_BrcticWolf \f1\par
+\tab\tab\tab\tab\}\par
+\cf3\par
+\par
+\par
+\tab\tab\tab\tab mech_id2 = mech_id\tab\f0\par
+\par
+\tab\tab\tab\par
+\f1\tab\tab\tab\tab if(equal$(Left$(o_chassis.o_availmechsdroplist.list_item[mech_selected], 4), "Ares"))\tab //\par
+\tab\tab\tab\tab\{\par
+\tab\tab\tab\tab\tab mech_id = M_Ares\par
+\tab\tab\tab\tab\}\par
+\cf4\tab\tab\tab\tab if(equal$(Left$(o_chassis.o_availmechsdroplist.list_item[mech_selected], 14), "Arctic Wolf II"))\tab // The number is the String Length of Arctic Wolf II // Mechstorm\par
+\tab\tab\tab\tab\{\par
+\tab\tab\tab\tab\tab mech_id = \f0 M_BrcticWolf \f1\par
+\tab\tab\tab\tab\}\par
+\cf3\par
+\cf0\par
+\par
+\tab\tab\tab\tab mech_id2 = mech_id\tab\par
+\par
+\par
+\cf2 Processing file : C:\\Program Files\\Microsoft Games\\MW4_MP1.1\\RESOURCE\\_props.mw4\\mercsshellscripts\\mechbay\\weapons.script\par
+\cf3\par
+\tab\tab head_location[43]\tab = 0,0,50\tab\tab // zeus\par
+\tab\tab head_location[M_Avatar]\tab = 0,0,50\tab\tab // Avatar\tab // mektek\par
+\tab\tab head_location[M_Warhammer]\tab = 0,0,50\tab\tab // Warhammer\tab // mektek\par
+\tab\tab head_location[M_Strider]\tab = 0,0,50\tab\tab // Strider\tab // mektek\par
+\tab\tab head_location[M_Marauder]\tab = 0,0,50\tab\tab // Marauder\tab // mektek\par
+\tab\tab head_location[M_Bloodasp]\tab = 0,0,50\tab\tab // mektek\par
+\tab\tab head_location[M_UrbanmechIIC]\tab = 0,0,50\tab\tab // Urban Mech\tab // mektek\par
+\tab\tab head_location[M_Stalker]\tab = 0,0,50\tab\tab // mektek\par
+\tab\tab head_location[M_Ares]\tab = 0,0,50\tab\tab // \par
+\tab\tab head_location[M_Urbanmech]\tab = 0,0,50\tab\tab // Urban Mech\tab // mektek\par
+\tab\tab\cf4 head_location[\f0 M_BrcticWolf \f1 ]\tab = 0,0,50\tab\tab // Arctic Wolf II\tab // Mechstorm\cf3\par
+\tab\tab head_location[NoMechID]\tab = 0,0,50\tab\tab // nothing\tab // mektek\par
+\cf2\par
+\cf3\tab\tab lefttorso_location[M_Urbanmech] = 580,200,50     \tab // urbie\tab // mektek\cf0\par
+\tab\tab\cf4 lefttorso_location[\f0 M_BrcticWolf \f1 ] = 600,270,50      // Arctic Wolf II\tab // Mechstorm\par
+\cf0\tab\tab\cf3 lefttorso_location[NoMechID] = 0,0,50         \tab // nothing\tab // mektek\par
+\par
+\cf0\tab\tab\cf3 centertorso_location[M_Urbanmech]\tab = 550,280,50    \tab // urbie\tab // mektek\par
+\cf4\tab\tab centertorso_location[\f0 M_BrcticWolf \f1 ]\tab = 0,0,50\tab // Arctic Wolf II\tab // Mechstorm\par
+\cf3\tab\tab centertorso_location[NoMechID] \tab = 0,0,50    \tab // nothing\tab // mektek\par
+\f0\par
+\par
+\f1\tab\tab righttorso_location[M_Urbanmech]\tab\tab = 480,200,50    // urbie\tab // mektek\par
+\cf4\tab\tab righttorso_location[\f0 M_BrcticWolf \f1 ]\tab\tab = 475,270,50\tab\tab // Arctic Wolf II\tab // Mechstorm\par
+\cf3\tab\tab righttorso_location[NoMechID]\tab = 0,0,50        // nothing\tab // mektek\par
+\f0\par
+\f1\tab\tab leftarm_location[M_Urbanmech]\tab = 666,295,50       \tab // urbie\tab // mektek\par
+\cf4\tab\tab leftarm_location[\f0 M_BrcticWolf \f1 ]\tab = 630,320,50       \tab // Arctic Wolf II\tab // Mechstorm\par
+\cf3\tab\tab leftarm_location[NoMechID]\tab = \cf0 0,0,50\tab\tab\tab\cf3 // nothing\tab // mektek\par
+\par
+\tab\tab rightarm_location[M_Urbanmech]\tab = 400,295,50      \tab // urbie\tab // mektek\par
+\tab\tab\cf4 rightarm_location[\f0 M_BrcticWolf \f1 ]\tab = 424,320,50      // Arctic Wolf II\tab // Mechstorm\cf3\par
+\tab\tab rightarm_location[NoMechID]\tab = 0,0,50          \tab // nothing\tab // mektek\par
+\cf0\par
+\cf3\tab\tab special1_location[M_Urbanmech] \tab = 0,0,50      \tab\tab // urbie\tab // mektek\par
+\cf4\tab\tab special1_location[\f0 M_BrcticWolf \f1 ] \tab = 464,180,50        \tab\tab // Arctic Wolf II\tab // Mechstorm\par
+\cf3\tab\tab special1_location[NoMechID] \tab = 0,0,50      \tab\tab // nothing\tab // mektek\par
+\par
+\tab\tab special2_location[M_Urbanmech] \tab = 0,0,50      \tab\tab // urbie\tab // mektek\par
+\cf4\tab\tab special2_location[\f0 M_BrcticWolf \f1 ] \tab = 589,180,50\tab\tab // Arctic Wolf II\tab // Mechstorm\par
+\cf3\tab\tab special2_location[NoMechID] \tab = 0,0,50      \tab\tab // nothing\par
+\par
+\tab\tab special1_label[M_Stalker]\tab = localize$(IDS_ML_WP_MISSILERACK)     \tab // mektek\par
+\tab\tab special1_label[M_Ares]\tab\tab = localize$(IDS_ML_WP_OMNIRACK)     \tab // mektek\par
+\cf4\tab\tab special1_label[\f0 M_BrcticWolf \f1 ]\tab = "Missile-Storm Pack"     \tab // Arctic Wolf II\tab // Mechstorm\par
+\par
+\cf0\tab\tab\cf3 special2_label[M_Stalker]\tab = localize$(IDS_ML_WP_MISSILERACK)     \tab // mektek\par
+\tab\tab special2_label[M_Ares]\tab\tab = localize$(IDS_ML_WP_MISSILERACK)     \tab // mektek\par
+\cf4\tab\tab special2_label[\f0 M_BrcticWolf \f1 ]\tab = "Missile-Storm Pack"     \tab // Arctic Wolf II\tab // Mechstorm\par
+\cf0\par
+\cf3\par
+\tab\tab\par
+\par
+\par
+\f0\par
+\par
+\par
+\par
+\par
+}
+ 

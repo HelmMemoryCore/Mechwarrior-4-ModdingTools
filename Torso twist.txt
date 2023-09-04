@@ -1,0 +1,7 @@
+mech_chassis.torso{gamemodel}
+
+634-637 torso twist rate
+
+63c-63f torso twist range
+
+640-643 elevation + depression

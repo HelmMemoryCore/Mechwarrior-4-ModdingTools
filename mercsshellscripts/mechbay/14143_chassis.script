@@ -1,0 +1,3110 @@
+// Mechwarrior: Vengeance
+// Copyright © 1999-2000
+// Mechbay_main.script
+// Paolo Malabuyo
+// July 12, 2000
+
+#include "Content\\MercsShellScripts\\stddefs.h"
+#include "Content\\MercsShellScripts\\MechLabHeaders_MERCS.h"
+#include "Content\\MercsShellScripts\\cm_listboxes.script"
+
+
+
+#define VARIANT_NAME_LENGTH 16
+
+chassis
+{
+	GUI_CREATE
+	{
+		int sepx1 = 22
+		int sepx2 = 308
+		if $$m_isCampaign$$ == 0
+		{
+			int sepy1 = 201
+			int sepy2 = 250
+		}
+		if $$m_isCampaign$$ == 1
+		{
+			int sepy1 = 170
+			int sepy2 = 250
+		}
+		int sepy3 = 437
+
+		int labelx = 22
+		int labely = 60
+		int boxx = 185
+		int boxy = 72
+		int boxwidth = 84
+		int noneditx = 331
+		int nonedity = 160
+
+		sound btnTriggeredSound = APATH "sfx_button5.wav"
+
+		float acceleration
+		float deacceleration
+		float turn_rate
+		float torso_twist
+		float twist_speed
+		int tech_type
+
+		float engine_topspeed
+		float engine_tons
+		int heatsinks_installed
+		int heatsinks_tons
+
+		int can_have_jump
+		float jump_tons
+		int can_have_ecm
+		float ecm_tons
+		int can_have_beagle
+		float beagle_tons
+		int can_have_lams
+		float lams_tons
+		int can_have_enhanced_optics
+		float enhanced_optics_tons
+		int can_have_iff_jammer
+		float iff_jammer_tons
+		int can_have_advanced_gyro
+		float advanced_gyro_tons
+
+		string chassis_tech[ LastMechID + 1 ]
+		chassis_tech[0] 	= localize$(DNL_CLAN)		    //Arctic Wolf
+		chassis_tech[1] 	= localize$(DNL_INNERSPHERE)    //argus
+		chassis_tech[2] 	= localize$(DNL_INNERSPHERE)    //atlas
+		chassis_tech[3] 	= localize$(DNL_INNERSPHERE)    //awesome
+		chassis_tech[4]     = localize$(DNL_INNERSPHERE)	//black knight
+		chassis_tech[5] 	= localize$(DNL_INNERSPHERE)    //bushwacker
+		chassis_tech[6] 	= localize$(DNL_INNERSPHERE)    //catapult
+		chassis_tech[7]     = localize$(DNL_CLAN)           //cauldron-born
+		chassis_tech[8] 	= localize$(DNL_INNERSPHERE)    //chimera
+		chassis_tech[9] 	= localize$(DNL_CLAN)           //cougar
+		chassis_tech[10]	= localize$(DNL_CLAN)           //daishi
+		chassis_tech[11]	= localize$(DNL_INNERSPHERE)	//dragon
+		chassis_tech[12]	= localize$(DNL_INNERSPHERE)	//Fafnir
+		chassis_tech[13]	= localize$(DNL_INNERSPHERE)	//flea
+		chassis_tech[14] 	= localize$(DNL_CLAN)    		//Gladiator
+		chassis_tech[15] 	= localize$(DNL_INNERSPHERE)    //Hauptmann
+		chassis_tech[16]	= localize$(DNL_CLAN)			//Hellhound
+		chassis_tech[17]	= localize$(DNL_INNERSPHERE)    //hellspawn
+		chassis_tech[18]	= localize$(DNL_INNERSPHERE)    //highlander
+		chassis_tech[19]	= localize$(DNL_INNERSPHERE)    //hunchback
+		chassis_tech[20]	= localize$(DNL_CLAN)		    //Kodiak
+		chassis_tech[21]	= localize$(DNL_CLAN)           //loki
+		chassis_tech[22] 	= localize$(DNL_INNERSPHERE)    //Longbow
+		chassis_tech[23]	= localize$(DNL_CLAN)           //madcat
+		chassis_tech[24]	= localize$(DNL_CLAN)           //madcat2
+		chassis_tech[25]	= localize$(DNL_CLAN)	        //masakari
+		chassis_tech[26]	= localize$(DNL_INNERSPHERE)    //mauler
+		chassis_tech[27]	= localize$(DNL_CLAN)           //novacat
+		chassis_tech[28]	= localize$(DNL_INNERSPHERE)    //osiris
+		chassis_tech[29] 	= localize$(DNL_INNERSPHERE)    //Owens
+		chassis_tech[30] 	= localize$(DNL_CLAN)    		//Puma
+		chassis_tech[31]	= localize$(DNL_INNERSPHERE)    //raven
+		chassis_tech[32]	= localize$(DNL_CLAN)		    //ryoken
+		chassis_tech[33]	= localize$(DNL_CLAN)           //shadowcat
+		chassis_tech[34]	= localize$(DNL_INNERSPHERE)    //sunder
+		chassis_tech[35]	= localize$(DNL_INNERSPHERE)	//templar
+		chassis_tech[36]	= localize$(DNL_INNERSPHERE)    //thanatos
+		chassis_tech[37]	= localize$(DNL_CLAN)           //thor
+		chassis_tech[38]	= localize$(DNL_CLAN)		    //uller
+		chassis_tech[39]	= localize$(DNL_INNERSPHERE)    //uziel
+		chassis_tech[40] 	= localize$(DNL_INNERSPHERE)    //Victor
+		chassis_tech[41]	= localize$(DNL_CLAN)           //vulture
+		chassis_tech[42]	= localize$(DNL_INNERSPHERE)    //wolfhound
+		chassis_tech[43]	= localize$(DNL_INNERSPHERE)    //zeus
+		chassis_tech[M_Avatar]	= localize$(DNL_INNERSPHERE)    //Avatar	// mektek
+		chassis_tech[M_Warhammer]	= localize$(DNL_INNERSPHERE)    //Warhammer	// mektek
+		chassis_tech[M_Strider]	= localize$(DNL_INNERSPHERE)    //Strider	// mektek
+		chassis_tech[M_Marauder]	= localize$(DNL_INNERSPHERE)           // mektek
+		chassis_tech[M_Bloodasp]	= localize$(DNL_CLAN)	        // mektek
+		chassis_tech[M_UrbanmechIIC]	= localize$(DNL_CLAN)    //Clan Urban Mech	// mektek
+		chassis_tech[M_Stalker]	= localize$(DNL_INNERSPHERE)    // mektek
+		chassis_tech[M_Ares]	= localize$(DNL_CLAN)	        // mektek
+		chassis_tech[M_Urbanmech]	= localize$(DNL_INNERSPHERE)    //Clan Urban Mech	// mektek
+		chassis_tech[M_BrcticWolf]	= localize$(DNL_CLAN)    //Clan 	// Arctic Wolf II	// Mechstorm
+
+		int create_limit						= 64
+		int session_create						= 0
+		object o_create_error
+
+		object o_mechpaks_error
+
+		// List box size for o_availmechsdroplist
+		$$m_listBoxSize$$						= $$m_mechLabCount$$ + create_limit
+
+		// Dummy array to receive mech status from MLDataSetupMechSelection when we don't need it
+		int dummy_status[$$m_listBoxSize$$]
+
+//		object o_availmechsdroplist				= s_droplistbox
+		object o_availmechsdroplist				= cm_mechlistbox
+
+		if $$m_isCampaign$$ == 0
+		{
+			o_availmechsdroplist.location		= 22, 135, 50
+			o_availmechsdroplist.max_displayed	= 17
+		}
+		if $$m_isCampaign$$ == 1
+		{
+			o_availmechsdroplist.location		= 22, boxy + 55, 50
+			o_availmechsdroplist.max_displayed	= 19
+		}
+		o_availmechsdroplist.list_size			= $$m_mechLabCount$$
+		o_availmechsdroplist.label				= localize$(IDS_ML_CH_TYPE)
+		o_availmechsdroplist.itemWidth			= 269
+		o_availmechsdroplist.boxFont3d			= FPATH localize$(IDS_F_ML_LABEL)
+		o_availmechsdroplist.itemHeight			= 20
+		o_availmechsdroplist.labelFont3d		= FPATH localize$(IDS_F_ML_LABEL)
+		o_availmechsdroplist.offsetLabel		= -1,-17
+		o_availmechsdroplist.arrowHeight		= 15
+		o_availmechsdroplist.id					= 201
+
+		if $$m_isCampaign$$ == 0
+		{
+
+			// List box size for o_availmechsdroplist2
+			$$m_listBoxSize$$						= $$m_mechLabCount$$ + create_limit
+
+//			object o_availmechsdroplist2			= s_droplistbox
+			object o_availmechsdroplist2			= cm_mechlistbox
+			o_availmechsdroplist2.location			= 22, 174, 30
+			o_availmechsdroplist2.max_displayed		= 13
+			o_availmechsdroplist2.list_size			= 0
+			o_availmechsdroplist2.label			= localize$(IDS_ML_CH_NAME)
+			o_availmechsdroplist2.itemWidth			= 269
+			o_availmechsdroplist2.boxFont3d			= FPATH localize$(IDS_F_ML_LABEL)
+			o_availmechsdroplist2.itemHeight		= 20
+			o_availmechsdroplist2.labelFont3d		= FPATH localize$(IDS_F_ML_LABEL)
+			o_availmechsdroplist2.offsetLabel		= -1,-17
+			o_availmechsdroplist2.arrowHeight		= 15
+			o_availmechsdroplist2.id					= 202
+
+			int count = 0
+			int last_mech = 0
+			int last_count = 0
+			int mech_selected = 0
+			int stock_mech_selected = 0
+			int variant_mech_selected = 0
+
+			//int chassisCount = $$m_chassisCount$$	// mektek
+			//int chassisCount = LastMechID	// mektek
+
+			int stock_count[$$m_chassisCount$$]
+			int stock_array[$$m_chassisCount$$ + 1]
+			string stock_name[$$m_chassisCount$$]
+			callback($$ML_CallbackHandler$$, MLDataSetupChassisSelection, stock_name[])
+
+			int selected_mech
+			string mech_name[$$m_mechLabCount$$ + create_limit]
+			string mech_name2[$$m_mechLabCount$$ + create_limit]
+			callback($$ML_CallbackHandler$$, MLDataSetupMechSelection, mech_name[], dummy_status[], selected_mech)
+
+//			stock_name[M_Avatar] = "Avatar"
+//			stock_name[M_Warhammer] = "Warhammer"
+//			stock_name[M_Strider] = "Strider"
+//			stock_name[M_Marauder] = "Marauder"
+//			stock_name[M_Bloodasp] = "Blood Asp"
+//			stock_name[M_UrbanmechIIC] = "Urban Mech Clan"
+//			stock_name[M_Stalker] = "Stalker"
+//			stock_name[M_Ares] = "Ares"
+//			stock_name[M_Urbanmech] = "Urban Mech Clan IS"
+
+			string mad_cat = localize$(DNL_MADCAT)
+			string mad_cat2 = localize$(DNL_MADCAT2)
+
+			o_availmechsdroplist.list_size = 0
+			for (int i = 0; i < $$m_chassisCount$$ ; i++)
+			{
+				stock_count[i] = 0
+			}
+
+			for (count = 0; count < $$m_mechLabCount$$; count++)
+			{
+				for (i = 0; i < $$m_chassisCount$$ ; i++)
+				{
+					if (equal$(left$(mech_name[count], length$(stock_name[i])), stock_name[i]) == true)
+					{
+						// special case for Mad Cat Mark II
+						if (!((equal$(stock_name[i], mad_cat) == true) && (equal$(left$(mech_name[count], length$(mad_cat2)), mad_cat2) == true)))
+						{
+							stock_count[i]++
+							mech_name2[count] = right$(mech_name[count], length$(mech_name[count]) - (length$(stock_name[i]) + 1))
+							break
+						}
+					}
+				}
+			}
+
+			for (i = 0; i < $$m_chassisCount$$ ; i++)
+			{
+				if (stock_count[i] != 0)
+				{
+					o_availmechsdroplist.list_item[o_availmechsdroplist.list_size] = stock_name[i]
+					o_availmechsdroplist.list_size++
+				}
+			}
+			initialize(o_availmechsdroplist)
+
+			count = 0
+			if ($$m_mechLabCount$$)
+			{
+				stock_array[0] = 0
+				count = 1
+				for (i = 0; i < $$m_chassisCount$$ ; i++)
+				{
+					if (stock_count[i] != 0)
+					{
+						stock_array[count] = stock_array[count - 1] + stock_count[i]
+						count++
+					}
+				}
+
+				stock_mech_selected = 0
+				while (selected_mech >= stock_array[stock_mech_selected])
+				{
+					stock_mech_selected++
+				}
+				stock_mech_selected--
+				last_count = stock_array[stock_mech_selected]
+				variant_mech_selected = selected_mech - last_count
+
+				count = 0
+				do
+				{
+					o_availmechsdroplist2.list_item[count] = mech_name2[last_count]
+					count++
+					last_count++
+					if (last_count == $$m_mechLabCount$$)
+						break
+				}
+				while ((stock_array[stock_mech_selected] + count) != stock_array[stock_mech_selected + 1])
+			}
+
+			o_availmechsdroplist2.list_size = count
+			initialize(o_availmechsdroplist2)
+
+			o_availmechsdroplist.nSelected = stock_mech_selected
+			o_availmechsdroplist2.nselected = variant_mech_selected
+		}
+		else
+		{
+			int selected_mech
+			callback($$ML_CallbackHandler$$, MLDataSetupMechSelection, o_availmechsdroplist.list_item[], O_availmechsdroplist.mech_status[], selected_mech)
+			initialize(o_availmechsdroplist)
+			o_availmechsdroplist.nSelected = selected_mech
+		}
+
+		if $$m_isCampaign$$ == 0
+		{
+			object o_newmechbutton			= s_multistatepane
+			o_newmechbutton.file			= WPATH "button_reg_99x23_4state.tga"
+			o_newmechbutton.total_states		= 4
+			o_newmechbutton.text			= localize$(IDS_GN_NEW)
+			o_newmechbutton.location		= 16, 73, 10
+			o_newmechbutton.text_v_offset		= -1
+			o_newmechbutton.gFont3d			= FPATH localize$( IDS_MICROSTYLE9BOLDEXT )
+			o_newmechbutton.id				= 203
+			initialize(o_newmechbutton)
+
+			object o_deletemechbutton		= s_multistatepane
+			o_deletemechbutton.file			= WPATH "button_reg_99x23_4state.tga"
+			o_deletemechbutton.total_states		= 4
+			o_deletemechbutton.text			= localize$(IDS_GN_REMOVE)
+			o_deletemechbutton.location		= 116, 73, 10
+			o_deletemechbutton.text_v_offset	= -1
+			o_deletemechbutton.gFont3d		= FPATH localize$( IDS_MICROSTYLE9BOLDEXT )
+			o_deletemechbutton.id			= 204
+			initialize(o_deletemechbutton)
+
+			object o_renamemechbutton		= s_multistatepane
+			o_renamemechbutton.file			= WPATH "button_reg_99x23_4state.tga"
+			o_renamemechbutton.total_states		= 4
+			o_renamemechbutton.text			= localize$(IDS_GN_RENAME)
+			o_renamemechbutton.location		= 216, 73, 10
+			o_renamemechbutton.text_v_offset	= -1
+			o_renamemechbutton.gFont3d		= FPATH localize$( IDS_MICROSTYLE9BOLDEXT )
+			o_renamemechbutton.id			= 223
+			initialize(o_renamemechbutton)
+		}
+
+		if $$m_isCampaign$$ == 1
+		{
+			object o_renamemechbutton		= s_multistatepane
+			o_renamemechbutton.file			= WPATH "button_reg_99x23_4state.tga"
+			o_renamemechbutton.total_states		= 4
+			o_renamemechbutton.text			= localize$(IDS_GN_RENAME)
+			o_renamemechbutton.location		= 182, 73, 10
+			o_renamemechbutton.text_v_offset	= -1
+			o_renamemechbutton.gFont3d		= FPATH localize$( IDS_MICROSTYLE9BOLDEXT )
+			o_renamemechbutton.id			= 223
+			initialize(o_renamemechbutton)
+		}
+
+		object o_deleteconfirm
+		object o_saveconfirm
+		object o_saveconfirm_new
+
+		object o_overlay					= overlay
+		o_overlay.location					= 0, 0, 55
+		initialize(o_overlay)
+		deactivate(o_overlay)
+
+		object o_newmech					= newmech
+		o_newmech.location					= 0, 0, 60
+		initialize(o_newmech)
+		deactivate(o_newmech)
+
+		object o_renamemech					= renamemech
+		o_renamemech.location					= 0, 0, 60
+		initialize(o_renamemech)
+		deactivate(o_renamemech)
+
+		int skin_num
+
+		object o_camodroplist				= s_droplistbox
+		if $$m_isCampaign$$ == 0
+		{
+			o_camodroplist.location				= 22, 216, 25
+//			o_camodroplist.location				= 22, 223, 25
+		}
+		if $$m_isCampaign$$ == 1
+		{
+			o_camodroplist.location				= 22, 180, 25
+//			o_camodroplist.location				= 22, boxy + 130, 25
+		}
+		o_camodroplist.list_size			= skin_num
+		o_camodroplist.offsetLabel			= -1,-17
+		o_camodroplist.label				= localize$(IDS_ML_CH_CAMO)
+		o_camodroplist.itemWidth			= 269
+		o_camodroplist.max_displayed		= 12
+		o_camodroplist.boxFont3d			= FPATH localize$(IDS_F_ML_LABEL)
+		o_camodroplist.itemHeight			= 20
+		o_camodroplist.labelFont3d			= FPATH localize$(IDS_F_ML_LABEL)
+		o_camodroplist.arrowHeight			= 15
+		o_camodroplist.id					= 205
+		initialize(o_camodroplist)
+
+		if ($$DEMO_MultiPlayer$$ == 1)
+		{
+			//set a block over the camaflage pull down
+			object o_camo_block = region_block
+			o_camo_block.location = 20, 220, 30
+			o_camo_block.region_width = 300
+			o_camo_block.region_height = 50
+			o_camo_block.id = 205
+			initialize(o_camo_block)
+		}
+
+		// heat_sinks spinbox
+		object o_heat_sinks_spinbox			= s_plus_minus_int
+		o_heat_sinks_spinbox.location		= boxx, 441, 10
+		o_heat_sinks_spinbox.boxwidth		= boxwidth
+		o_heat_sinks_spinbox.id				= 207
+		initialize(o_heat_sinks_spinbox)
+
+		// engine_topspeed spinbox
+		object o_engine_topspeed_spinbox	= s_plus_minus_float
+		o_engine_topspeed_spinbox.boxwidth	= boxwidth
+		o_engine_topspeed_spinbox.location	= boxx, 471, 10
+		o_engine_topspeed_spinbox.id		= 206
+		initialize(o_engine_topspeed_spinbox)
+
+		int component_list_top		= 284
+		int component_v_spacing 	= 18
+//		int component_v_spacing 	= 20
+
+		object o_ECM			= s_aux_equip
+		o_ECM.location			= 20, component_list_top + (component_v_spacing*0), 10
+		o_ECM.id				= 213
+		o_ECM.equip_name		= localize$(DNL_ECM_SHORT)
+		initialize(o_ECM)
+
+		object o_beagle			= s_aux_equip
+		o_beagle.location		= 20, component_list_top + (component_v_spacing*1), 10
+		o_beagle.id				= 214
+		o_beagle.equip_name		= localize$(DNL_BAP)
+		initialize(o_beagle)
+
+		object o_jumpjets		= s_aux_equip
+		o_jumpjets.location		= 20, component_list_top + (component_v_spacing*2), 10
+		o_jumpjets.id			= 212
+		o_jumpjets.equip_name	= localize$(DNL_JUMPJETS)
+		initialize(o_jumpjets)
+
+		object o_LAMS			= s_aux_equip
+		o_LAMS.location			= 20, component_list_top + (component_v_spacing*3), 10
+		o_LAMS.id				= 217
+		o_LAMS.equip_name		= localize$(DNL_LAMS_SHORT)
+		initialize(o_LAMS)
+
+		object o_EnhancedOptics			= s_aux_equip
+		o_EnhancedOptics.location		= 20, component_list_top + (component_v_spacing*4), 10
+		o_EnhancedOptics.id				= 218
+		o_EnhancedOptics.equip_name		= localize$(DNL_ENHANCED_OPTICS)
+		initialize(o_EnhancedOptics)
+
+		object o_IFF_Jammer         = s_aux_equip
+		o_IFF_Jammer.location       = 20, component_list_top + (component_v_spacing*5), 10
+		o_IFF_Jammer.id             = 219
+		o_IFF_Jammer.equip_name     = localize$(DNL_IFF_JAMMER)
+		initialize(o_IFF_Jammer)
+
+		object o_AdvancedGyro           = s_aux_equip
+		o_AdvancedGyro.location         = 20, component_list_top + (component_v_spacing*6), 10
+		o_AdvancedGyro.id               = 220
+		o_AdvancedGyro.equip_name       = localize$(DNL_ADVANCED_GYRO)
+		initialize(o_AdvancedGyro)
+
+		if $$m_mechLabCount$$ > 0
+		{
+			if ($$m_isCampaign$$ == 0)
+			{
+				stock_mech_selected = o_availmechsdroplist.nselected
+				variant_mech_selected = o_availmechsdroplist2.nselected
+				mech_selected = stock_array[stock_mech_selected] + variant_mech_selected
+				callback($$ML_CallbackHandler$$, MLSelectNewMech, mech_Selected, mech_name[mech_selected])
+			}
+			else
+			{
+				callback($$ML_CallbackHandler$$, MLSelectNewMech, o_availmechsdroplist.nSelected, o_availmechsdroplist.list_item[o_availmechsdroplist.nSelected])
+			}
+		}
+
+		int jumpjets_installed
+		int ecm_installed
+		int beagle_installed
+		int lams_installed
+		int enhanced_optics_installed
+		int iff_jammer_installed
+		int advanced_gyro_installed
+
+		int previous_mech = -1
+		int new_mech
+
+		// support for not showing group weapons dialog if there are no weapons mounted
+		int grp_array_size = 30
+		int grp_typearray[grp_array_size]
+		int grp_id_array[grp_array_size]
+		int grp_loc_array[grp_array_size]
+		int grp_group1_array[grp_array_size]
+		int grp_group2_array[grp_array_size]
+		int grp_group3_array[grp_array_size]
+		int grp_group4_array[grp_array_size]
+		int grp_group5_array[grp_array_size]
+		int grp_group6_array[grp_array_size]
+		int grp_num_weapons
+
+		string mechStateStr[5]
+		//int mechDamageState
+		//float costToRepairMech
+		//float accountBalance
+
+
+		mechStateStr[0]		= localize$(IDS_MECHSTATUS_NORMAL)
+		mechStateStr[1]		= localize$(IDS_MECHSTATUS_DAMAGED)
+		mechStateStr[2]		= localize$(IDS_MECHSTATUS_DESTROYED)
+		mechStateStr[3]		= localize$(IDS_MECHSTATUS_CRIPPLED)
+		mechStateStr[4]		= localize$(IDS_MECHSTATUS_REPAIRING)
+
+		//indexes
+		int status_normal = 0
+		int status_damaged = 1
+		int status_destroyed = 2
+		int status_crippled = 3
+		int status_repairing = 4
+
+		object o_mechStatus			 	= static_label
+		object o_costToRepairMech 		= static_label
+		object o_accountBalance			= static_label
+		object o_mechValue	 			= static_label
+		object o_value_mechStatus		= static_label
+		object o_value_costToRepairMech = static_label
+		object o_value_accountBalance	= static_label
+		object o_value_mechValue	 	= static_label
+	}
+
+	GUI_INIT
+	{
+		if $$m_mechLabCount$$ > 0
+		{
+			if ($$m_isCampaign$$ == 0)
+			{
+				stock_mech_selected = o_availmechsdroplist.nselected
+				variant_mech_selected = o_availmechsdroplist2.nselected
+				mech_selected = stock_array[stock_mech_selected] + variant_mech_selected
+				callback($$ML_CallbackHandler$$, MLSelectNewMech, mech_Selected, mech_name[mech_selected])
+				int mech_success = callback($$ML_CallbackHandler$$, MLSelectNewMech, mech_Selected, mech_name[mech_selected])
+
+				if (mech_success != 1)
+				{
+					int need_clan_pak = 0
+					int need_is_pak = 0
+					int wrong_mech_selected = mech_selected
+
+					if (mech_success == -1)
+						need_clan_pak = 1
+
+					if (mech_success == -2)
+						need_is_pak = 1
+
+					if ($$m_mechLabCount$$ > 1)
+					{
+						// continue to search since we have more than 1 mech in the mech lab
+
+						if (previous_mech != -1)
+						{
+							// this is not the time we fired up mech lab
+							if ((stock_array[stock_mech_selected+1] - stock_array[stock_mech_selected]) > 1)
+							{
+								// We have more than one variant in the current chassis
+
+								// let's find out we are jumping from another chassis
+								int previous_stock_mech_selected = 0
+								while (previous_mech >= stock_array[previous_stock_mech_selected])
+								{
+									previous_stock_mech_selected++
+								}
+								previous_stock_mech_selected--
+
+								if (stock_mech_selected != previous_stock_mech_selected)
+								{
+									// we are jumping into another chassis.  Search for any valid mech in that chassis
+									selected_mech = stock_mech_selected + variant_mech_selected
+									while ((mech_success != 1) && (selected_mech < stock_array[stock_mech_selected+1]))
+									{
+										variant_mech_selected = selected_mech - stock_mech_selected
+
+										// search the next mech
+										o_availmechsdroplist.nselected = stock_mech_selected
+										o_availmechsdroplist2.nselected = variant_mech_selected
+
+										mech_selected = stock_array[stock_mech_selected] + variant_mech_selected
+										mech_success = callback($$ML_CallbackHandler$$, MLSelectNewMech, mech_Selected, mech_name[mech_selected])
+
+										selected_mech++
+									}
+								}
+							}
+
+							if (mech_success != 1)
+							{
+								// use our previous mech
+								selected_mech = previous_mech
+								stock_mech_selected = 0
+								while (selected_mech >= stock_array[stock_mech_selected])
+								{
+									stock_mech_selected++
+								}
+								stock_mech_selected--
+								last_count = stock_array[stock_mech_selected]
+								variant_mech_selected = selected_mech - last_count
+
+								o_availmechsdroplist.nselected = stock_mech_selected
+								o_availmechsdroplist2.nselected = variant_mech_selected
+
+								mech_selected = stock_array[stock_mech_selected] + variant_mech_selected
+								mech_success = callback($$ML_CallbackHandler$$, MLSelectNewMech, mech_Selected, mech_name[mech_selected])
+
+								// let the user know that you can't use the last mech
+								o_mechpaks_error			= o_ErrorScreen
+								o_mechpaks_error.error_header	= localize$(IDS_MPK_ERROR_TITLE)
+								if (need_clan_pak == 1)
+									o_mechpaks_error.error_message	= mech_name[wrong_mech_selected] " " localize$(IDS_MPK_CLAN_NO_SELECT) "\n\n" localize$(IDS_MPK_CLAN_MECH_PURCHASE)
+								else
+								if (need_is_pak == 1)
+									o_mechpaks_error.error_message	= mech_name[wrong_mech_selected] " " localize$(IDS_MPK_IS_NO_SELECT) "\n\n" localize$(IDS_MPK_IS_MECH_PURCHASE)
+
+								o_mechpaks_error.button_mode	= ONE_BUTTON_MODE
+								o_mechpaks_error.buttonText[0]	= localize$(IDS_GN_OK)
+								initialize(o_mechpaks_error)
+								o_mechpaks_error.mButton[0].id	= 400
+								activate(o_mechpaks_error)
+							}
+						}
+						else
+						{
+							// search all mechs for a mech that is valid
+							int i = 0
+							while ((mech_success != 1) && (i < $$m_mechLabCount$$))
+							{
+								selected_mech = i
+								stock_mech_selected = 0
+								while (selected_mech >= stock_array[stock_mech_selected])
+								{
+									stock_mech_selected++
+								}
+								stock_mech_selected--
+								last_count = stock_array[stock_mech_selected]
+								variant_mech_selected = selected_mech - last_count
+
+								o_availmechsdroplist.nselected = stock_mech_selected
+								o_availmechsdroplist2.nselected = variant_mech_selected
+
+								mech_selected = stock_array[stock_mech_selected] + variant_mech_selected
+								mech_success = callback($$ML_CallbackHandler$$, MLSelectNewMech, mech_Selected, mech_name[mech_selected])
+
+								if (mech_success == -1)
+									need_clan_pak = 1
+
+								if (mech_success == -2)
+									need_is_pak = 1
+
+								i++
+							}
+						}
+					}
+
+					if (mech_success != 1)
+					{
+						parent.mech_exists = FALSE
+
+						// prompt the user to create a new mech
+						if session_create < create_limit
+						{
+							// let the user know that you can't use the last mech
+							o_mechpaks_error			= o_ErrorScreen
+							o_mechpaks_error.error_header	= localize$(IDS_MPK_ERROR_TITLE)
+
+							if (need_clan_pak == 1) && (need_is_pak == 1)
+								o_mechpaks_error.error_message	= localize$(IDS_MPK_BOTH_NO_EXIST) "\n\n" localize$(IDS_MPK_BOTH_PURCHASE) "\n\n" localize$(IDS_MPK_CONTINUE)
+							else
+							if (need_clan_pak == 1)
+								o_mechpaks_error.error_message	= localize$(IDS_MPK_CLAN_NO_EXIST) "\n\n" localize$(IDS_MPK_CLAN_MECH_PURCHASE) "\n\n" localize$(IDS_MPK_CONTINUE)
+							else
+							if (need_is_pak == 1)
+								o_mechpaks_error.error_message	= localize$(IDS_MPK_IS_NO_EXIST) "\n\n" localize$(IDS_MPK_IS_MECH_PURCHASE) "\n\n" localize$(IDS_MPK_CONTINUE)
+
+							o_mechpaks_error.button_mode	= ONE_BUTTON_MODE
+							o_mechpaks_error.buttonText[0]	= localize$(IDS_GN_OK)
+							initialize(o_mechpaks_error)
+							o_mechpaks_error.mButton[0].id	= 401
+							activate(o_mechpaks_error)
+
+							activate(o_overlay)
+							o_newmech.no_cancel = 1
+							initialize(o_newmech)
+							activate(o_newmech)
+							focus(o_newmech.o_variantname)
+						}
+
+						// We can safely assume that session_create will never reach create_limit
+					}
+				}
+				new_mech = mech_selected
+			}
+			else
+			{
+				new_mech = o_availmechsdroplist.nSelected
+				callback($$ML_CallbackHandler$$, MLSelectNewMech, o_availmechsdroplist.nSelected, o_availmechsdroplist.list_item[o_availmechsdroplist.nSelected])
+			}
+			previous_mech		= new_mech
+			parent.just_saved	= true
+
+			parent.o_restorebutton.state	= 3
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 3
+				initialize(parent.o_savebutton)
+			//}
+
+			callback($$ML_CallbackHandler$$, MLDataSetupGetMechNoEditData, acceleration, deacceleration, turn_rate, torso_twist, twist_speed, tech_type)
+
+
+			callback($$ML_CallbackHandler$$, MLDataSetupGetHeatSinks, heatsinks_installed)
+			callback($$ML_CallbackHandler$$, MLDataSetupGetEngineSpeed, engine_topspeed, engine_tons)
+
+			callback($$ML_CallbackHandler$$, MLGetJumpJets, jumpjets_installed, can_have_jump, jump_tons)
+			callback($$ML_CallbackHandler$$, MLGetECM, ecm_installed, can_have_ecm, ecm_tons)
+			callback($$ML_CallbackHandler$$, MLGetBeagle, beagle_installed, can_have_beagle, beagle_tons)
+			callback($$ML_CallbackHandler$$, MLGetLAMS, lams_installed, can_have_lams, lams_tons)
+			callback($$ML_CallbackHandler$$, MLGetEnhancedOptics, enhanced_optics_installed, can_have_enhanced_optics, enhanced_optics_tons)
+			callback($$ML_CallbackHandler$$, MLGetIFF_Jammer, iff_jammer_installed, can_have_iff_jammer, iff_jammer_tons)
+			callback($$ML_CallbackHandler$$, MLGetAdvancedGyro, advanced_gyro_installed, can_have_advanced_gyro, advanced_gyro_tons)
+
+			callback($$ML_CallbackHandler$$, MLGetSkinListCount, skin_num)
+
+			//skin_num = 44
+			string skin_names[skin_num]
+
+			int skin_selected
+			callback($$ML_CallbackHandler$$, MLDataGetSkinList, skin_names[], skin_selected)
+
+			if can_have_ecm != 0
+			{
+				o_ECM.unmountable = false
+				if ecm_installed != 0
+				{
+					o_ECM.state = 2
+				}
+				if ecm_installed == 0
+				{
+					o_ECM.state = 0
+				}
+
+				o_ECM.equip_tonnage = ecm_tons
+			}
+			else
+			{
+				o_ECM.state = 0
+				o_ECM.equip_tonnage = 0
+				o_ECM.unmountable = true
+			}
+
+			if can_have_beagle != 0
+			{
+				o_beagle.unmountable = false
+				if beagle_installed != 0
+				{
+					o_beagle.state = 2
+				}
+				if beagle_installed == 0
+				{
+					o_beagle.state = 0
+				}
+
+				o_beagle.equip_tonnage = beagle_tons
+			}
+			else
+			{
+				o_beagle.state = 0
+				o_beagle.equip_tonnage = 0
+				o_beagle.unmountable = true
+			}
+
+
+			if can_have_jump != 0
+			{
+				o_jumpjets.unmountable = false
+				if jumpjets_installed != 0
+				{
+					o_jumpjets.state = 2
+				}
+				if jumpjets_installed == 0
+				{
+					o_jumpjets.state = 0
+				}
+
+				o_jumpjets.equip_tonnage = jump_tons
+			}
+			else
+			{
+				o_jumpjets.state = 0
+				o_jumpjets.equip_tonnage = 0
+				o_jumpjets.unmountable = true
+			}
+
+			if can_have_lams != 0
+			{
+				o_LAMS.unmountable = false
+				if lams_installed != 0
+				{
+					o_LAMS.state = 2
+				}
+				if lams_installed == 0
+				{
+					o_LAMS.state = 0
+				}
+
+				o_LAMS.equip_tonnage = lams_tons
+			}
+			else
+			{
+				o_LAMS.state = 0
+				o_LAMS.equip_tonnage = 0
+				o_LAMS.unmountable = true
+			}
+
+			if can_have_enhanced_optics != 0
+			{
+				o_EnhancedOptics.unmountable = false
+				if enhanced_optics_installed != 0
+				{
+					o_EnhancedOptics.state = 2
+				}
+				if enhanced_optics_installed == 0
+				{
+					o_EnhancedOptics.state = 0
+				}
+
+				o_EnhancedOptics.equip_tonnage = enhanced_optics_tons
+			}
+			else
+			{
+				o_EnhancedOptics.state = 0
+				o_EnhancedOptics.equip_tonnage = 0
+				o_EnhancedOptics.unmountable = true
+			}
+
+
+			if can_have_iff_jammer != 0
+			{
+				o_IFF_Jammer.unmountable = false
+				if iff_jammer_installed != 0
+				{
+					o_IFF_Jammer.state = 2
+				}
+				if iff_jammer_installed == 0
+				{
+					o_IFF_Jammer.state = 0
+				}
+
+				o_IFF_Jammer.equip_tonnage = iff_jammer_tons
+			}
+			else
+			{
+				o_IFF_Jammer.state = 0
+				o_IFF_Jammer.equip_tonnage = 0
+				o_IFF_Jammer.unmountable = true
+			}
+
+			if can_have_advanced_gyro != 0
+			{
+				o_AdvancedGyro.unmountable = false
+				if advanced_gyro_installed != 0
+				{
+					o_AdvancedGyro.state = 2
+				}
+				if advanced_gyro_installed == 0
+				{
+					o_AdvancedGyro.state = 0
+				}
+
+				o_AdvancedGyro.equip_tonnage = advanced_gyro_tons
+			}
+			else
+			{
+				o_AdvancedGyro.state = 0
+				o_AdvancedGyro.equip_tonnage = 0
+				o_AdvancedGyro.unmountable = true
+			}
+
+			initialize(o_ECM)
+			initialize(o_beagle)
+			initialize(o_jumpjets)
+			initialize(o_LAMS)
+			initialize(o_EnhancedOptics)
+			initialize(o_IFF_Jammer)
+			initialize(o_AdvancedGyro)
+
+			o_camodroplist.list_size = skin_num
+
+			int s
+			//for s = 0; s < skin_num; s++	// mektek
+			//for s = 0; s < 41; s++	// mektek
+			//{
+			//	o_camodroplist.list_item[s] = skin_names[s]
+			//}
+
+
+			// replacement skins - mektek - don't forget to modify NetLobby.script too!
+			o_camodroplist.list_item[0] = "0-Ops Blue"
+			o_camodroplist.list_item[1] = "1-Ops Red"
+			o_camodroplist.list_item[2] = "2-Ops OliveDrab"
+			o_camodroplist.list_item[3] = "3-Ops Yellow"
+			o_camodroplist.list_item[4] = "4-Ops Purple"
+			o_camodroplist.list_item[5] = "5-Ops Cyan"
+			o_camodroplist.list_item[6] = "6-Ops Orange"
+			o_camodroplist.list_item[7] = "7-Ops Charcoal"
+			o_camodroplist.list_item[8] = "8-USMC Marpat"		// new
+			o_camodroplist.list_item[9] = "9-USMC Urban"		// new
+			o_camodroplist.list_item[10] = "a-US Army Desert"	// new
+			o_camodroplist.list_item[11] = "b-Snowball"
+			o_camodroplist.list_item[12] = "c-Panzer"
+			o_camodroplist.list_item[13] = "d-LowlightUrban"
+			o_camodroplist.list_item[14] = "e-Giraffe"
+			o_camodroplist.list_item[15] = "f-Treeline"
+			o_camodroplist.list_item[16] = "g-Savanna"
+			o_camodroplist.list_item[17] = "h-Pakistan Brush"	// new
+			o_camodroplist.list_item[18] = "i-SteinerDesert"
+			o_camodroplist.list_item[19] = "j-Winter Ridge"
+			o_camodroplist.list_item[20] = "k-Norway"		// new
+			o_camodroplist.list_item[21] = "l-Mist"
+			o_camodroplist.list_item[22] = "m-Merkava"
+			o_camodroplist.list_item[23] = "n-Russian Reed"		// new
+			o_camodroplist.list_item[24] = "!-Polish Desert"	// new			
+			o_camodroplist.list_item[25] = "^-Swamp"
+			o_camodroplist.list_item[26] = "#-Spanish Sahara"	// new
+			o_camodroplist.list_item[27] = "$-South African Snow"	// new
+			o_camodroplist.list_item[28] = "%-German Fleck"		// new
+			o_camodroplist.list_item[29] = "o-Police Tiger"		// new
+			o_camodroplist.list_item[30] = "p-Power Pink"
+			o_camodroplist.list_item[31] = "q-South Africa"		// new
+			o_camodroplist.list_item[32] = "r-Portugal"		// new
+			o_camodroplist.list_item[33] = "s-Cuban Lizard"		// new
+			o_camodroplist.list_item[34] = "t-Blue Line"
+			o_camodroplist.list_item[35] = "u-DesertSabre"
+			o_camodroplist.list_item[36] = "v-Saudi Blue"		// new
+			o_camodroplist.list_item[37] = "w-Desert"		// new
+			o_camodroplist.list_item[38] = "x-Deep Woods"		// new
+			o_camodroplist.list_item[39] = "y-Plasma Grid Red"	// new
+			o_camodroplist.list_item[40] = "z-Tiger Stripes"	// new
+
+			// mektek skins
+			o_camodroplist.list_item[41] = "~-Desert Fox"		// new
+			o_camodroplist.list_item[42] = "--Woodlands"		// new
+			o_camodroplist.list_item[43] = "&-Dark Panzer"		// new
+			o_camodroplist.list_item[44] = "+-Jungle"		// new
+
+			o_camodroplist.list_item[45] = ".-Vietnam Tiger"	// new
+			o_camodroplist.list_item[46] = "(-Vietnam Tiger Gold"	// new
+			o_camodroplist.list_item[47] = "'-Desert Tiger"		// new
+			o_camodroplist.list_item[48] = ")-Rhodesia"		// new
+			o_camodroplist.list_item[49] = "]-Snowblind"		// new
+			o_camodroplist.list_item[50] = "[-Winter War"		// new
+
+			o_camodroplist.list_item[51] = "None"
+
+
+
+			o_camodroplist.nSelected = skin_selected
+			if ($$DEMO_Multiplayer$$ == 1)
+			{
+				o_camodroplist.nSelected = 24 //set the pull down to black legion
+			}
+
+
+			initialize(o_camodroplist)
+
+			o_engine_topspeed_spinbox.displayed_value	= engine_topspeed
+			o_heat_sinks_spinbox.displayed_value		= heatsinks_installed
+		}
+
+		if exists(o_deletemechbutton)
+		{
+			if o_availmechsdroplist.list_size == 0
+			{
+				o_deletemechbutton.state = 3
+			}
+			else
+			{
+				o_deletemechbutton.state = 0
+			}
+			initialize(o_deletemechbutton)
+		}
+
+		if exists(o_renamemechbutton)
+		{
+			if o_availmechsdroplist.list_size == 0
+			{
+				o_renamemechbutton.state = 3
+			}
+			else
+			{
+				o_renamemechbutton.state = 0
+			}
+			initialize(o_renamemechbutton)
+		}
+
+		int STATUS_LABELS_X	  	= 348
+		int STATUS_LABELS_Y   	= 200
+		int STATUS_LABELS_Z	  	= 50
+		int LABEL_SPACING		= 28
+//		int LABEL_SPACING		= 40
+		int VALUE_SPACING		= 12
+//		int VALUE_SPACING		= 15
+		int whichLabel			= 0
+		int _labelWidth 		= 190
+		int INDENT			    = 10
+
+        // hide these labels when not in a campaign
+		if $$m_isCampaign$$ == 1
+		{
+    		o_mechStatus		._origin   		= STATUS_LABELS_X, STATUS_LABELS_Y+(LABEL_SPACING*whichLabel), STATUS_LABELS_Z
+    		o_mechStatus        ._width	   		= _labelWidth
+    		o_mechStatus        .text	   		= localize$( IDS_MECH_STATUS )
+    		o_mechStatus        ._justification	= just_left
+    		whichLabel++
+
+    		o_costToRepairMech	._origin   		= STATUS_LABELS_X, STATUS_LABELS_Y+(LABEL_SPACING*whichLabel), STATUS_LABELS_Z
+    		o_costToRepairMech  ._width	   		= _labelWidth
+    		o_costToRepairMech  .text	   		= localize$( IDS_COST_TO_REPAIR )
+    		o_costToRepairMech  ._justification	= just_left
+    		whichLabel++
+    		whichLabel++ // make extra room for the repair button
+			// STATUS_LABELS_Y = STATUS_LABELS_Y + 10 // make extra room for the repair button
+
+    		o_accountBalance    ._origin   		= STATUS_LABELS_X, STATUS_LABELS_Y+(LABEL_SPACING*whichLabel), STATUS_LABELS_Z
+    		o_accountBalance    ._width	   		= _labelWidth
+    		o_accountBalance    .text	   		= localize$( IDS_ACCOUNT_BALANCE )
+    		o_accountBalance    ._justification	= just_left
+    		whichLabel++
+        }
+		o_mechValue             ._origin 		= STATUS_LABELS_X, STATUS_LABELS_Y+(LABEL_SPACING*whichLabel), STATUS_LABELS_Z
+		o_mechValue             ._width	 		= _labelWidth
+		o_mechValue             .text	 		= localize$( IDS_MECH_VALUE )
+		o_mechValue             ._justification	= just_left
+
+		//Normal	= 0
+		//Damaged
+		//Destroyed
+		//Crippled
+		//Repairing
+
+        // note, MLGetMechStatus() only sets mechStatus if this isn't a campaign
+		int mechStatus = 1
+		int mechIsRepairing = 0
+		callback($$ML_CallbackHandler$$, MLGetMechStatus, mechStatus, mechIsRepairing )
+
+		if $$m_isCampaign$$ == 1 && $$m_mechLabCount$$ > 0
+		{
+    	    int costToRepairMech = callback($$GetMechRepairCost$$)
+            int currentBalance = callback($$GetMoneyBalance$$)
+
+            // hide these labels when not in a campaign
+
+            o_value_mechStatus          ._origin   		= o_mechStatus._origin.x + INDENT, o_mechStatus._origin.y + VALUE_SPACING, o_mechStatus._origin.z
+    		o_value_mechStatus          ._width	   		= _labelWidth
+    		o_value_mechStatus          .text	   		= mechStateStr[ mechStatus ]
+    		o_value_mechStatus          ._justification	= just_left
+    		o_value_mechStatus		    ._textColor		=  packcolor (72,203,135,255)
+
+    		o_value_costToRepairMech    ._origin   		= o_costToRepairMech._origin.x + INDENT, o_costToRepairMech._origin.y + VALUE_SPACING, o_costToRepairMech._origin.z
+    		o_value_costToRepairMech    ._width	   		= _labelWidth
+    		if ((callback($$GetMechRepairStatus$$)) || (parent.tempRepairStatusFlag))
+    		{
+    			o_value_costToRepairMech.text 		    = mechStateStr[status_repairing]
+    			o_value_costToRepairMech._textColor	    = packcolor (72,203,135,255)
+    		}
+    		else
+    		{
+    			o_value_costToRepairMech.text 		    = fmtcommanum$(costToRepairMech)
+    			o_value_costToRepairMech._textColor	    = packcolor (72,203,135,255)
+    		}
+    		o_value_costToRepairMech    ._justification	= just_left
+    		o_value_costToRepairMech    ._isFloat 		= false
+
+
+    		o_value_accountBalance      ._origin   		= o_accountBalance._origin.x + INDENT, o_accountBalance._origin.y + VALUE_SPACING, o_accountBalance._origin.z
+    		o_value_accountBalance      ._width	   		= _labelWidth
+    		if (parent.tempRepairStatusFlag)
+    		{
+    			o_value_accountBalance  .text	    	=  fmtcommanum$(currentBalance - costToRepairMech)  //display what will happen if we dont save
+    			o_value_accountBalance	._textColor	    =  packcolor (72,203,135,255)
+    		}
+    		else
+    		{
+    			o_value_accountBalance  .text   		= fmtcommanum$(currentBalance)
+    			o_value_accountBalance	._textColor		=  packcolor (72,203,135,255)
+    		}
+    		o_value_accountBalance      ._justification	= just_left
+    		o_value_accountBalance      ._isFloat 		= false
+        }
+
+		o_value_mechValue               ._origin   		= o_mechValue._origin.x + INDENT, o_mechValue._origin.y + VALUE_SPACING, o_mechValue._origin.z
+		o_value_mechValue               ._width	   		= _labelWidth
+		o_value_mechValue               .text	   		= fmtcommanum$(callback($$GetMechValuePlusWeapons$$))
+		o_value_mechValue               ._justification	= just_left
+		o_value_mechValue        	    ._isFloat		= false
+		o_value_mechValue		        ._textColor		=  packcolor (72,203,135,255)
+
+        // hide these labels when not in a campaign
+		if $$m_isCampaign$$ == 1 && $$m_mechLabCount$$ > 0
+		{
+     		initialize(o_mechStatus)
+     		initialize(o_costToRepairMech)
+     		initialize(o_accountBalance)
+     		initialize(o_value_mechStatus)
+     		initialize(o_value_costToRepairMech)
+     		initialize(o_value_accountBalance)
+        }
+        initialize(o_mechValue)
+ 		initialize(o_value_mechValue)
+
+		// spew conv$( o_value_mechStatus.location.x ) ", " conv$( o_value_mechStatus.location.z ) ", " conv$( o_value_mechStatus.location.z )
+		// spew conv$( o_value_mechStatus._origin.x ) ", " conv$( o_value_mechStatus._origin.z ) ", " conv$( o_value_mechStatus._origin.z )
+	}
+
+	GUI_ACTIVATE
+	{
+		o_value_mechValue               .text	   		= fmtcommanum$(callback($$GetMechValuePlusWeapons$$))
+		initialize( o_value_mechValue	 	 )
+
+		if $$m_isCampaign$$ == 0
+		{
+			callback($$ML_CallbackHandler$$, MLDataSetupMechSelection, mech_name[], dummy_status[], selected_mech)
+
+			o_availmechsdroplist.list_size = 0
+			for (int i = 0; i < $$m_chassisCount$$ ; i++)
+			{
+				stock_count[i] = 0
+			}
+
+			for (count = 0; count < $$m_mechLabCount$$; count++)
+			{
+				for (i = 0; i < $$m_chassisCount$$ ; i++)
+				{
+					if (equal$(left$(mech_name[count], length$(stock_name[i])), stock_name[i]) == true)
+					{
+
+						// special case for Mad Cat Mark II
+						if (!((equal$(stock_name[i], mad_cat) == true) && (equal$(left$(mech_name[count], length$(mad_cat2)), mad_cat2) == true)))
+						{
+							stock_count[i]++
+							mech_name2[count] = right$(mech_name[count], length$(mech_name[count]) - (length$(stock_name[i]) + 1))
+							break
+						}
+
+					}
+				}
+			}
+
+			for (i = 0; i < $$m_chassisCount$$ ; i++)
+			{
+				if (stock_count[i] != 0)
+				{
+					o_availmechsdroplist.list_item[o_availmechsdroplist.list_size] = stock_name[i]
+					o_availmechsdroplist.list_size++
+				}
+			}
+			initialize(o_availmechsdroplist)
+
+			count = 0
+			if ($$m_mechLabCount$$)
+			{
+				stock_array[0] = 0
+				count = 1
+				for (i = 0; i < $$m_chassisCount$$ ; i++)
+				{
+					if (stock_count[i] != 0)
+					{
+						stock_array[count] = stock_array[count - 1] + stock_count[i]
+						count++
+					}
+				}
+
+				selected_mech = previous_mech
+				stock_mech_selected = 0
+				while (selected_mech >= stock_array[stock_mech_selected])
+				{
+					stock_mech_selected++
+				}
+				stock_mech_selected--
+				last_count = stock_array[stock_mech_selected]
+				variant_mech_selected = selected_mech - last_count
+
+				count = 0
+				do
+				{
+					o_availmechsdroplist2.list_item[count] = mech_name2[last_count]
+					count++
+					last_count++
+					if (last_count == $$m_mechLabCount$$)
+						break
+				}
+				while ((stock_array[stock_mech_selected] + count) != stock_array[stock_mech_selected + 1])
+			}
+
+			o_availmechsdroplist2.list_size = count
+			initialize(o_availmechsdroplist2)
+
+			o_availmechsdroplist.nSelected = stock_mech_selected
+			o_availmechsdroplist2.nselected = variant_mech_selected
+		}
+
+		if exists(o_newmechbutton)
+			activate(o_newmechbutton)
+		if exists(o_deletemechbutton)
+		{
+			if o_availmechsdroplist.list_size == 0
+			{
+				o_deletemechbutton.state = 3
+			}
+			else
+			{
+				o_deletemechbutton.state = 0
+			}
+			initialize(o_deletemechbutton)
+
+			activate(o_deletemechbutton)
+		}
+		if exists(o_renamemechbutton)
+		{
+			if o_availmechsdroplist.list_size == 0
+			{
+				o_renamemechbutton.state = 3
+			}
+			else
+			{
+				o_renamemechbutton.state = 0
+			}
+			initialize(o_renamemechbutton)
+
+			activate(o_renamemechbutton)
+		}
+		activate(o_availmechsdroplist)
+		if ($$m_isCampaign$$ == 0)
+			activate(o_availmechsdroplist2)
+
+		activate(o_camodroplist)
+
+		if ($$DEMO_MultiPlayer$$ == 1)
+		{
+			activate (o_camo_block)
+		}
+
+		activate(o_engine_topspeed_spinbox)
+		activate(o_heat_sinks_spinbox)
+
+		activate(o_ECM)
+		activate(o_beagle)
+		activate(o_jumpjets)
+		activate(o_LAMS)
+		activate(o_EnhancedOptics)
+		activate(o_IFF_Jammer)
+		activate(o_AdvancedGyro)
+
+        // hide these labels when not in a campaign
+		if $$m_isCampaign$$ == 1 && $$m_mechLabCount$$ > 0
+		{
+     		activate( o_mechStatus			 )
+     		activate( o_costToRepairMech 		 )
+     		activate( o_accountBalance		 )
+     		activate( o_value_mechStatus		 )
+     		activate( o_value_costToRepairMech )
+     		activate( o_value_accountBalance	 )
+        }
+ 		activate( o_mechValue	 			 )
+ 		activate( o_value_mechValue	 	 )
+
+	}
+
+	GUI_DEACTIVATE
+	{
+		deactivate(o_availmechsdroplist)
+		if ($$m_isCampaign$$ == 0)
+			deactivate(o_availmechsdroplist2)
+
+		deactivate(o_camodroplist)
+		if ($$DEMO_MultiPlayer$$ == 1)
+		{
+			deactivate (o_camo_block)
+		}
+
+		if exists(o_newmechbutton)
+			deactivate(o_newmechbutton)
+		if exists(o_deletemechbutton)
+			deactivate(o_deletemechbutton)
+		if exists(o_renamemechbutton)
+			deactivate(o_renamemechbutton)
+		deactivate(o_engine_topspeed_spinbox)
+		deactivate(o_heat_sinks_spinbox)
+
+		deactivate(o_ECM)
+		deactivate(o_beagle)
+		deactivate(o_jumpjets)
+		deactivate(o_LAMS)
+		deactivate(o_EnhancedOptics)
+		deactivate(o_IFF_Jammer)
+		deactivate(o_AdvancedGyro)
+
+        // hide these labels when not in a campaign
+		if $$m_isCampaign$$ == 1 && $$m_mechLabCount$$ > 0
+		{
+     		deactivate( o_mechStatus			 )
+     		deactivate( o_costToRepairMech 		 )
+     		deactivate( o_accountBalance		 )
+     		deactivate( o_value_mechStatus		 )
+     		deactivate( o_value_costToRepairMech )
+     		deactivate( o_value_accountBalance	 )
+        }
+ 		deactivate( o_mechValue	 			 )
+ 		deactivate( o_value_mechValue	 	 )
+
+	}
+
+	GUI_DRAW
+	{
+		setpencolor(0x66ffffff)
+		// Separator line 1
+//		drawline sepx1, sepy1 to sepx2, sepy1
+//		drawline sepx1, sepy1 - 1 to sepx1 + 20, sepy1 - 1
+//		drawline sepx1, sepy1 + 1 to sepx1 + 20, sepy1 + 1
+//		drawline sepx2 - 20, sepy1 - 1 to sepx2, sepy1 - 1
+//		drawline sepx2 - 20, sepy1 + 1 to sepx2, sepy1 + 1
+		// Separator line 2
+		drawline sepx1, sepy2 to sepx2, sepy2
+		drawline sepx1, sepy2 - 1 to sepx1 + 20, sepy2 - 1
+		drawline sepx1, sepy2 + 1 to sepx1 + 20, sepy2 + 1
+		drawline sepx2 - 20, sepy2 - 1 to sepx2, sepy2 - 1
+		drawline sepx2 - 20, sepy2 + 1 to sepx2, sepy2 + 1
+		// Separator line 4
+		drawline sepx1, sepy3 to sepx2, sepy3
+		drawline sepx1, sepy3 - 1 to sepx1 + 20, sepy3 - 1
+		drawline sepx1, sepy3 + 1 to sepx1 + 20, sepy3 + 1
+		drawline sepx2 - 20, sepy3 - 1 to sepx2, sepy3 - 1
+		drawline sepx2 - 20, sepy3 + 1 to sepx2, sepy3 + 1
+
+		print3d_attributes = regfont, 0xffffffff, 1, 1, 1, 0, 0
+		print3d_margins = 20, 130 - 74 to 315, 530
+		print3d_margins = 20, 130 to 315, 530
+		print3d_position = labelx, 444
+		print3d localize$(IDS_ML_CH_HEATSINKS)
+		print3d_position = labelx, 475
+		print3d localize$(IDS_ML_CH_TOPSPEED)
+		print3d_position = labelx, 492
+		print3d localize$(IDS_ML_CH_UPGRADE)
+
+		print3d_attributes = regfont, 0xffffffff, 1, 1, 1, 0, 0, just_right
+		print3d_margins = 250, 130 to 310, 530
+		print3d_position = 250, 444
+		print3d conv$(heatsinks_installed) ".00"
+		print3d_position = 250, 492
+		print3d engine_tons
+
+		print3d_attributes = regfont, 0xffffffff, 1, 1, 1, 0, 0
+		print3d_margins = 20, 130 to 315, 530
+		print3d_position = 22, 260
+		print3d localize$(IDS_ML_CH_AUXEQUIP)
+		print3d_attributes = regfont, 0xffffffff, 1, 1, 1, 0, 0, just_right
+		print3d_margins = 250, 130 to 315, 530
+		print3d_position = 250, 260
+		print3d localize$(IDS_ML_CH_TONS)
+
+		// If you are looking for the spot where mech status (and repair cost etc) info is displayed, search for "static_label"
+
+		// Non-editable information
+//==============================================================
+// -dsilverman
+// commented out this section...it was an eyesore. Eventually
+// we'll use it in the comstar box.
+//==============================================================
+//		if parent.mech_exists == true
+//		{
+//			print3d_attributes = regfont, 0xffffffff, 1, 1, 1, 0, 0
+//			print3d_margins = noneditx, nonedity to getresx() - 10, nonedity + 371
+//			print3d_position = noneditx, labely + 135
+//			print3d localize$(IDS_ML_CH_CHASSISTECH)
+//			print3d_position = noneditx, labely + 180
+//			print3d localize$(IDS_ML_CH_CHASSISCLASS)
+//			print3d_position = noneditx, labely + 225
+//			print3d localize$(IDS_ML_CH_ACCELERATION)
+//			print3d_position = noneditx, labely + 270
+//			print3d localize$(IDS_ML_CH_DECELERATION)
+//			print3d_position = noneditx, labely + 315
+//			print3d localize$(IDS_ML_CH_TURNRATE)
+//			print3d_position = noneditx, labely + 360
+//			print3d localize$(IDS_ML_CH_TWISTRANGE)
+//			print3d_position = noneditx, labely + 405
+//			print3d localize$(IDS_ML_CH_TWISTSPEED)
+//
+//			print3d_attributes = boldfont, 0xffffffff, 1, 1, 1, 0, 0
+//			print3d_margins = noneditx, nonedity to getresx() - 10, nonedity + 371
+//			print3d_position = noneditx + 20, labely + 155
+//			print3d chassis_tech[parent.mech_id]
+//			print3d_position = noneditx + 20, labely + 200
+//			print3d class[parent.mech_id]
+//			print3d_position = noneditx + 20, labely + 245
+//			print3d acceleration
+//			print3d_position = noneditx + 20, labely + 290
+//			print3d deacceleration
+//			print3d_position = noneditx + 20, labely + 335
+//			print3d turn_rate
+//			print3d_position = noneditx + 20, labely + 380
+//			print3d torso_twist
+//			print3d_position = noneditx + 20, labely + 425
+//			print3d twist_speed
+//		}
+	}
+
+	GUI_MAILBOX
+	{
+		int WORKING_MECH = -1
+		if (sender == o_availmechsdroplist)
+		{
+			int tmp_mech
+			if ($$m_isCampaign$$)
+			{
+				tmp_mech = o_availmechsdroplist.nSelected
+			}
+			else
+			{
+				o_availmechsdroplist2.nselected = 0
+				stock_mech_selected = o_availmechsdroplist.nselected
+				variant_mech_selected = o_availmechsdroplist2.nselected
+				tmp_mech = stock_array[stock_mech_selected] + variant_mech_selected
+			}
+
+			if previous_mech != tmp_mech
+			{
+				if parent.just_saved == true
+				{
+					parent.grouped		= 1
+
+					initialize(this)
+					activate(this)
+				}
+				if parent.just_saved == false
+				{
+					o_saveconfirm				= o_ErrorScreen
+					o_saveconfirm.error_header	= localize$(IDS_ML_SAVE_CHANGES)
+					o_saveconfirm.error_message	= localize$(IDS_ML_CH_SAVECURRENT)
+					o_saveconfirm.button_mode	= TWO_BUTTON_MODE
+					o_saveconfirm.buttonText[0]	= localize$(IDS_GN_YES)
+					o_saveconfirm.buttonText[1]	= localize$(IDS_GN_NO)
+					initialize(o_saveconfirm)
+					o_saveconfirm.mButton[0].id	= 221
+					o_saveconfirm.mButton[1].id	= 222
+					activate(o_saveconfirm)
+					return
+				}
+			}
+		}
+
+		if ($$m_isCampaign$$ == 0)
+		{
+			if (sender == o_availmechsdroplist2)
+			{
+				stock_mech_selected = o_availmechsdroplist.nselected
+				variant_mech_selected = o_availmechsdroplist2.nselected
+				mech_selected = stock_array[stock_mech_selected] + variant_mech_selected
+				int tmp_mech	= mech_selected
+				if previous_mech != tmp_mech
+				{
+					if parent.just_saved == true
+					{
+						parent.grouped		= 1
+
+						initialize(this)
+						activate(this)
+					}
+					if parent.just_saved == false
+					{
+						o_saveconfirm				= o_ErrorScreen
+						o_saveconfirm.error_header	= localize$(IDS_ML_SAVE_CHANGES)
+						o_saveconfirm.error_message	= localize$(IDS_ML_CH_SAVECURRENT)
+						o_saveconfirm.button_mode	= TWO_BUTTON_MODE
+						o_saveconfirm.buttonText[0]	= localize$(IDS_GN_YES)
+						o_saveconfirm.buttonText[1]	= localize$(IDS_GN_NO)
+						initialize(o_saveconfirm)
+						o_saveconfirm.mButton[0].id	= 221
+						o_saveconfirm.mButton[1].id	= 222
+						activate(o_saveconfirm)
+						return
+					}
+				}
+			}
+		}
+
+		if sender == o_saveconfirm
+		{
+			if getmessage() == 0	// YES SAVE
+			{
+				callback($$ML_CallbackHandler$$, MLDataGetWeaponGroups, grp_typearray[], grp_id_array[], grp_loc_array[], grp_group1_array[], grp_group2_array[], grp_group3_array[], grp_group4_array[], grp_group5_array[], grp_group6_array[], grp_num_weapons, grp_array_size)
+
+				parent.o_restorebutton.state	= 3
+				initialize(parent.o_restorebutton)
+				//if ($$m_isCampaign$$ != 1)
+				//{
+					parent.o_savebutton.state		= 3
+					initialize(parent.o_savebutton)
+				//}
+
+				if parent.grouped == 0 && grp_num_weapons > 0
+				{
+					parent.o_groupweapons.change_mech = 1
+					activate(parent.o_overlay)
+					initialize(parent.o_groupweapons)
+					activate(parent.o_groupweapons)
+				}
+				else
+				{
+					if (parent.tempRepairStatusFlag == true)
+					{
+						callback($$RepairMech$$, WORKING_MECH)
+						parent.tempRepairStatusFlag = false
+					}
+					callback($$ML_CallbackHandler$$, MLSave)
+					parent.just_saved = true
+
+					initialize(this)
+					activate(this)
+				}
+			}
+
+			if getmessage() == 1	// NO DON'T SAVE
+			{
+				parent.grouped		= 1
+
+				if (parent.tempRepairStatusFlag == true)
+				{
+					parent.tempRepairStatusFlag = false
+				}
+				initialize(this)
+				activate(this)
+			}
+		}
+
+		if sender == o_camodroplist
+		{
+			callback($$ML_CallbackHandler$$, MLSetMechSkin, o_camodroplist.nselected)
+
+			parent.just_saved = false
+
+			parent.o_restorebutton.state	= 0
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 0
+				initialize(parent.o_savebutton)
+			//}
+
+		}
+
+		if exists(o_newmechbutton)
+		{
+			if sender == o_newmechbutton
+			{
+				play btnTriggeredSound,1
+
+				if parent.just_saved == true
+				{
+					if session_create < create_limit
+					{
+						activate(o_overlay)
+						initialize(o_newmech)
+						activate(o_newmech)
+						focus(o_newmech.o_variantname)
+					}
+					if session_create == create_limit
+					{
+						o_create_error					= o_ErrorScreen
+						o_create_error.error_header		= localize$(IDS_ML_CREATE_LIMIT_TITLE)
+						o_create_error.error_message	= localize$(IDS_ML_CREATE_LIMIT)
+						o_create_error.button_mode		= ONE_BUTTON_MODE
+						o_create_error.buttonText[0]	= localize$(IDS_GN_OK)
+						initialize(o_create_error)
+						o_create_error.mButton[0].id	= 200
+						activate(o_create_error)
+						return
+					}
+				}
+				if parent.just_saved == false
+				{
+					o_saveconfirm_new				= o_ErrorScreen
+					o_saveconfirm_new.error_header	= localize$(IDS_ML_SAVE_CHANGES)
+					o_saveconfirm_new.error_message	= localize$(IDS_ML_CH_SAVECURRENT)
+					o_saveconfirm_new.button_mode	= TWO_BUTTON_MODE
+					o_saveconfirm_new.buttonText[0]	= localize$(IDS_GN_YES)
+					o_saveconfirm_new.buttonText[1]	= localize$(IDS_GN_NO)
+					initialize(o_saveconfirm_new)
+					o_saveconfirm_new.mButton[0].id	= 221
+					o_saveconfirm_new.mButton[1].id	= 222
+					activate(o_saveconfirm_new)
+					return
+				}
+			}
+
+			if sender == o_saveconfirm_new
+			{
+				if getmessage() == 0		// YES SAVE
+				{
+					callback($$ML_CallbackHandler$$, MLDataGetWeaponGroups, grp_typearray[], grp_id_array[], grp_loc_array[], grp_group1_array[], grp_group2_array[], grp_group3_array[], grp_group4_array[], grp_group5_array[], grp_group6_array[], grp_num_weapons, grp_array_size)
+
+					parent.o_restorebutton.state	= 3
+					initialize(parent.o_restorebutton)
+					//if ($$m_isCampaign$$ != 1)
+					//{
+						parent.o_savebutton.state		= 3
+						initialize(parent.o_savebutton)
+					//}
+
+
+					if parent.grouped == 0 && grp_num_weapons > 0
+					{
+						parent.o_groupweapons.new_mech = 1
+						activate(parent.o_overlay)
+						initialize(parent.o_groupweapons)
+						activate(parent.o_groupweapons)
+					}
+					else
+					{
+						if (parent.tempRepairStatusFlag == true)
+						{
+							callback($$RepairMech$$, WORKING_MECH)
+							parent.tempRepairStatusFlag = false
+						}
+						callback($$ML_CallbackHandler$$, MLSave)
+						parent.just_saved = true
+
+						activate(o_overlay)
+						initialize(o_newmech)
+						activate(o_newmech)
+						focus(o_newmech.o_variantname)
+					}
+				}
+
+				if getmessage() == 1		// NO DON'T SAVE
+				{
+					if (parent.tempRepairStatusFlag == true)
+					{
+						parent.tempRepairStatusFlag = false
+					}
+					if session_create < create_limit
+					{
+						activate(o_overlay)
+						initialize(o_newmech)
+						activate(o_newmech)
+						focus(o_newmech.o_variantname)
+					}
+					if session_create == create_limit
+					{
+						o_create_error					= o_ErrorScreen
+						o_create_error.error_header		= localize$(IDS_ML_CREATE_LIMIT_TITLE)
+						o_create_error.error_message	= localize$(IDS_ML_CREATE_LIMIT)
+						o_create_error.button_mode		= ONE_BUTTON_MODE
+						o_create_error.buttonText[0]	= localize$(IDS_GN_OK)
+						initialize(o_create_error)
+						o_create_error.mButton[0].id	= 200
+						activate(o_create_error)
+						return
+					}
+				}
+			}
+
+			if sender == o_create_error
+			{
+				o_newmechbutton.state				= 3
+				initialize(o_newmechbutton)
+			}
+		}
+
+		if exists(o_deletemechbutton)
+		{
+			if sender == o_deletemechbutton
+			{
+				if (o_availmechsdroplist.list_size)
+				{
+					o_deleteconfirm					= o_ErrorScreen
+					o_deleteconfirm.error_header	= localize$(IDS_ML_REMOVEMECH)
+					o_deleteconfirm.error_message	= localize$(IDS_ML_REMOVEMECH_SURE)
+					o_deleteconfirm.button_mode		= TWO_BUTTON_MODE
+					o_deleteconfirm.buttonText[0]	= localize$(IDS_GN_YES)
+					o_deleteconfirm.buttonText[1]	= localize$(IDS_GN_NO)
+					initialize(o_deleteconfirm)
+					o_deleteconfirm.mButton[0].id	= 198
+					o_deleteconfirm.mButton[1].id	= 199
+					activate(o_deleteconfirm)
+					return
+				}
+			}
+
+			// if confirm dialog says yes, go ahead and delete the current mech
+			// And it is only valid in Non-campaign MechLab mode
+			if ((sender == o_deleteconfirm) && (getmessage() == 0))
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLDeleteMech)
+				if ($$m_mechLabCount$$)
+				{
+					// store the name of the mech that we really want
+					string our_selected_stock_mech_name
+					string our_selected_variant_mech_name
+					if (o_availmechsdroplist2.list_size > 1)
+					{
+						our_selected_stock_mech_name = o_availmechsdroplist.list_item[o_availmechsdroplist.nSelected]
+						if (o_availmechsdroplist2.nSelected == o_availmechsdroplist2.list_size - 1)
+							our_selected_variant_mech_name = o_availmechsdroplist2.list_item[o_availmechsdroplist2.nSelected - 1]
+						else
+							our_selected_variant_mech_name = o_availmechsdroplist2.list_item[o_availmechsdroplist2.nSelected + 1]
+
+					}
+					else
+					{
+						if (o_availmechsdroplist.nSelected == o_availmechsdroplist.list_size - 1)
+							our_selected_stock_mech_name = o_availmechsdroplist.list_item[o_availmechsdroplist.nSelected - 1]
+						else
+							our_selected_stock_mech_name = o_availmechsdroplist.list_item[o_availmechsdroplist.nSelected + 1]
+						our_selected_variant_mech_name = ""
+					}
+
+					// update the avail mech drop list
+					callback($$ML_CallbackHandler$$, MLDataSetupMechSelection, mech_name[], dummy_status[], selected_mech)
+
+					o_availmechsdroplist.list_size = 0
+					for (int i = 0; i < $$m_chassisCount$$ ; i++)
+					{
+						stock_count[i] = 0
+					}
+
+					for (count = 0; count < $$m_mechLabCount$$; count++)
+					{
+						for (i = 0; i < $$m_chassisCount$$ ; i++)
+						{
+							if (equal$(left$(mech_name[count], length$(stock_name[i])), stock_name[i]) == true)
+							{
+								// special case for Mad Cat Mark II
+								if (!((equal$(stock_name[i], mad_cat) == true) && (equal$(left$(mech_name[count], length$(mad_cat2)), mad_cat2) == true)))
+								{
+									stock_count[i]++
+									mech_name2[count] = right$(mech_name[count], length$(mech_name[count]) - (length$(stock_name[i]) + 1))
+									break
+								}
+
+							}
+						}
+					}
+
+					for (i = 0; i < $$m_chassisCount$$ ; i++)
+					{
+						if (stock_count[i] != 0)
+						{
+							o_availmechsdroplist.list_item[o_availmechsdroplist.list_size] = stock_name[i]
+							o_availmechsdroplist.list_size++
+						}
+					}
+					initialize(o_availmechsdroplist)
+
+					count = 0
+					if ($$m_mechLabCount$$)
+					{
+						stock_array[0] = 0
+						count = 1
+						for (i = 0; i < $$m_chassisCount$$ ; i++)
+						{
+							if (stock_count[i] != 0)
+							{
+								stock_array[count] = stock_array[count - 1] + stock_count[i]
+								count++
+							}
+						}
+
+						// let's search for our mech and select it
+						for (stock_mech_selected = 0; stock_mech_selected < o_availmechsdroplist.list_size; stock_mech_selected++)
+						{
+							if (equal$(o_availmechsdroplist.list_item[stock_mech_selected], our_selected_stock_mech_name))
+							{
+								break
+							}
+						}
+
+						last_count = stock_array[stock_mech_selected]
+
+						count = 0
+						do
+						{
+							o_availmechsdroplist2.list_item[count] = mech_name2[last_count]
+							count++
+							last_count++
+							if (last_count == $$m_mechLabCount$$)
+								break
+						}
+						while ((stock_array[stock_mech_selected] + count) != stock_array[stock_mech_selected + 1])
+					}
+
+					o_availmechsdroplist2.list_size = count
+					initialize(o_availmechsdroplist2)
+
+					if (equal$(our_selected_variant_mech_name, "") == true)
+					{
+						variant_mech_selected = 0
+					}
+					else
+					{
+						for (variant_mech_selected = 0; variant_mech_selected < o_availmechsdroplist2.list_size; variant_mech_selected++)
+						{
+							if (equal$(o_availmechsdroplist2.list_item[variant_mech_selected], our_selected_variant_mech_name))
+							{
+								break
+							}
+						}
+					}
+
+					previous_mech = -1
+					o_availmechsdroplist.nSelected = stock_mech_selected
+					o_availmechsdroplist2.nselected = variant_mech_selected
+
+					initialize(this)
+					activate(this)
+
+					mail(1)
+				}
+				else
+				{
+					o_availmechsdroplist.list_item[0] = ""
+					o_availmechsdroplist.list_size = 0
+					o_availmechsdroplist.nSelected = 0
+					initialize(o_availmechsdroplist)
+
+					o_availmechsdroplist2.list_item[0] = ""
+					o_availmechsdroplist2.list_size = 0
+					o_availmechsdroplist2.nSelected = 0
+					initialize(o_availmechsdroplist2)
+
+					o_camodroplist.list_size = 0
+					o_camodroplist.list_item[0] = ""
+					o_camodroplist.nSelected = 0
+					initialize(o_camodroplist)
+
+					o_heat_sinks_spinbox.displayed_value = 0
+					o_engine_topspeed_spinbox.displayed_value = 0
+
+					o_ECM.state = 0
+					o_ECM.equip_tonnage = 0
+					o_ECM.unmountable = false
+					o_beagle.state = 0
+					o_beagle.equip_tonnage = 0
+					o_beagle.unmountable = false
+					o_jumpjets.state = 0
+					o_jumpjets.equip_tonnage = 0
+					o_jumpjets.unmountable = false
+					o_LAMS.state = 0
+					o_LAMS.equip_tonnage = 0
+					o_LAMS.unmountable = false
+					o_EnhancedOptics.state = 0
+					o_EnhancedOptics.equip_tonnage = 0
+					o_EnhancedOptics.unmountable = false
+					o_IFF_Jammer.state = 0
+					o_IFF_Jammer.equip_tonnage = 0
+					o_IFF_Jammer.unmountable = false
+					o_AdvancedGyro.state = 0
+					o_AdvancedGyro.equip_tonnage = 0
+					o_AdvancedGyro.unmountable = false
+					initialize(o_ECM)
+					initialize(o_beagle)
+					initialize(o_jumpjets)
+					initialize(o_LAMS)
+					initialize(o_EnhancedOptics)
+					initialize(o_IFF_Jammer)
+					initialize(o_AdvancedGyro)
+
+					parent.mech_id = -1
+					parent.o_tonnage_nums[0].value = 0.0
+					parent.o_tonnage_nums[1].value = 0.0
+					parent.o_tonnage_nums[2].value = 0.0
+					mail(1, parent.o_tonnage_nums[0])
+					mail(1, parent.o_tonnage_nums[1])
+					mail(1, parent.o_tonnage_nums[2])
+					mail(0, parent.o_statlines[0])
+					mail(0, parent.o_statlines[1])
+					mail(0, parent.o_statlines[2])
+					mail(0, parent.o_statlines[3])
+
+					parent.mech_exists = false
+
+					activate(parent.o_tabs_block)
+					activate(parent.o_chassis_block)
+					activate(parent.o_buttons_block)
+
+					initialize(this)
+				}
+			}
+		}
+
+		if exists(o_renamemechbutton)
+		{
+			if sender == o_renamemechbutton
+			{
+				play btnTriggeredSound,1
+
+				activate(o_overlay)
+				initialize(o_renamemech)
+				activate(o_renamemech)
+				focus(o_renamemech.o_variantname)
+			}
+
+			if sender == o_renamemech
+			{
+				// handle campaign rename
+				if (GetMessage() == 1) && ($$m_isCampaign$$)
+				{
+					int selected_mech
+					callback($$ML_CallbackHandler$$, MLDataSetupMechSelection, o_availmechsdroplist.list_item[], o_availmechsdroplist.mech_status[], selected_mech)
+					initialize(o_availmechsdroplist)
+
+					// let's search for our mech and select it
+					string mech_name = o_renamemech.s_basename[0] " " o_renamemech.o_variantname.boxValue
+					for (int our_selected_mech = 0; our_selected_mech < o_availmechsdroplist.list_size; our_selected_mech++)
+					{
+						if (equal$(o_availmechsdroplist.list_item[our_selected_mech], mech_name))
+						{
+							break
+						}
+					}
+					previous_mech = our_selected_mech
+					o_availmechsdroplist.nSelected = our_selected_mech
+				}
+
+				// handle non-campaign rename
+				if (GetMessage() == 1) && ($$m_isCampaign$$ == 0)
+				{
+					callback($$ML_CallbackHandler$$, MLDataSetupMechSelection, mech_name[], dummy_status[], selected_mech)
+
+					o_availmechsdroplist.list_size = 0
+					for (int i = 0; i < $$m_chassisCount$$ ; i++)
+					{
+						stock_count[i] = 0
+					}
+
+					for (count = 0; count < $$m_mechLabCount$$; count++)
+					{
+						for (i = 0; i < $$m_chassisCount$$ ; i++)
+						{
+							if (equal$(left$(mech_name[count], length$(stock_name[i])), stock_name[i]) == true)
+							{
+								// special case for Mad Cat Mark II
+								if (!((equal$(stock_name[i], mad_cat) == true) && (equal$(left$(mech_name[count], length$(mad_cat2)), mad_cat2) == true)))
+								{
+									stock_count[i]++
+									mech_name2[count] = right$(mech_name[count], length$(mech_name[count]) - (length$(stock_name[i]) + 1))
+									break
+								}
+							}
+						}
+					}
+
+					for (i = 0; i < $$m_chassisCount$$ ; i++)
+					{
+						if (stock_count[i] != 0)
+						{
+							o_availmechsdroplist.list_item[o_availmechsdroplist.list_size] = stock_name[i]
+							o_availmechsdroplist.list_size++
+						}
+					}
+					initialize(o_availmechsdroplist)
+
+					count = 0
+					if ($$m_mechLabCount$$)
+					{
+						stock_array[0] = 0
+						count = 1
+						for (i = 0; i < $$m_chassisCount$$ ; i++)
+						{
+							if (stock_count[i] != 0)
+							{
+								stock_array[count] = stock_array[count - 1] + stock_count[i]
+								count++
+							}
+						}
+
+						selected_mech = previous_mech
+						stock_mech_selected = 0
+						while (selected_mech >= stock_array[stock_mech_selected])
+						{
+							stock_mech_selected++
+						}
+						stock_mech_selected--
+						last_count = stock_array[stock_mech_selected]
+						variant_mech_selected = selected_mech - last_count
+
+						count = 0
+						do
+						{
+							o_availmechsdroplist2.list_item[count] = mech_name2[last_count]
+							count++
+							last_count++
+							if (last_count == $$m_mechLabCount$$)
+								break
+						}
+						while ((stock_array[stock_mech_selected] + count) != stock_array[stock_mech_selected + 1])
+					}
+
+					o_availmechsdroplist2.list_size = count
+					initialize(o_availmechsdroplist2)
+
+					o_availmechsdroplist.nSelected = stock_mech_selected
+
+					// let's search for our mech and select it
+					for (variant_mech_selected = 0; variant_mech_selected < o_availmechsdroplist2.list_size; variant_mech_selected++)
+					{
+						if (equal$(o_availmechsdroplist2.list_item[variant_mech_selected], o_renamemech.o_variantname.boxValue))
+						{
+							break
+						}
+					}
+					o_availmechsdroplist2.nSelected = variant_mech_selected
+
+					stock_mech_selected = o_availmechsdroplist.nselected
+					variant_mech_selected = o_availmechsdroplist2.nselected
+					mech_selected = stock_array[stock_mech_selected] + variant_mech_selected
+					previous_mech = mech_selected
+				}
+			}
+		}
+
+		// it is only valid in Non-campaign MechLab mode
+		if sender == o_newmech
+		{
+			if GetMessage() == 1
+			{
+				callback($$ML_CallbackHandler$$, MLDataSetupMechSelection, mech_name[], dummy_status[], selected_mech)
+
+				o_availmechsdroplist.list_size = 0
+				for (int i = 0; i < $$m_chassisCount$$ ; i++)
+				{
+					stock_count[i] = 0
+				}
+
+				for (count = 0; count < $$m_mechLabCount$$; count++)
+				{
+					for (i = 0; i < $$m_chassisCount$$ ; i++)
+					{
+						if (equal$(left$(mech_name[count], length$(stock_name[i])), stock_name[i]) == true)
+						{
+							// special case for Mad Cat Mark II
+							if (!((equal$(stock_name[i], mad_cat) == true) && (equal$(left$(mech_name[count], length$(mad_cat2)), mad_cat2) == true)))
+							{
+								stock_count[i]++
+								mech_name2[count] = right$(mech_name[count], length$(mech_name[count]) - (length$(stock_name[i]) + 1))
+								break
+							}
+
+						}
+					}
+				}
+
+				for (i = 0; i < $$m_chassisCount$$ ; i++)
+				{
+					if (stock_count[i] != 0)
+					{
+						o_availmechsdroplist.list_item[o_availmechsdroplist.list_size] = stock_name[i]
+						o_availmechsdroplist.list_size++
+					}
+				}
+				initialize(o_availmechsdroplist)
+
+				count = 0
+				if ($$m_mechLabCount$$)
+				{
+					stock_array[0] = 0
+					count = 1
+					for (i = 0; i < $$m_chassisCount$$ ; i++)
+					{
+						if (stock_count[i] != 0)
+						{
+							stock_array[count] = stock_array[count - 1] + stock_count[i]
+							count++
+						}
+					}
+
+					stock_mech_selected = 0
+					while (selected_mech >= stock_array[stock_mech_selected])
+					{
+						stock_mech_selected++
+					}
+					stock_mech_selected--
+					last_count = stock_array[stock_mech_selected]
+					variant_mech_selected = selected_mech - last_count
+
+					count = 0
+					do
+					{
+						o_availmechsdroplist2.list_item[count] = mech_name2[last_count]
+						count++
+						last_count++
+						if (last_count == $$m_mechLabCount$$)
+							break
+					}
+					while ((stock_array[stock_mech_selected] + count) != stock_array[stock_mech_selected + 1])
+				}
+
+				o_availmechsdroplist2.list_size = count
+				initialize(o_availmechsdroplist2)
+
+				o_availmechsdroplist.nSelected = stock_mech_selected
+				o_availmechsdroplist2.nselected = variant_mech_selected
+
+				session_create++
+
+				parent.just_saved = true
+			}
+		}
+
+		if sender == o_engine_topspeed_spinbox
+		{
+			if GetMessage() == 1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLSetEngineUpgrade)
+				callback($$ML_CallbackHandler$$, MLDataSetupGetEngineSpeed, engine_topspeed, engine_tons)
+			}
+			if GetMessage() == -1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLSetEngineDegrade)
+				callback($$ML_CallbackHandler$$, MLDataSetupGetEngineSpeed, engine_topspeed, engine_tons)
+			}
+
+			o_engine_topspeed_spinbox.displayed_value = engine_topspeed
+			parent.just_saved = false
+
+			parent.o_restorebutton.state	= 0
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 0
+				initialize(parent.o_savebutton)
+			//}
+		}
+
+		if sender == o_heat_sinks_spinbox
+		{
+			if GetMessage() == 1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLAddHeatSink)
+				callback($$ML_CallbackHandler$$, MLDataSetupGetHeatSinks, heatsinks_installed)
+			}
+			if GetMessage() == -1
+			{
+				play btnTriggeredSound,1
+				callback($$ML_CallbackHandler$$, MLRemoveHeatSink)
+				callback($$ML_CallbackHandler$$, MLDataSetupGetHeatSinks, heatsinks_installed)
+			}
+
+			o_heat_sinks_spinbox.displayed_value = heatsinks_installed
+			parent.just_saved = false
+
+			parent.o_restorebutton.state	= 0
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 0
+				initialize(parent.o_savebutton)
+			//}
+		}
+
+		if sender == o_ECM
+		{
+			int value
+			if getmessage() == 1
+			{
+				value = 1
+			}
+			if getmessage() == 0
+			{
+				value = 0
+			}
+
+			callback($$ML_CallbackHandler$$, MLSetECM, value)
+			callback($$ML_CallbackHandler$$, MLGetECM, ecm_installed, can_have_ecm, ecm_tons)
+
+			if can_have_ecm != 0
+			{
+				if ecm_installed != 0
+				{
+					o_ECM.state = 2
+				}
+				if ecm_installed == 0
+				{
+					o_ECM.state = 0
+				}
+			}
+			initialize(o_ECM)
+			parent.just_saved = false
+
+			parent.o_restorebutton.state	= 0
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 0
+				initialize(parent.o_savebutton)
+			//}
+		}
+
+		if sender == o_beagle
+		{
+			int value
+			if getmessage() == 1
+			{
+				value = 1
+			}
+			if getmessage() == 0
+			{
+				value = 0
+			}
+
+			callback($$ML_CallbackHandler$$, MLSetBeagle, value)
+			callback($$ML_CallbackHandler$$, MLGetBeagle, beagle_installed, can_have_beagle, beagle_tons)
+
+			if can_have_beagle != 0
+			{
+				if beagle_installed != 0
+				{
+					o_beagle.state = 2
+				}
+				if beagle_installed == 0
+				{
+					o_beagle.state = 0
+				}
+			}
+			initialize(o_beagle)
+			parent.just_saved = false
+
+			parent.o_restorebutton.state	= 0
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 0
+				initialize(parent.o_savebutton)
+			//}
+		}
+
+		if sender == o_jumpjets
+		{
+			int value
+			if getmessage() == 1
+			{
+				value = 1
+			}
+			if getmessage() == 0
+			{
+				value = 0
+			}
+
+			callback($$ML_CallbackHandler$$, MLSetJumpJets, value)
+			callback($$ML_CallbackHandler$$, MLGetJumpJets, jumpjets_installed, can_have_jump, jump_tons)
+
+			if can_have_jump != 0
+			{
+				if jumpjets_installed != 0
+				{
+					o_jumpjets.state = 2
+				}
+				if jumpjets_installed == 0
+				{
+					o_jumpjets.state = 0
+				}
+			}
+			initialize(o_jumpjets)
+			parent.just_saved = false
+
+			parent.o_restorebutton.state	= 0
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 0
+				initialize(parent.o_savebutton)
+			//}
+		}
+
+		if sender == o_LAMS
+		{
+			int value
+			if getmessage() == 1
+			{
+				value = 1
+			}
+			if getmessage() == 0
+			{
+				value = 0
+			}
+
+			callback($$ML_CallbackHandler$$, MLSetLAMS, value)
+			callback($$ML_CallbackHandler$$, MLGetLAMS, lams_installed, can_have_lams, lams_tons)
+
+			if can_have_lams != 0
+			{
+				if lams_installed != 0
+				{
+					o_LAMS.state = 2
+				}
+				if lams_installed == 0
+				{
+					o_LAMS.state = 0
+				}
+			}
+			initialize(o_LAMS)
+			parent.just_saved = false
+
+			parent.o_restorebutton.state	= 0
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 0
+				initialize(parent.o_savebutton)
+			//}
+		}
+
+		if sender == o_EnhancedOptics
+		{
+			int value
+			if getmessage() == 1
+			{
+				value = 1
+			}
+			if getmessage() == 0
+			{
+				value = 0
+			}
+
+			callback($$ML_CallbackHandler$$, MLSetEnhancedOptics, value)
+			callback($$ML_CallbackHandler$$, MLGetEnhancedOptics, enhanced_optics_installed, can_have_enhanced_optics, enhanced_optics_tons)
+
+			if can_have_enhanced_optics != 0
+			{
+				if enhanced_optics_installed != 0
+				{
+					o_EnhancedOptics.state = 2
+				}
+				if enhanced_optics_installed == 0
+				{
+					o_EnhancedOptics.state = 0
+				}
+			}
+			initialize(o_EnhancedOptics)
+			parent.just_saved = false
+
+			parent.o_restorebutton.state	= 0
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 0
+				initialize(parent.o_savebutton)
+			//}
+		}
+
+
+		if sender == o_IFF_Jammer
+		{
+			int value
+			if getmessage() == 1
+			{
+				value = 1
+			}
+			if getmessage() == 0
+			{
+				value = 0
+			}
+
+			callback($$ML_CallbackHandler$$, MLSetIFF_Jammer, value)
+			callback($$ML_CallbackHandler$$, MLGetIFF_Jammer, iff_jammer_installed, can_have_iff_jammer, iff_jammer_tons)
+			if can_have_iff_jammer != 0
+			{
+				if iff_jammer_installed != 0
+				{
+					o_IFF_Jammer.state = 2
+				}
+				if iff_jammer_installed == 0
+				{
+					o_IFF_Jammer.state = 0
+				}
+			}
+			initialize(o_IFF_Jammer)
+			parent.just_saved = false
+
+			parent.o_restorebutton.state	= 0
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 0
+				initialize(parent.o_savebutton)
+			//}
+		}
+
+
+		if sender == o_AdvancedGyro
+		{
+			int value
+			if getmessage() == 1
+			{
+				value = 1
+			}
+			if getmessage() == 0
+			{
+				value = 0
+			}
+
+			callback($$ML_CallbackHandler$$, MLSetAdvancedGyro, value)
+			callback($$ML_CallbackHandler$$, MLGetAdvancedGyro, advanced_gyro_installed, can_have_advanced_gyro, advanced_gyro_tons)
+
+			if can_have_advanced_gyro != 0
+			{
+				if advanced_gyro_installed != 0
+				{
+					o_AdvancedGyro.state = 2
+				}
+				if advanced_gyro_installed == 0
+				{
+					o_AdvancedGyro.state = 0
+				}
+			}
+			initialize(o_AdvancedGyro)
+			parent.just_saved = false
+
+			parent.o_restorebutton.state	= 0
+			initialize(parent.o_restorebutton)
+			//if ($$m_isCampaign$$ != 1)
+			//{
+				parent.o_savebutton.state		= 0
+				initialize(parent.o_savebutton)
+			//}
+		}
+
+
+		mail(1)
+	}
+}
+
+newmech
+{
+	GUI_CREATE
+	{
+		int max_items = 40
+
+		sound btnTriggeredSound = APATH "sfx_button5.wav"
+
+		int boxx1 = 225
+		int boxx2 = 575
+		int boxy1 = 175
+		int boxy2 = 425
+		int boxz = 65
+
+
+		//int chassisCount = $$m_chassisCount$$	// mektek
+		//int chassisCount = LastMechID	// mektek
+
+		object o_chassisdroplistbox =						s_droplistbox
+		o_chassisdroplistbox.boxFont3d =					FPATH localize$(IDS_F_ML_LABEL)
+		o_chassisdroplistbox.backColor =					packcolor (0, 0, 0, 255)
+		o_chassisdroplistbox.boxTextColor =					packcolor (255, 255, 255, 255)
+		o_chassisdroplistbox.boxTextSelectedColor =			packcolor (125, 125, 125, 255)
+		o_chassisdroplistbox.frameHighlightColor =			packcolor (255, 255, 255, 255)
+		o_chassisdroplistbox.boxhighlightColor =			packcolor (50, 120, 255, 200)
+		o_chassisdroplistbox.ItemHighlightColor =			packcolor (0, 0, 0, 255)
+		o_chassisdroplistbox.selectedColor =				packcolor (120, 120, 255, 150)
+		o_chassisdroplistbox.labelTextColor =				packcolor (255, 255, 255, 255)
+		o_chassisdroplistbox.borderColor =					packcolor (255, 255, 255, 255)
+		o_chassisdroplistbox.itemHeight =					20
+		o_chassisdroplistbox.max_displayed =				8
+		o_chassisdroplistbox.labelFont3d =					FPATH localize$(IDS_F_ML_LABEL)
+		o_chassisdroplistbox.offsetLabel =					0,-20
+		o_chassisdroplistbox.arrowHeight =					15
+		o_chassisdroplistbox.location =						boxx1 + 32, boxy1 + 70, boxz
+		o_chassisdroplistbox.list_size =					$$m_chassisCount$$
+		o_chassisdroplistbox.label =						localize$(IDS_ML_CH_TYPE)
+		o_chassisdroplistbox.itemWidth =					270
+		o_chassisdroplistbox.max_displayed =				7
+		o_chassisdroplistbox.id = 208
+
+		callback($$ML_CallbackHandler$$, MLDataSetupChassisSelection, o_chassisdroplistbox.list_item[])
+
+		initialize(o_chassisdroplistbox)
+
+		// Variable for selected mech name
+		string s_selectedmech
+
+		object o_variantname =					s_editbox
+        o_variantname.disable_quotes =          true
+//		enableIME(true, o_variantname)
+		o_variantname.location =				boxx1 + 32, boxy1 + 140, boxz
+		o_variantname.boxWidth =				285			//MUST BE INTIALIZED width of the edit field of the box
+		o_variantname.boxHeight =				20			//MUST BE INTIALIZED height of the edit field of the box//
+		if (callback($$ImeCallback$$, 0) == 0)
+		{
+			o_variantname.boxtextlimit =			VARIANT_NAME_LENGTH
+		}
+		o_variantname.boxFont3d	=				FPATH localize$(IDS_F_GEN_EDITBOX)			//MUST BE INTIALIZED
+		o_variantname.boxTextOffset =			3,3		//CAN BE INITIALIZED
+		o_variantname.label =					localize$(IDS_ML_CH_NAME)				//CAN BE INITIALIZED
+		o_variantname.labelFont3d	=			FPATH localize$(IDS_F_ML_LABEL)			//MUST BE INTIALIZED
+		o_variantname.offset =					0,-20					//CAN BE INITIALIZED offset of text from button
+		o_variantname.id = 209
+		initialize (o_variantname)
+
+		// Variable that stores the typed in name
+		string s_newname
+
+		object o_createnew			= s_multistatepane
+		o_createnew.file			= WPATH "button_reg_138x23_3state.tga"
+		o_createnew.total_states	= 3
+		o_createnew.text			= localize$(IDS_GN_CREATE)
+		o_createnew.location		= boxx1 + 30, boxy2 - 55, boxz
+		o_createnew.gFont3d			= FPATH localize$(IDS_F_ML_BUTTON)
+		o_createnew.id				= 211
+		initialize(o_createnew)
+
+		object o_cancelnew			= s_multistatepane
+		o_cancelnew.file			= WPATH "button_reg_138x23_3state.tga"
+		o_cancelnew.total_states	= 3
+		o_cancelnew.text			= localize$(IDS_GN_CANCEL)
+		o_cancelnew.location		= boxx1 + 178, boxy2 - 55, boxz
+		o_cancelnew.gFont3d			= FPATH localize$(IDS_F_ML_BUTTON)
+		o_cancelnew.id				= 210
+		initialize(o_cancelnew)
+
+		pane p_dialog				= GPATH "dialog_350x250.tga"
+
+		object o_error
+		object o_overwriteconfirm
+	}
+
+	GUI_INIT
+	{
+		region = boxx1, boxy1 to boxx2, boxy2
+		o_variantname.boxValue = localize$(IDS_ML_SAVE_DEFAULTNAME)
+		initialize(o_variantname)
+	}
+
+	GUI_ACTIVATE
+	{
+		activate(o_chassisdroplistbox)
+		activate(o_variantname)
+		activate(o_cancelnew)
+		activate(o_createnew)
+
+		if exists(@chat@)
+		{
+			unfocus(@chat@o_chat_entry)
+			@chat@namemech_flag = 0
+			focus(o_variantname)
+		}
+	}
+
+	GUI_DEACTIVATE
+	{
+		deactivate(o_chassisdroplistbox)
+		deactivate(o_variantname)
+		deactivate(o_cancelnew)
+		deactivate(o_createnew)
+
+		if exists(@chat@)
+		{
+			focus(@chat@o_chat_entry)
+			@chat@namemech_flag = 1
+		}
+	}
+
+	GUI_DRAW
+	{
+		render p_dialog, boxx1, boxy1
+
+		setpencolor(0xaaffffff)
+		drawline boxx1 + 32, boxy2 - 70 to boxx2 - 32, boxy2 - 70
+		drawline boxx1 + 32, boxy2 - 69 to boxx1 + 47, boxy2 - 69
+		drawline boxx1 + 32, boxy2 - 71 to boxx1 + 47, boxy2 - 71
+		drawline boxx2 - 47, boxy2 - 69 to boxx2 - 32, boxy2 - 69
+		drawline boxx2 - 47, boxy2 - 71 to boxx2 - 32, boxy2 - 71
+
+		print3d_attributes = boldfont, 0xffffffff, 1, 1, 1, 0, 0, just_center
+		print3d_margins = boxx1, boxy1 to boxx2, boxy2
+		print3d_position = boxx1, boxy1 + 6
+		print3d localize$(IDS_ML_CH_NEWMECH)
+
+	}
+
+	GUI_EXECUTE
+	{
+		// diables save button if mech name is null
+		if length$(o_variantname.boxvalue) < 1)
+			o_createnew.state = 3
+		else
+			o_createnew.state = 0
+	}
+
+	GUI_MAILBOX
+	{
+		if sender == o_cancelnew
+		{
+			play btnTriggeredSound,1
+			parent.o_overlay.fadeout = true
+			unfocus(o_newmech.o_variantname)
+			deactivate(o_newmech)
+		}
+
+		if sender == o_createnew
+		{
+			play btnTriggeredSound,1
+
+			if $$m_mechLabCount$$ == 0
+			{
+				deactivate(parent.parent.o_tabs_block)
+				deactivate(parent.parent.o_chassis_block)
+				deactivate(parent.parent.o_buttons_block)
+			}
+
+			s_selectedmech						= o_chassisdroplistbox.list_item[o_chassisdroplistbox.nSelected]
+			s_newname							= o_variantname.boxValue
+
+			if (callback($$ImeCallback$$, 0) && length$(s_newname) > VARIANT_NAME_LENGTH)
+			{
+				o_error = o_ErrorScreen
+				o_error.error_message			= localize$(IDS_ML_ERROR_LONG_VARIANT_NAME)
+				initialize(o_error)
+				o_error.mButton[0].id			= 197
+				activate(o_error)
+				o_variantname.boxValue			= left$(o_variantname.boxValue, VARIANT_NAME_LENGTH)
+				o_variantname.displayed_start	= 0
+				o_variantname.displayed_end		= VARIANT_NAME_LENGTH
+				if (o_variantname.cursor_pos > VARIANT_NAME_LENGTH)
+					o_variantname.cursor_pos	= VARIANT_NAME_LENGTH
+			}
+			else
+			{
+				// Bug 3491 - if all space then reject
+				int box_length = length$(o_variantname.boxValue)
+				for (int iloop = 0; iloop < box_length; iloop++)
+				{
+					if (equal$(mid$(o_variantname.boxValue, iloop, iloop + 1), " ") != true)
+					{
+						break
+					}
+				}
+				if (iloop == box_length)
+				{
+					o_error = o_ErrorScreen
+					o_error.error_message = localize$(IDS_ML_ERROR_EMPTY_NAME)
+					initialize(o_error)
+					o_error.mButton[0].id		= 197
+					activate(o_error)
+					return
+				}
+
+				int overwrite = 0
+				int	nErrorCode = callback($$ML_CallbackHandler$$, MLCreateNewMech, o_chassisdroplistbox.list_item[o_chassisdroplistbox.nSelected], o_chassisdroplistbox.nSelected, o_variantname.boxValue, overwrite)
+				if ( nErrorCode == -1)
+				{
+					o_error = o_ErrorScreen
+					o_error.error_message		= localize$(IDS_ML_ERROR_RESERVED)
+					initialize(o_error)
+					o_error.mButton[0].id		= 197
+					activate(o_error)
+					return
+				}
+				if ( nErrorCode == 3402)
+				{
+					o_overwriteconfirm				= o_ErrorScreen
+					o_overwriteconfirm.error_header	= localize$(IDS_ML_MECH_EXISTS)
+					o_overwriteconfirm.error_message	= localize$(IDS_ML_MECH_EXISTS_DESCRIPTION)
+					o_overwriteconfirm.button_mode	= TWO_BUTTON_MODE
+					o_overwriteconfirm.buttonText[0]	= localize$(IDS_GN_YES)
+					o_overwriteconfirm.buttonText[1]	= localize$(IDS_GN_NO)
+					initialize(o_overwriteconfirm)
+					o_overwriteconfirm.mButton[0].id	= 221
+					o_overwriteconfirm.mButton[1].id	= 222
+					activate(o_overwriteconfirm)
+					return
+				}
+				if ( nErrorCode == 1)
+				{
+					mail(1) //this is to reinit the chassis boxes
+					parent.o_overlay.fadeout	= true
+
+					parent.parent.mech_exists	= true
+
+					unfocus(o_newmech.o_variantname)
+					deactivate(o_newmech)
+					initialize(parent.parent.o_chassis)
+					activate(parent.parent.o_chassis)
+					mail(1, parent.parent.parent.o_mainui)
+
+					parent.parent.grouped		= 1
+				}
+			}
+		}
+
+		if (sender = o_overwriteconfirm)
+		{
+			if getmessage() == 0		// YES SAVE
+			{
+				int overwrite = 1
+				callback($$ML_CallbackHandler$$, MLCreateNewMech, o_chassisdroplistbox.list_item[o_chassisdroplistbox.nSelected], o_chassisdroplistbox.nSelected, o_variantname.boxValue, overwrite)
+
+				mail(1) //this is to reinit the chassis boxes
+				parent.o_overlay.fadeout	= true
+
+				parent.parent.mech_exists	= true
+
+				unfocus(o_newmech.o_variantname)
+				deactivate(o_newmech)
+				initialize(parent.parent.o_chassis)
+				activate(parent.parent.o_chassis)
+				mail(1, parent.parent.parent.o_mainui)
+
+				parent.parent.grouped		= 1
+			}
+
+			if getmessage() == 1		// NO DON'T SAVE
+			{
+				deactivate(o_overwriteconfirm)
+				activate(o_newmech)
+				focus(o_newmech.o_variantname)
+			}
+		}
+	}
+}
+
+renamemech
+{
+	GUI_CREATE
+	{
+		int max_items = 40
+
+		sound btnTriggeredSound = APATH "sfx_button5.wav"
+
+		int boxx1 = 225
+		int boxx2 = 575
+		int boxy1 = 175
+		int boxy2 = 425
+		int boxz = 65
+
+		object o_variantname =					s_editbox
+        o_variantname.disable_quotes =          true
+//		enableIME(true, o_variantname)
+		o_variantname.location =				boxx1 + 32, boxy1 + 140, boxz
+		o_variantname.boxWidth =				285			//MUST BE INTIALIZED width of the edit field of the box
+		o_variantname.boxHeight =				20			//MUST BE INTIALIZED height of the edit field of the box//
+		if (callback($$ImeCallback$$, 0) == 0)
+		{
+			o_variantname.boxtextlimit =			VARIANT_NAME_LENGTH
+		}
+		o_variantname.boxFont3d	=				FPATH localize$(IDS_F_GEN_EDITBOX)			//MUST BE INTIALIZED
+		o_variantname.boxTextOffset =			3,3		//CAN BE INITIALIZED
+		o_variantname.label =					localize$(IDS_ML_CH_NAME)				//CAN BE INITIALIZED
+		o_variantname.labelFont3d	=			FPATH localize$(IDS_F_ML_LABEL)			//MUST BE INTIALIZED
+		o_variantname.offset =					0,-20					//CAN BE INITIALIZED offset of text from button
+		o_variantname.id = 209
+		initialize (o_variantname)
+
+		// Variable for selected mech name
+		string s_selectedmech
+
+		// Variable that stores the typed in name
+		string s_newname
+		string s_basename[1]
+
+		object o_savenewname			= s_multistatepane
+		o_savenewname.file				= WPATH "button_reg_138x23_3state.tga"
+		o_savenewname.total_states		= 3
+		o_savenewname.text				= localize$(IDS_GN_OK)
+		o_savenewname.location			= boxx1 + 30, boxy2 - 55, boxz
+		o_savenewname.gFont3d			= FPATH localize$(IDS_F_ML_BUTTON)
+		o_savenewname.id				= 211
+		initialize(o_savenewname)
+
+		object o_cancelnewname			= s_multistatepane
+		o_cancelnewname.file			= WPATH "button_reg_138x23_3state.tga"
+		o_cancelnewname.total_states	= 3
+		o_cancelnewname.text			= localize$(IDS_GN_CANCEL)
+		o_cancelnewname.location		= boxx1 + 178, boxy2 - 55, boxz
+		o_cancelnewname.gFont3d			= FPATH localize$(IDS_F_ML_BUTTON)
+		o_cancelnewname.id				= 224
+		initialize(o_cancelnewname)
+
+		pane p_dialog				= GPATH "dialog_350x250.tga"
+
+		object o_error
+		object o_overwriteconfirm
+	}
+
+	GUI_INIT
+	{
+		region = boxx1, boxy1 to boxx2, boxy2
+
+		if ($$m_isCampaign$$ == 1)
+		{
+			s_selectedmech						= parent.o_availmechsdroplist.list_item[parent.o_availmechsdroplist.nSelected]
+			if (callback($$ML_CallbackHandler$$, MLGetBaseMechName, s_selectedmech, s_basename[]) == -1)
+				o_variantname.boxValue = ""
+			else
+				o_variantname.boxValue = right$(s_selectedmech, length$(s_selectedmech)-length$(s_basename[0]) -1)
+		}
+		else
+		{
+			o_variantname.boxValue = parent.o_availmechsdroplist2.list_item[parent.o_availmechsdroplist2.nSelected]
+		}
+
+		initialize(o_variantname)
+	}
+
+	GUI_ACTIVATE
+	{
+		activate(o_variantname)
+		activate(o_cancelnewname)
+		activate(o_savenewname)
+
+		if exists(@chat@)
+		{
+			unfocus(@chat@o_chat_entry)
+			@chat@namemech_flag = 0
+			focus(o_variantname)
+		}
+	}
+
+	GUI_DEACTIVATE
+	{
+		deactivate(o_variantname)
+		deactivate(o_cancelnewname)
+		deactivate(o_savenewname)
+
+		if exists(@chat@)
+		{
+			focus(@chat@o_chat_entry)
+			@chat@namemech_flag = 1
+		}
+	}
+
+	GUI_DRAW
+	{
+		render p_dialog, boxx1, boxy1
+
+		setpencolor(0xaaffffff)
+		drawline boxx1 + 32, boxy2 - 70 to boxx2 - 32, boxy2 - 70
+		drawline boxx1 + 32, boxy2 - 69 to boxx1 + 47, boxy2 - 69
+		drawline boxx1 + 32, boxy2 - 71 to boxx1 + 47, boxy2 - 71
+		drawline boxx2 - 47, boxy2 - 69 to boxx2 - 32, boxy2 - 69
+		drawline boxx2 - 47, boxy2 - 71 to boxx2 - 32, boxy2 - 71
+
+		print3d_attributes = boldfont, 0xffffffff, 1, 1, 1, 0, 0, just_center
+		print3d_margins = boxx1, boxy1 to boxx2, boxy2
+		print3d_position = boxx1, boxy1 + 6
+		print3d localize$(IDS_ML_RENAMEMECH)
+
+		print3d_attributes = regfont, 0xffffffff, 1, 1, 1, 0, 0, just_left
+		print3d_margins = boxx1+32, boxy1 to boxx2-32, boxy2
+		print3d_position = boxx1+32, boxy1+60
+		print3d localize$(IDS_ML_RENAMEMECH_DESC)
+	}
+
+	GUI_EXECUTE
+	{
+		// diables save button if mech name is null
+		if length$(o_variantname.boxvalue) < 1)
+			o_savenewname.state = 3
+		else
+			o_savenewname.state = 0
+	}
+
+	GUI_MAILBOX
+	{
+		if sender == o_cancelnewname
+		{
+			play btnTriggeredSound,1
+			parent.o_overlay.fadeout = true
+			unfocus(o_renamemech.o_variantname)
+			deactivate(o_renamemech)
+		}
+
+		if sender == o_savenewname
+		{
+			play btnTriggeredSound,1
+
+			if $$m_mechLabCount$$ == 0
+			{
+				deactivate(parent.parent.o_tabs_block)
+				deactivate(parent.parent.o_chassis_block)
+				deactivate(parent.parent.o_buttons_block)
+			}
+
+			s_selectedmech						= parent.o_availmechsdroplist.list_item[parent.o_availmechsdroplist.nSelected]
+			s_newname							= o_variantname.boxValue
+
+			callback($$ML_CallbackHandler$$, MLGetBaseMechName, s_selectedmech, s_basename[])
+
+			if (callback($$ImeCallback$$, 0) && length$(s_newname) > VARIANT_NAME_LENGTH)
+			{
+				o_error = o_ErrorScreen
+				o_error.error_message			= localize$(IDS_ML_ERROR_LONG_VARIANT_NAME)
+				initialize(o_error)
+				o_error.mButton[0].id			= 197
+				activate(o_error)
+				o_variantname.boxValue			= left$(o_variantname.boxValue, VARIANT_NAME_LENGTH)
+				o_variantname.displayed_start	= 0
+				o_variantname.displayed_end		= VARIANT_NAME_LENGTH
+				if (o_variantname.cursor_pos > VARIANT_NAME_LENGTH)
+					o_variantname.cursor_pos	= VARIANT_NAME_LENGTH
+			}
+
+			// Bug 3491 - if all space then reject
+			int box_length = length$(o_variantname.boxValue)
+			for (int iloop = 0; iloop < box_length; iloop++)
+			{
+				if (equal$(mid$(o_variantname.boxValue, iloop, iloop + 1), " ") != true)
+				{
+					break
+				}
+			}
+			if (iloop == box_length)
+			{
+				o_error = o_ErrorScreen
+				o_error.error_message = localize$(IDS_ML_ERROR_EMPTY_NAME)
+				initialize(o_error)
+				o_error.mButton[0].id		= 197
+				activate(o_error)
+				return
+			}
+
+			int overwrite = 0
+			int nErrorCode = callback($$ML_CallbackHandler$$, MLRename, s_basename[0], s_newname, overwrite)
+			if ( nErrorCode == -1)
+			{
+				o_error = o_ErrorScreen
+				o_error.error_message		= localize$(IDS_ML_ERROR_RESERVED)
+				initialize(o_error)
+				o_error.mButton[0].id		= 197
+				activate(o_error)
+				return
+			}
+			if ( nErrorCode == 3402)
+			{
+				if $$m_isCampaign$$ == 0
+				{
+					o_overwriteconfirm				= o_ErrorScreen
+					o_overwriteconfirm.error_header	= localize$(IDS_ML_MECH_EXISTS)
+					o_overwriteconfirm.error_message	= localize$(IDS_ML_MECH_EXISTS_DESCRIPTION)
+					o_overwriteconfirm.button_mode	= TWO_BUTTON_MODE
+					o_overwriteconfirm.buttonText[0]	= localize$(IDS_GN_YES)
+					o_overwriteconfirm.buttonText[1]	= localize$(IDS_GN_NO)
+					initialize(o_overwriteconfirm)
+					o_overwriteconfirm.mButton[0].id	= 221
+					o_overwriteconfirm.mButton[1].id	= 222
+					activate(o_overwriteconfirm)
+					return
+				}
+				if $$m_isCampaign$$ == 1
+				{
+					o_overwriteconfirm				= o_ErrorScreen
+					o_overwriteconfirm.error_header	= localize$(IDS_ML_MECH_EXISTS)
+					o_overwriteconfirm.error_message	= localize$(IDS_ML_MECH_EXISTS_NOOVERWRITE)
+					o_overwriteconfirm.button_mode	= ONE_BUTTON_MODE
+					o_overwriteconfirm.buttonText[0]	= localize$(IDS_GN_OK)
+					initialize(o_overwriteconfirm)
+					o_overwriteconfirm.mButton[0].id	= 221
+					activate(o_overwriteconfirm)
+					return
+				}
+			}
+			if ( nErrorCode == 1)
+			{
+				mail(1) //this is to reinit the chassis boxes
+				parent.o_overlay.fadeout	= true
+
+				unfocus(o_renamemech.o_variantname)
+				deactivate(o_renamemech)
+				//initialize(parent.parent.o_chassis)
+				activate(parent.parent.o_chassis)
+				mail(1, parent.parent.parent.o_mainui)
+
+				parent.parent.grouped		= 1
+			}
+		}
+		if (sender = o_overwriteconfirm)
+		{
+			if getmessage() == 0		// YES SAVE
+			{
+				if $$m_isCampaign$$ == 0
+				{
+					int overwrite = 1
+					callback($$ML_CallbackHandler$$, MLRename, s_basename[0], s_newname, overwrite)
+
+					mail(1) //this is to reinit the chassis boxes
+					parent.o_overlay.fadeout	= true
+
+					parent.parent.mech_exists	= true
+
+					unfocus(o_renamemech.o_variantname)
+					deactivate(o_renamemech)
+					//initialize(parent.parent.o_chassis)
+					activate(parent.parent.o_chassis)
+					mail(1, parent.parent.parent.o_mainui)
+
+					parent.parent.grouped		= 1
+				}
+				if $$m_isCampaign$$ == 1
+				{
+					deactivate(o_overwriteconfirm)
+					activate(o_renamemech)
+					focus(o_renamemech.o_variantname)
+				}
+			}
+
+			if getmessage() == 1		// NO DON'T SAVE
+			{
+				deactivate(o_overwriteconfirm)
+				activate(o_renamemech)
+				focus(o_renamemech.o_variantname)
+			}
+		}
+	}
+}
+
+s_aux_equip
+{
+	GUI_CREATE
+	{
+		location = 0, 0, 10
+
+		float equip_tonnage = 0
+		string equip_name
+		int id = 0
+
+		int state
+		int unmountable = 0
+
+		object checkbox
+
+		region = location.x + 22, location.y - 2 to location.x + 290, location.y + 14
+	}
+
+	GUI_INIT
+	{
+		checkbox				= s_checkbox
+		checkbox.location		= location.x + 2, location.y - 1, location.z + 1
+		checkbox.file			= WPATH "checkbox_15x15_4state.tga"
+		checkbox.total_states	= 4
+		checkbox.id				= id
+		checkbox.state			= state
+		initialize(checkbox)
+
+		if (unmountable)
+			checkbox.state = 3
+	}
+
+	REGION_ENTERED
+	{
+		if exists(@infobox@)
+		{
+			mail(id, @infobox@)
+		}
+	}
+
+	REGION_EXITED
+	{
+		if exists(@infobox@)
+		{
+			mail(-1, @infobox@)
+		}
+	}
+
+	GUI_ACTIVATE
+	{
+		initialize(this)
+		activate(checkbox)
+	}
+
+	GUI_DEACTIVATE
+	{
+		deactivate(checkbox)
+	}
+
+	GUI_DRAW
+	{
+		if (unmountable)
+			print3d_attributes = regfont, 0xff333333, 1, 1, 1, 0, 0
+		else
+			print3d_attributes = regfont, 0xffffffff, 1, 1, 1, 0, 0
+		print3d_margins = location.x + 25, location.y to location.x + 290, location.y + 20
+		print3d_position = location.x + 25, location.y
+		print3d equip_name
+
+		if (unmountable)
+			print3d_attributes = regfont, 0xff333333, 1, 1, 1, 0, 0, just_right
+		else
+			print3d_attributes = regfont, 0xffffffff, 1, 1, 1, 0, 0, just_right
+		print3d_margins = location.x + 25, location.y to location.x + 290, location.y + 20
+		print3d_position = location.x + 25, location.y
+		print3d equip_tonnage
+	}
+
+	GUI_MAILBOX
+	{
+		if getmessage() == 1
+		{
+			mail(1)
+		}
+
+		if getmessage() == 0
+		{
+			mail(0)
+		}
+	}
+}

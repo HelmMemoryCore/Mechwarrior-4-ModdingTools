@@ -1,0 +1,36 @@
+Instruction
+MW4 Weapon Balancer 1.0
+
+This program can modify weapon parameters (id,distance,speed,recycleTime,slots,damage,tonnage,heat,cost,ammo) in MechWarrior 4. It takes original weapon files and creates new modified weapon files.
+WARNING: there is no warranty that this program works at all. I tested it on my Mech install and it is working.
+During work with console paths cannot contain spaces.
+
+Requirements: for using this software you need to install Java Runtime Environment 7 (jre7)
+
+format: <arg> <argValue> <arg> <argValue> ... <command>
+Possible args:
+-mainFLdr - folder which contains all weapon groups
+-grFldr - folder which contains only one weapon group
+-resFldr - folder for storing generated configurations
+-resFile - file for storing program output
+-srcFile - file with new weapon stats
+-statSrcFile - file which contains new stats
+Possible commands:
+getStats - print all weapon stats from mainFldr (if specified) or grFldr (if specified) to resFile
+setStats - generate new weapon stats by mainFldr or grFldr to resFldr. Uses srcFile for import new weapon stats
+
+This program works in console.
+Returns help:
+java -jar mw4weaponBalancer.jar
+
+Returns stats for all weapon to resFile:
+java -jar mw4weaponBalancer.jar -mainFldr <path> -resFile <path> getStats
+
+Returns stats for one weapon group to console:
+java -jar mw4weaponBalancer.jar -grFldr <path> getStats
+
+Generate new stat files:
+java -jar mw4weaponBalancer.jar -mainFldr <path> -resFldr <path> -statSrcFile <path> setStats
+
+Generated result file may be imported to excel by tab separator.
+Stat file may be copied directly from excel to text file.

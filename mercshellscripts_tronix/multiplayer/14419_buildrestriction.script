@@ -1,0 +1,787 @@
+#include "Content\\MercsShellScripts\\stddefs.h"
+#include "Content\\MercsShellScripts\\ScriptStrings.h"
+#include "Content\\MercsShellScripts\\NetParams.h"
+#include "Content\\MercsShellScripts\\ShellFunctionHeaders.hpp"
+#include "Content\\MercsShellScripts\\MechLabHeaders_MERCS.h"
+#include "Content\\MercsShellScripts\\common_shell.script"
+#define SCRIPTPATH "content\\MercsShellScripts\\Multiplayer\\"
+
+#include "Content\\MercsShellScripts\\mc_listboxes.script"
+#include "Content\\MercsShellScripts\\listboxes.script"
+#include "Content\\MercsShellScripts\\buttons.script"
+#include "Content\\MercsShellScripts\\c_Text.script"
+#include "Content\\MercsShellScripts\\c_rollover.script"
+#include "Content\\MercsShellScripts\\WeaponNames.h"
+#include "Content\\MercsShellScripts\\ErrorScreen.script"
+
+#define MSG_SETWEAPONSLIST 20001
+
+main
+{
+	GUI_CREATE
+	{
+
+		int i
+		int MAX_MC_ITEMS = 60
+		int MAX_MC_COLUMNS = 2
+		int MAX_MCCB_ITEMS = 60
+		int MAX_MCCB_COLUMNS = 2
+		int param_id
+		int allowed
+		int chassis
+		int num_beam
+		int num_ball
+		int num_miss
+		int num_comp
+		int BeamFirst = 1
+		int BallFirst = 1
+		int MissFirst = 1
+		int CompFirst = 1
+		int OldList	= 0
+
+		object o_background = background
+
+		object o_frame			= frame
+		o_frame.type			= 1
+		o_frame.location		= 0, 0, 100
+		o_frame.screen_name		= localize$(IDS_MP_BR_TITLE) " " MEKTEK_VERSION
+		initialize(o_frame)
+
+		object o_mouselines		= mouselines
+		o_mouselines.location	= 0, 0, o_frame.location.z - 1
+
+		object oRollover	= s_HelpRegion
+		oRollover.nFontID	= IDS_F_ROLLOVER_INFO
+		oRollover.cTextColor	= 0xFF5AE35A
+		oRollover.location	= 11,537,255
+		oRollover.nWidth	= 547
+		oRollover.nHeight	= 57
+		initialize(oRollover)
+
+		//Text Titles
+		object oChassisTitle	= s_Text
+		oChassisTitle.location	= 101 ,70,nZ_TEXT
+		oChassisTitle.nFontID	= IDS_F_MP_LABEL
+		oChassisTitle.nResID	= IDS_MP_BR_CHASSIS_TITLE
+		oChassisTitle.cTextColor= cWhite
+		oChassisTitle.nJustify	= 0
+		initialize(oChassisTitle)
+
+		object oWeaponsTitle	= s_Text
+		oWeaponsTitle.location	= 376 ,70,nZ_TEXT
+		oWeaponsTitle.nFontID	= IDS_F_MP_LABEL
+		oWeaponsTitle.nResID	= IDS_MP_BR_WEAPONS_TITLE
+		oWeaponsTitle.cTextColor= cWhite
+		oWeaponsTitle.nJustify	= 0
+		initialize(oWeaponsTitle)
+
+		//Buttons
+		object oCancel			= s_multistatepane
+		oCancel.file			= WPATH "button_reg_196x27_3state.tga"
+		oCancel.text			= localize$(IDS_GN_CANCEL)
+		oCancel.nRollover		= 1
+		oCancel.nHelpID			= IDS_HELP_MP_BR_CANCEL
+		oCancel.total_states	= 3
+		oCancel.location		= 580, 510, o_frame.location.z + 1	//nZ_BUTTON
+		initialize (oCancel)
+
+		object oReady			= s_multistatepane
+		oReady.file				= WPATH "button_main_196x41_3state.tga"
+		oReady.text				= localize$(IDS_GN_OK)
+		oReady.nRollover		= 1
+		oReady.nHelpID			= IDS_HELP_MP_BR_READY
+		oReady.total_states		= 3
+		oReady.location			= 580, 540, o_frame.location.z + 1	//nZ_BUTTON
+		initialize (oReady)
+
+		int useClanPak = callback($$ShellCheckClanPak$$)
+		int useISPak = callback($$ShellCheckISPak$$)
+
+
+		//Chassis list
+		int Drop_Y		= 95
+		int Drop_C1_Off	= 5
+		int Drop_C2_Off	= 25
+		int Drop_H		= 365
+
+		int k
+		string szChassis[ LastMechID + 1 ]
+		int nChassisID[ LastMechID + 1 ] // Maps indices to chassis IDs
+		int nPrev_ChassisSelect
+		int greatest_x //These valus are for the calc's in the oDChassis height and wiidth
+		int greatest_y
+		MAX_MC_ITEMS = LastMechID + 1 //21 new Mechs	// mektek
+		MAX_MCCB_ITEMS = LastMechID + 1 //21 new Mechs	// mektek
+
+		object oDChassis				= s_mc_listbox
+		oDChassis.nRollover				= 1
+		oDChassis.nHelpID				= IDS_HELP_MP_BR_CHASSIS
+		oDChassis.location				= 100,Drop_Y,nZ_LISTBOX
+		oDChassis.itemWidth				= 200
+		oDChassis.itemHeight			= 1	  //This refers to the height of a step (or scroll distance in pixels) defined by you.  NOT the height of all items
+		oDChassis.itemHeight_padding	= 10
+		oDChassis.list_size				= LastMechID + 1 //21 new Mechs	// mektek
+		oDChassis.NUM_OF_COLUMNS		= 2
+		oDChassis.column_header_height	= 0
+		oDChassis.max_displayed			= Drop_H  // max number of itemheight's.  maz_displayed*itemheight = height of listbox
+		oDChassis.uniform_item_height	= 0
+		oDChassis.column[0].checked		= true
+		oDChassis.column[0].location.x	= Drop_C1_Off
+		oDChassis.column[1].location.x	= Drop_C2_Off
+		oDChassis.column[1].fontcolor	= cWhite
+
+		//Fill String array in alphabetical order
+		szChassis[M_ArcticWolf]       	= localize$(DNL_ARCTICWOLF)
+		szChassis[M_Argus]            	= localize$(DNL_ARGUS)
+		szChassis[M_Atlas]            	= localize$(DNL_ATLAS)
+		szChassis[M_Awesome]          	= localize$(DNL_AWESOME)
+		szChassis[M_BlackKnight]      	= localize$(DNL_BLACKKNIGHT)
+		szChassis[M_Bushwacker]       	= localize$(DNL_BUSHWACKER)
+		szChassis[M_Catapult]         	= localize$(DNL_CATAPULT)
+		szChassis[M_CauldronBorn]     	= localize$(DNL_CAULDRONBORN)
+		szChassis[M_Chimera]          	= localize$(DNL_CHIMERA)
+		szChassis[M_Cougar]           	= localize$(DNL_COUGAR)
+		szChassis[M_Daishi]           	= localize$(DNL_DAISHI)
+		szChassis[M_Dragon]           	= localize$(DNL_DRAGON)
+		szChassis[M_Fafnir]           	= localize$(DNL_FAFNIR)
+		szChassis[M_Flea]             	= localize$(DNL_FLEA)
+		szChassis[M_Gladiator]       	= localize$(DNL_GLADIATOR)
+		szChassis[M_Hauptmann]       	= localize$(DNL_HAUPTMANN)
+		szChassis[M_Hellhound]        	= localize$(DNL_HELLHOUND)
+		szChassis[M_Hellspawn]        	= localize$(DNL_HELLSPAWN)
+		szChassis[M_Highlander]       	= localize$(DNL_HIGHLANDER)
+		szChassis[M_Hunchback]        	= localize$(DNL_HUNCHBACK)
+		szChassis[M_Kodiak]           	= localize$(DNL_KODIAK)
+		szChassis[M_Loki]             	= localize$(DNL_LOKI)
+		szChassis[M_Longbow]       	= localize$(DNL_LONGBOW)
+		szChassis[M_Madcat]           	= localize$(DNL_MADCAT)
+		szChassis[M_Madcat_MKII]      	= localize$(DNL_MADCAT2)
+		szChassis[M_Masakari]         	= localize$(DNL_MASAKARI)
+		szChassis[M_Mauler]           	= localize$(DNL_MAULER)
+		szChassis[M_Novacat]          	= localize$(DNL_NOVACAT)
+		szChassis[M_Osiris]           	= localize$(DNL_OSIRIS)
+		szChassis[M_Owens]       	= localize$(DNL_OWENS)
+		szChassis[M_Puma]       	= localize$(DNL_PUMA)
+		szChassis[M_Raven]            	= localize$(DNL_RAVEN)
+		szChassis[M_Ryoken]           	= localize$(DNL_RYOKEN)
+		szChassis[M_Shadowcat]        	= localize$(DNL_SHADOWCAT)
+		szChassis[M_Sunder]           	= localize$(DNL_SUNDER)
+		szChassis[M_Templar]          	= localize$(DNL_TEMPLAR)
+		szChassis[M_Thanatos]         	= localize$(DNL_THANATOS)
+		szChassis[M_Thor]             	= localize$(DNL_THOR)
+		szChassis[M_Uller]            	= localize$(DNL_ULLER)
+		szChassis[M_Uziel]            	= localize$(DNL_UZIEL)
+		szChassis[M_Victor]       	= localize$(DNL_VICTOR)
+		szChassis[M_Vulture]          	= localize$(DNL_VULTURE)
+		szChassis[M_Wolfhound]        	= localize$(DNL_WOLFHOUND)
+		szChassis[M_Zeus]             	= localize$(DNL_ZEUS)
+
+		szChassis[M_Avatar]          	= "Avatar"	// mektek
+		szChassis[M_Warhammer]         	= "Warhammer"	// mektek
+		szChassis[M_Strider]          	= "Strider"	// mektek
+		szChassis[M_Marauder]          	= "Marauder"	// mektek
+		szChassis[M_Bloodasp]          	= "Blood Asp"	// mektek
+		szChassis[M_UrbanmechIIC]       = "Urban Mech Clan"	// mektek
+		szChassis[M_Stalker]          	= "Stalker"	// mektek
+		szChassis[M_Ares]          	= "Ares"	// mektek
+		szChassis[M_Urbanmech]       	= "Urban Mech IS"	// mektek
+		szChassis[M_BrcticWolf]       	= "BrcticWolf"	// Tronix
+
+		// Fill array mapping list indices to mech IDs
+		nChassisID[M_ArcticWolf]    	= M_ArcticWolf
+		nChassisID[M_Argus]         	= M_Argus
+		nChassisID[M_Atlas]         	= M_Atlas
+		nChassisID[M_Awesome]       	= M_Awesome
+		nChassisID[M_BlackKnight]   	= M_BlackKnight
+		nChassisID[M_Bushwacker]    	= M_Bushwacker
+		nChassisID[M_Catapult]      	= M_Catapult
+		nChassisID[M_CauldronBorn]  	= M_CauldronBorn
+		nChassisID[M_Chimera]       	= M_Chimera
+		nChassisID[M_Cougar]        	= M_Cougar
+		nChassisID[M_Daishi]        	= M_Daishi
+		nChassisID[M_Dragon]        	= M_Dragon
+		nChassisID[M_Fafnir]        	= M_Fafnir
+		nChassisID[M_Flea]          	= M_Flea
+		nChassisID[M_Gladiator]   		= M_Gladiator
+		nChassisID[M_Hauptmann]         = M_Hauptmann
+		nChassisID[M_Hellhound]     	= M_Hellhound
+		nChassisID[M_Hellspawn]     	= M_Hellspawn
+		nChassisID[M_Highlander]    	= M_Highlander
+		nChassisID[M_Hunchback]     	= M_Hunchback
+		nChassisID[M_Kodiak]        	= M_Kodiak
+		nChassisID[M_Loki]          	= M_Loki
+		nChassisID[M_Longbow]           = M_Longbow
+		nChassisID[M_Madcat]        	= M_Madcat
+		nChassisID[M_Madcat_MKII]   	= M_Madcat_MKII
+		nChassisID[M_Masakari]      	= M_Masakari
+		nChassisID[M_Mauler]        	= M_Mauler
+		nChassisID[M_Novacat]       	= M_Novacat
+		nChassisID[M_Osiris]        	= M_Osiris
+		nChassisID[M_Owens]             = M_Owens
+		nChassisID[M_Puma]              = M_Puma
+		nChassisID[M_Raven]         	= M_Raven
+		nChassisID[M_Ryoken]        	= M_Ryoken
+		nChassisID[M_Shadowcat]     	= M_Shadowcat
+		nChassisID[M_Sunder]        	= M_Sunder
+		nChassisID[M_Templar]       	= M_Templar
+		nChassisID[M_Thanatos]      	= M_Thanatos
+		nChassisID[M_Thor]          	= M_Thor
+		nChassisID[M_Uller]         	= M_Uller
+		nChassisID[M_Uziel]         	= M_Uziel
+		nChassisID[M_Victor]            = M_Victor
+		nChassisID[M_Vulture]       	= M_Vulture
+		nChassisID[M_Wolfhound]     	= M_Wolfhound
+		nChassisID[M_Zeus]          	= M_Zeus
+//
+		nChassisID[M_Avatar]       	= M_Avatar	// mektek
+		nChassisID[M_Warhammer]       	= M_Warhammer	// mektek
+		nChassisID[M_Strider]       	= M_Strider	// mektek
+		nChassisID[M_Marauder]        	= M_Marauder	// mektek
+		nChassisID[M_Bloodasp]        	= M_Bloodasp	// mektek
+		nChassisID[M_UrbanmechIIC]       = M_UrbanmechIIC	// mektek
+		nChassisID[M_Stalker]       	= M_Stalker	// mektek
+		nChassisID[M_Ares]       	= M_Ares	// mektek
+		nChassisID[M_Urbanmech]       	= M_Urbanmech	// mektek
+		nChassisID[M_BrcticWolf]       	= M_BrcticWolf	// mektek
+
+		for  k = 0; k < oDChassis.list_size; k++
+		{
+			oDChassis.column[1].list_item[k] = szChassis[k]
+
+			oDChassis.list_order[k] = k
+
+			oDChassis.column[0].pic_file				= WPATH "Checkbox_15x15_3_Build.tga"
+			oDChassis.column[0].checkbox_num_of_states	= 3
+			oDChassis.column[0].fontAlignment			= just_left
+		}
+		bitmap_create black = 20,20  //comment out if you don't have any images
+		initialize (oDChassis)
+
+		//set value for checkboxes
+		for  k = 0; k < oDChassis.list_size; k++
+		{
+			//if ((!useClanPak) && (callback($$IsChassisInClanPak$$, szChassis[k]) == 1))
+			//{
+			//	oDChassis.column[0].o_checkbox[k].disable_check = true
+			//	oDChassis.column[0].o_checkbox[k].check	= 1
+			//}
+			//else
+			//if ((!useISPak) && (callback($$IsChassisInISPak$$, szChassis[k]) == 1))
+			//{
+			//	oDChassis.column[0].o_checkbox[k].disable_check = true
+			//	oDChassis.column[0].o_checkbox[k].check	= 1
+			//}
+			//else
+			//{
+	    		param_id = ALLOWED_MECH_PARAMETER
+			allowed = callback($$GetLocalNetworkMissionParamater$$,param_id,nChassisID[k])
+    			oDChassis.column[0].o_checkbox[k].check		= allowed
+            		//}
+		}
+
+
+		//Junk strings for weapons callbacks
+		//int List_max = 45
+		int List_max = 128	// mektek
+		int ids[List_max]
+		int slots[List_max]
+		int slot_size[List_max]
+		float ton[List_max]
+		float damage[List_max]
+		float range[List_max]
+		float heat[List_max]
+		float weapon_recycle[List_max]
+		int inventory_count[List_max]
+		int num_weap
+
+		//Backup Holder
+		int j
+		int holder[150]
+
+		//weapon names
+		object oBuildWeaponNames = build_weapon_names
+
+		//Weapon sorting list
+		object oWeaponSelection				= s_droplistbox
+		oWeaponSelection.nRollover			= 1
+		oWeaponSelection.nHelpID			= IDS_HELP_MP_BR_SELECTION
+		oWeaponSelection.itemHeight			= 20
+		oWeaponSelection.max_displayed		= 8
+		oWeaponSelection.offsetLabel		= 0,-15
+		oWeaponSelection.arrowHeight		= 15
+		oWeaponSelection.location			= 375,Drop_Y,nZ_LISTBOX
+		oWeaponSelection.list_size			= 4
+	//	oWeaponSelection.label				= localize$(IDS_ML_WP_LIST)
+	//	oWeaponSelection.offsetLabel		= -74, 3
+		oWeaponSelection.itemWidth			= 301
+		oWeaponSelection.max_displayed		= 4
+
+		oWeaponSelection.list_item[0] = localize$(IDS_ML_WP_LISTBEAM)
+		oWeaponSelection.list_item[1] = localize$(IDS_ML_WP_LISTMISSILE)
+		oWeaponSelection.list_item[2] = localize$(IDS_ML_WP_LISTBALLISTIC)
+		oWeaponSelection.list_item[3] = localize$(IDS_MP_BR_COMPONENT)
+
+		initialize(oWeaponSelection)
+
+		//Weapons list
+		MAX_MCCB_ITEMS = 35
+
+		//callback($$ML_CallbackHandler$$, MLDataSetupBeamWeapons, ids[], slots[], slot_size[], ton[], damage[], range[], heat[], weapon_recycle[], inventory_count[], num_weap, 75)
+		num_weap = LastBeamID - FirstBeamID + 1
+		for(i=0;i<num_weap;i++)
+		{
+			ids[i] = i
+		}
+		object oDWeapon					= s_mc_listbox
+		oDWeapon.nRollover				= 1
+		oDWeapon.nHelpID				= IDS_HELP_MP_BR_WEAPONS
+		oDWeapon.location				= 375,Drop_Y + 30,nZ_LISTBOX - 20
+		oDWeapon.itemWidth				= 300
+		oDWeapon.itemHeight				= 1	  //This refers to the height of a step (or scroll distance in pixels) defined by you.  NOT the height of all items
+		oDWeapon.itemHeight_padding		= 10
+		oDWeapon.list_size				= num_weap
+		oDWeapon.NUM_OF_COLUMNS			= 2
+		oDWeapon.column_header_height	= 0
+		oDWeapon.max_displayed			= Drop_H - 30  // max number of itemheight's.  maz_displayed*itemheight = height of listbox
+		oDWeapon.uniform_item_height	= 0
+		oDWeapon.column[0].checked		= true
+		oDWeapon.column[0].location.x	= Drop_C1_Off
+		oDWeapon.column[1].location.x	= Drop_C2_Off
+		oDWeapon.column[1].fontcolor	= cWhite
+
+		object o_mechpaks_error
+
+		initialize (this)
+
+		framerate = 0
+	}
+	GUI_INIT
+	{
+		// Get the original status of the weapons and store them at a safe place
+		if (BeamFirst)
+		{
+			for (i=FirstBeamID; i<=LastBeamID; i++)
+			{
+				param_id = ALLOWED_BEAM_WEAPON_PARAMETER
+				allowed = callback($$GetLocalNetworkMissionParamater$$,param_id,i)
+				holder[i] = allowed
+			}
+		}
+		BeamFirst = 0
+		if (MissFirst)
+		{
+			for (i=FirstMissileID; i<=LastMissileID; i++)
+			{
+				param_id = ALLOWED_MISSILE_WEAPON_PARAMETER
+				allowed = callback($$GetLocalNetworkMissionParamater$$,param_id,i)
+				holder[i] = allowed
+			}
+		}
+		MissFirst = 0
+		if (BallFirst)
+		{
+			for (i=FirstProjectileID; i<=LastProjectileID; i++)
+			{
+				param_id = ALLOWED_PROJECTILE_WEAPON_PARAMETER
+				allowed = callback($$GetLocalNetworkMissionParamater$$,param_id,i)
+				holder[i] = allowed
+			}
+		}
+		BallFirst = 0
+		if (CompFirst)
+		{
+			for (i=FirstGenericSubsystemID; i<=LastGenericSubsystemID; i++)
+			{
+				param_id = ALLOWED_GENERIC_SUBSYSTEM_PARAMETER
+				allowed = callback($$GetLocalNetworkMissionParamater$$,param_id,i)
+				holder[i] = allowed
+			}
+		}
+		CompFirst = 0
+
+		//Resize List and populate it
+		oDWeapon.list_size = num_weap
+		for  k = 0; k < oDWeapon.list_size; k++
+		{
+			oDWeapon.column[1].list_item[k] = oBuildWeaponNames.weapon_names[ids[k]]
+
+			oDWeapon.list_order[k] = k
+
+			oDWeapon.column[0].pic_file					= WPATH "Checkbox_15x15_3_Build.tga"
+			oDWeapon.column[0].checkbox_num_of_states	= 3
+			oDWeapon.column[0].fontAlignment			= just_left
+		}
+		oDWeapon.start_of_list = 0
+		initialize (oDWeapon)
+		activate(oDWeapon)
+		mail(-1, oDWeapon)
+
+		//Get the allowed status of the weapons
+		if(oWeaponSelection.nselected == 0)//Beam
+		{
+			for (i=0; i<num_weap; i++)
+			{
+				if ((!useClanPak) && (callback($$IsSubsystemInClanPak$$, ids[i]) == 1))
+				{
+					oDWeapon.column[0].o_checkbox[i].disable_check = true
+					oDWeapon.column[0].o_checkbox[i].check	= 1
+				}
+				else
+				if ((!useISPak) && (callback($$IsSubsystemInISPak$$, ids[i]) == 1))
+				{
+					oDWeapon.column[0].o_checkbox[i].disable_check = true
+					oDWeapon.column[0].o_checkbox[i].check	= 1
+				}
+				else
+				{
+				    param_id = ALLOWED_BEAM_WEAPON_PARAMETER
+				    allowed = callback($$GetLocalNetworkMissionParamater$$,param_id,ids[i])
+				    oDWeapon.column[0].o_checkbox[i].check		= allowed
+                		}
+			}
+		}
+		if(oWeaponSelection.nselected == 1)//Miss
+		{
+			for (i=0; i<num_weap; i++)
+			{
+				if ((!useClanPak) && (callback($$IsSubsystemInClanPak$$, ids[i]) == 1))
+				{
+					oDWeapon.column[0].o_checkbox[i].disable_check = true
+					oDWeapon.column[0].o_checkbox[i].check	= 1
+				}
+				else
+				if ((!useISPak) && (callback($$IsSubsystemInISPak$$, ids[i]) == 1))
+				{
+					oDWeapon.column[0].o_checkbox[i].disable_check = true
+					oDWeapon.column[0].o_checkbox[i].check	= 1
+				}
+				else
+				{
+				    param_id = ALLOWED_MISSILE_WEAPON_PARAMETER
+				    allowed = callback($$GetLocalNetworkMissionParamater$$,param_id,ids[i])
+				    oDWeapon.column[0].o_checkbox[i].check		= allowed
+                		}
+			}
+		}
+		if(oWeaponSelection.nselected == 2)//Ball
+		{
+			for (i=0; i<num_weap; i++)
+			{
+				if ((!useClanPak) && (callback($$IsSubsystemInClanPak$$, ids[i]) == 1))
+				{
+					oDWeapon.column[0].o_checkbox[i].disable_check = true
+					oDWeapon.column[0].o_checkbox[i].check	= 1
+				}
+				else
+				if ((!useISPak) && (callback($$IsSubsystemInISPak$$, ids[i]) == 1))
+				{
+					oDWeapon.column[0].o_checkbox[i].disable_check = true
+					oDWeapon.column[0].o_checkbox[i].check	= 1
+				}
+				else
+				{
+				    param_id = ALLOWED_PROJECTILE_WEAPON_PARAMETER
+				    allowed = callback($$GetLocalNetworkMissionParamater$$,param_id,ids[i])
+				    oDWeapon.column[0].o_checkbox[i].check		= allowed
+                }
+			}
+		}
+		if(oWeaponSelection.nselected == 3)//Comp
+		{
+			for (i=0; i<num_weap; i++)
+			{
+				if ((!useClanPak) && (callback($$IsSubsystemInClanPak$$, ids[i]) == 1))
+				{
+					oDWeapon.column[0].o_checkbox[i].disable_check = true
+					oDWeapon.column[0].o_checkbox[i].check	= 1
+				}
+				else
+				if ((!useISPak) && (callback($$IsSubsystemInISPak$$, ids[i]) == 1))
+				{
+					oDWeapon.column[0].o_checkbox[i].disable_check = true
+					oDWeapon.column[0].o_checkbox[i].check	= 1
+				}
+				else
+				{
+				    param_id = ALLOWED_GENERIC_SUBSYSTEM_PARAMETER
+				    allowed = callback($$GetLocalNetworkMissionParamater$$,param_id,ids[i])
+				    oDWeapon.column[0].o_checkbox[i].check		= allowed
+				}
+			}
+		}
+	}
+	GUI_MAILBOX
+	{
+		for (i = 0; i < oDChassis.list_size; i++)
+		{
+			if (sender == oDChassis.column[0].o_checkbox[i])
+			{
+				// let the user know that you can't disable the mech
+				//o_mechpaks_error			= o_ErrorScreen
+				//o_mechpaks_error.error_header	= localize$(IDS_MPK_ERROR_TITLE)
+
+				//if ((!useClanPak) && (callback($$IsChassisInClanPak$$, szChassis[i]) == 1))
+				//{
+				//	o_mechpaks_error.error_message	= szChassis[i] " " localize$(IDS_MPK_CLAN_MECH_NO_RESTRICT) "\n\n" localize$(IDS_MPK_CLAN_MECH_PURCHASE)
+//
+				//}
+				//else
+				//if ((!useISPak) && (callback($$IsChassisInISPak$$, szChassis[i]) == 1))
+				//{
+				//	o_mechpaks_error.error_message	= szChassis[i] " " localize$(IDS_MPK_IS_MECH_NO_RESTRICT) "\n\n" localize$(IDS_MPK_IS_MECH_PURCHASE)
+				//}
+
+				//o_mechpaks_error.button_mode	= ONE_BUTTON_MODE
+				//o_mechpaks_error.buttonText[0]	= localize$(IDS_GN_OK)
+				//initialize(o_mechpaks_error)
+				//activate(o_mechpaks_error)
+
+				//return
+			}
+		}
+
+		for (i = 0; i < oDWeapon.list_size; i++)
+		{
+			if (sender == oDWeapon.column[0].o_checkbox[i])
+			{
+				// let the user know that you can't disabled the weapon
+				o_mechpaks_error			= o_ErrorScreen
+				o_mechpaks_error.error_header	= localize$(IDS_MPK_ERROR_TITLE)
+
+				if ((!useClanPak) && (callback($$IsSubsystemInClanPak$$, ids[i]) == 1))
+				{
+					o_mechpaks_error.error_message	= oBuildWeaponNames.weapon_names[ids[i]] " " localize$(IDS_MPK_CLAN_COMP_NO_RESTRICT) "\n\n" localize$(IDS_MPK_CLAN_COMP_PURCHASE)
+
+				}
+				else
+				if ((!useISPak) && (callback($$IsSubsystemInISPak$$, ids[i]) == 1))
+				{
+					o_mechpaks_error.error_message	= oBuildWeaponNames.weapon_names[ids[i]] " " localize$(IDS_MPK_IS_COMP_NO_RESTRICT) "\n\n" localize$(IDS_MPK_IS_COMP_PURCHASE)
+				}
+
+				o_mechpaks_error.button_mode	= ONE_BUTTON_MODE
+				o_mechpaks_error.buttonText[0]	= localize$(IDS_GN_OK)
+				initialize(o_mechpaks_error)
+				activate(o_mechpaks_error)
+
+				return
+			}
+		}
+		switch (sender)
+		{
+			case oCancel:
+				{
+					for (i=FirstBeamID; i<=LastBeamID; i++)
+					{
+						param_id = ALLOWED_BEAM_WEAPON_PARAMETER
+						allowed = holder[i]
+						callback($$SetNetworkMissionParamater$$,param_id,i,allowed)
+					}
+					for (i=FirstProjectileID; i<=LastProjectileID; i++)
+					{
+						param_id = ALLOWED_PROJECTILE_WEAPON_PARAMETER
+						allowed = holder[i]
+						callback($$SetNetworkMissionParamater$$,param_id,i,allowed)
+					}
+					for (i=FirstMissileID; i<=LastMissileID; i++)
+					{
+						param_id = ALLOWED_MISSILE_WEAPON_PARAMETER
+						allowed = holder[i]
+						callback($$SetNetworkMissionParamater$$,param_id,i,allowed)
+					}
+					for (i=FirstGenericSubsystemID; i<=LastGenericSubsystemID; i++)
+					{
+						param_id = ALLOWED_GENERIC_SUBSYSTEM_PARAMETER
+						allowed = holder[i]
+						callback($$SetNetworkMissionParamater$$,param_id,i,allowed)
+					}
+					script_continue "HostGame1.script"
+					script_end
+				}
+			break
+			case oReady:
+				{
+					//for (i=FirstMechID; i<(LastMechID - FirstMechID + 1); i++)	
+					for (i=FirstMechID; i<=LastMechID; i++)	// mektek
+					{
+						param_id = ALLOWED_MECH_PARAMETER
+						allowed = oDChassis.column[0].o_checkbox[i].check
+						callback($$SetNetworkMissionParamater$$,param_id,nChassisID[i],allowed)
+					}
+					mail(MSG_SETWEAPONSLIST,this)
+
+					script_continue "HostGame1.script"
+//					script_run scriptpath "HostGame1.script", 0x1000
+					@HostGame1@o_build_restrict.state = 2
+					initialize(@HostGame1@o_build_restrict)
+					@HostGame1@o_Restrict.state = 0
+					initialize(@HostGame1@o_Restrict)
+
+					script_end
+				}
+			break
+			case oWeaponSelection:
+				{
+					if oWeaponSelection.nselected == 0 //Beam
+					{
+						mail(MSG_SETWEAPONSLIST,this)
+					}
+					if oWeaponSelection.nselected == 1 //Missile
+					{
+						mail(MSG_SETWEAPONSLIST,this)
+					}
+					if oWeaponSelection.nselected == 2 //Projectile
+					{
+						mail(MSG_SETWEAPONSLIST,this)
+					}
+					if oWeaponSelection.nselected == 3 //Components
+					{
+						mail(MSG_SETWEAPONSLIST,this)
+					}
+
+					for i = 0; i < oDWeapon.list_size; i++
+					{
+						kill oDWeapon.list_button[i]
+						kill oDWeapon.column[0].o_checkbox[i]
+					}
+
+					if oWeaponSelection.nselected == 0 //Beam
+					{
+						num_weap = LastBeamID - FirstBeamID + 1
+						for(i = 0; i < num_weap;i++)
+						{
+							ids[i] = FirstBeamID + i
+						}
+						num_beam = num_weap
+						initialize (this)
+						OldList = 0
+					}
+					if oWeaponSelection.nselected == 1 //Missile
+					{
+						num_weap = LastMissileID - FirstMissileID + 1
+						for(i = 0; i < num_weap;i++)
+						{
+							ids[i] = FirstMissileID + i
+						}
+						num_miss = num_weap
+						initialize (this)
+						OldList = 1
+					}
+					if oWeaponSelection.nselected == 2 //Projectile
+					{
+						num_weap = LastProjectileID - FirstProjectileID + 1
+						for(i = 0; i < num_weap;i++)
+						{
+							ids[i] = FirstProjectileID + i
+						}
+						num_ball = num_weap
+						initialize (this)
+						OldList = 2
+					}
+					if oWeaponSelection.nselected == 3 //Components
+					{
+						num_weap = LastGenericSubsystemID - FirstGenericSubsystemID + 1
+						for(i = 0; i < num_weap;i++)
+						{
+							// Bug fix 6495 - This fix is to remove AMS
+							// from the restriction list.
+							if (FirstGenericSubsystemID + i > Sub_AMS)
+							{
+								// Bug fix 4242 - This fix is to remove light amp
+								// from the restriction list.
+								if (FirstGenericSubsystemID + i > Sub_LightAmp)
+								{
+									ids[i-2] = FirstGenericSubsystemID + i
+								}
+								else
+									ids[i-1] = FirstGenericSubsystemID + i
+							}
+							else
+							{
+								ids[i] = FirstGenericSubsystemID + i
+							}
+						}
+						num_weap--
+						num_weap--
+						num_comp = num_weap
+						initialize (this)
+						OldList = 3
+					}
+				}
+			break
+		}
+		switch (getmessage())
+		{
+			{
+				case MSG_SETWEAPONSLIST:
+				{
+					if(OldList == 0)
+					{
+						for (i=0; i<num_weap; i++)
+						{
+							param_id = ALLOWED_BEAM_WEAPON_PARAMETER
+							allowed = oDWeapon.column[0].o_checkbox[i].check
+							callback($$SetNetworkMissionParamater$$,param_id,ids[i],allowed)
+						}
+					}
+					if(OldList == 1)
+					{
+						for (i=0; i<num_weap; i++)
+						{
+							param_id = ALLOWED_MISSILE_WEAPON_PARAMETER
+							allowed = oDWeapon.column[0].o_checkbox[i].check
+							callback($$SetNetworkMissionParamater$$,param_id,ids[i],allowed)
+						}
+					}
+					if(OldList == 2)
+					{
+						for (i=0; i<num_weap; i++)
+						{
+							param_id = ALLOWED_PROJECTILE_WEAPON_PARAMETER
+							allowed = oDWeapon.column[0].o_checkbox[i].check
+							callback($$SetNetworkMissionParamater$$,param_id,ids[i],allowed)
+						}
+					}
+					if(OldList == 3)
+					{
+						for (i=0; i<num_weap; i++)
+						{
+							param_id = ALLOWED_GENERIC_SUBSYSTEM_PARAMETER
+							allowed = oDWeapon.column[0].o_checkbox[i].check
+							callback($$SetNetworkMissionParamater$$,param_id,ids[i],allowed)
+						}
+					}
+				}
+			}
+		}
+	}
+}
+background
+{
+	GUI_CREATE
+	{
+		location = 0,0,-3
+		pane p_background
+		if ($$DEMO_Multiplayer$$ == 1)
+		{
+			p_background = GPATH "mechlabx.tga"
+		}
+		else
+		{
+			p_background = GPATH "MULTIPlayer.tga"
+		}
+
+//		pane p_frame = GPATH "frame.tga"
+
+//		pane p_pane = GPATH "\\Multiplayer\\infobox.tga"
+//		alphamode (p_pane) = am_alpha_alphainvalpha
+
+	}
+
+	GUI_DRAW
+	{
+		render P_background, 0,0
+//		Render p_frame, 0,0
+//		render p_pane, 33, 490
+	}
+}

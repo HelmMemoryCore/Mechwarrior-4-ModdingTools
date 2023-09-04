@@ -1,0 +1,1966 @@
+//Mechwarrior: Mercenaries
+//Copyright (c) 2002
+//BlackMarket.script
+//Saunders
+//April 21, 2002
+
+#include "Content\\MercsShellScripts\\stddefs.h"
+#include "Content\\MercsShellScripts\\ShellFunctionHeaders.hpp"
+#include "Content\\MercsShellScripts\\MechLabHeaders_MERCS.h"
+#include "Content\\MercsShellScripts\\common_shell.script" //?
+#include "Content\\MercsShellScripts\\ScriptStrings.h"
+#include "Content\\MercsShellScripts\\ErrorScreen.script"
+
+#include "Content\\MercsShellScripts\\buttons.script"
+#include "Content\\MercsShellScripts\\spinbox.script"
+#include "Content\\MercsShellScripts\\editbox.script"
+#include "Content\\MercsShellScripts\\listboxes.script"
+#include "Content\\MercsShellScripts\\mc_listboxes.script"
+#include "Content\\MercsShellScripts\\MechBay\\MarketMultiColumnListbox.script"
+#include "Content\\MercsShellScripts\\c_Text.script"
+#include "Content\\MercsShellScripts\\c_rollover.script"
+#include "Content\\MercsShellScripts\\MechWeight.script"
+
+#define ONE_BUTTON_MODE 1
+#define TWO_BUTTON_MODE 2
+#define THREE_BUTTON_MODE 3
+
+#define BUTTON_ENABLEDOFF		0
+#define BUTTON_ENABLEDFOCUS		1
+#define BUTTON_ENABLED			2
+#define BUTTON_DISABLED	 		3
+
+#define DROP_MASK_Z	250
+#define BACKGROUND_Z 50
+main
+{
+	GUI_CREATE
+	{
+		setresource ("ScriptStrings_MERCS.dll")
+
+		callback ($$Shell_CallbackHandler$$, ShellInitBlackMarketScreen)
+
+		if ( ! exists( @infobox@ ) )
+		{
+			script_run MB_SPATH "infobox.script" , 0x1000
+		}
+
+		@mouse@pointer.showMousePointer = 0
+
+		object mechinfo = mech_info
+		int MAX_COLUMNS = 4
+		// Multicolumn listboxes
+		int MAX_MC_ITEMS = 200			//MAXIMUM NUMBER OF ITEMS LISTED
+		int MAX_MC_COLUMNS = 10
+		// Multicolumn checklistbox
+		int MAX_MCCB_ITEMS = 250			//MAXIMUM NUMBER OF ITEMS LISTED
+		int MAX_MCCB_COLUMNS = 10
+		// Spinbox
+		int MAX_SPIN_ITEMS = 40			//MAXIMUM NUMBER OF ITEMS LISTED MUST BE SET (for numeric based, set 1)
+		object o_frame			= frame
+		o_frame.boldfont		= FPATH localize$(IDS_F_ML_DATA)
+		o_frame.type			= 0
+		o_frame.location		= 0, 0, BACKGROUND_Z
+		o_frame.screen_name		= localize$( IDS_FREEMARKET ) " " MEKTEK_VERSION
+		o_closebutton.location		= 776, 0, BACKGROUND_Z + 1
+		initialize(o_frame)
+
+		string orbital_view		= localize$( IDS_ORBITAL_VIEW )
+		string itemNames[250]
+
+		// This may be used later to display an error dialog.
+		object oError
+
+		font3d smallfont		= FPATH localize$(IDS_F_CHAT_ENTRY)
+
+		string microStyle8BoldStr      = localize$( IDS_MICROSTYLE8BOLD )
+		string microStyle8BoldExtStr   = localize$( IDS_MICROSTYLE8BOLDEXT )
+		string microStyle9BoldStr      = localize$( IDS_MICROSTYLE9BOLD )
+		string microStyle9BoldExtStr   = localize$( IDS_MICROSTYLE9BOLDEXT )
+		string microStyle10BoldStr     = localize$( IDS_MICROSTYLE10BOLD )
+		string microStyle10BoldExtStr  = localize$( IDS_MICROSTYLE10BOLDEXT )
+		string microStyle12BoldStr     = localize$( IDS_MICROSTYLE12BOLD )
+		string microStyle12BoldExtStr  = localize$( IDS_MICROSTYLE12BOLDEXT )
+		string microStyle14BoldExtStr  = localize$( IDS_MICROSTYLE14BOLDEXT )
+
+		font3d microStyle8BoldFont      = FPATH microStyle8BoldStr
+		font3d microStyle8BoldExtFont   = FPATH microStyle8BoldExtStr
+		font3d microStyle9BoldFont      = FPATH microStyle9BoldStr
+		font3d microStyle9BoldExtFont   = FPATH microStyle9BoldExtStr
+		font3d microStyle10BoldFont     = FPATH microStyle10BoldStr
+		font3d microStyle10BoldExtFont  = FPATH microStyle10BoldExtStr
+		// font3d microStyle12BoldFont     = FPATH microStyle12BoldStr
+		// font3d microStyle12BoldExtFont  = FPATH microStyle12BoldExtStr
+		font3d microStyle14BoldExtFont  = FPATH microStyle14BoldExtStr
+
+		sound btnRolloverSound		= APATH "sfx_button7.wav"
+		sound btnPressedSound		= APATH "sfx_button5.wav"
+		sound btnTriggeredSound		= APATH "sfx_button5.wav"
+		sound addWeapon				= APATH "sfx_add_weapon.wav"
+		sound notAllowed			= APATH "sfx_wrongbutton.wav"
+
+		itemNames[0]  = localize$(DNL_LGLAS)
+		itemNames[1]  = localize$(DNL_MDLAS)
+		itemNames[2]  = localize$(DNL_SMLAS)
+		itemNames[3]  = localize$(DNL_CERLGL_SHORT)
+		itemNames[4]  = localize$(DNL_CERMDL_SHORT)
+		itemNames[5]  = localize$(DNL_CERSML_SHORT)
+		itemNames[6]  = localize$(DNL_LGPLS)
+		itemNames[7]  = localize$(DNL_MDPLS)
+		itemNames[8]  = localize$(DNL_SMPLS)
+		itemNames[9]  = localize$(DNL_LGXPLS)
+		itemNames[10] = localize$(DNL_MDXPLS)
+		itemNames[11] = localize$(DNL_SMXPLS)
+		itemNames[12] = localize$(DNL_CLGPLS_SHORT)
+		itemNames[13] = localize$(DNL_CMDPLS_SHORT)
+		itemNames[14] = localize$(DNL_CSMPLS_SHORT)
+		itemNames[15] = localize$(DNL_PPC_SHORT)
+		itemNames[16] = localize$(DNL_CERPPC_SHORT)
+		itemNames[17] = localize$(DNL_FLAMER)
+		itemNames[18] = localize$(DNL_CFLAMER)
+		itemNames[W_CapPPC] = "CapPPC"  // Evil
+		itemNames[W_HeavyLargeLaser] = "Heavy Large Laser"  // Evil
+		itemNames[W_HeavyMediumLaser] = "Heavy Medium Laser"  // Evil
+
+
+		itemNames[51] = localize$(DNL_LRM5_SHORT)
+		itemNames[52] = localize$(DNL_LRM10_SHORT)
+		itemNames[53] = localize$(DNL_LRM15_SHORT)
+		itemNames[54] = localize$(DNL_LRM20_SHORT)
+		itemNames[55] = localize$(DNL_CLRM5_SHORT)
+		itemNames[56] = localize$(DNL_CLRM10_SHORT)
+		itemNames[57] = localize$(DNL_CLRM15_SHORT)
+		itemNames[58] = localize$(DNL_CLRM20_SHORT)
+		itemNames[59] = localize$(DNL_MRM10_SHORT)
+		itemNames[60] = localize$(DNL_MRM20_SHORT)
+		itemNames[61] = localize$(DNL_MRM30_SHORT)
+		itemNames[62] = localize$(DNL_MRM40_SHORT)
+		itemNames[63] = localize$(DNL_SMRM10_SHORT)
+		itemNames[64] = localize$(DNL_SMRM20_SHORT)
+		itemNames[65] = localize$(DNL_SMRM30_SHORT)
+		itemNames[66] = localize$(DNL_SMRM40_SHORT)
+		itemNames[67] = localize$(DNL_SRM2_SHORT)
+		itemNames[68] = localize$(DNL_SRM4_SHORT)
+		itemNames[69] = localize$(DNL_SRM6_SHORT)
+		itemNames[70] = localize$(DNL_SSRM2_SHORT)
+		itemNames[71] = localize$(DNL_SSRM4_SHORT)
+		itemNames[72] = localize$(DNL_SSRM6_SHORT)
+		itemNames[73] = localize$(DNL_ARROWCLUSTER_SHORT)
+		itemNames[74] = localize$(DNL_ARROWHEAVY_SHORT)
+		itemNames[75] = localize$(DNL_NARC)
+		itemNames[76] = localize$(DNL_CNARC)
+		itemNames[77] = localize$(DNL_FLARE)
+		itemNames[78] = localize$(DNL_ARTILLERY)
+		itemNames[W_ISRM2] = "Inferno SRM2"  // Evil
+		itemNames[W_RL20] = "Rocket Launcher"  // Evil
+		itemNames[W_ATM6M] = "ATM6 Medium"  // Evil
+		itemNames[W_ATM12M] = "ATM12 Medium"  // Evil
+		itemNames[W_ATM6E] = "ATM6 Extended"  // Evil
+		itemNames[W_ATM12E] = "ATM12 Extended"  // Evil
+
+		itemNames[W_MiniGauss] = "MiniGauss"  // jeho
+		itemNames[W_Napalm] = "Napalm Thumper"  // jeho
+		itemNames[W_LongTomTracer] = "LongTom Tracer"  // jeho
+		itemNames[W_ThumperTracer] = "Thumper Tracer"  // jeho
+		itemNames[W_Thumper] = "Thumper"  // Evil
+		itemNames[W_ClanLightMGun] = "Clan Light Machine Gun"  // Evil
+		itemNames[W_LAC5] = "LightAC5"  // Evil
+		itemNames[W_HVAC2] = "HyperAC2"  // Evil
+		itemNames[W_HVAC5] = "HyperAC5"  // Evil
+		itemNames[W_HVAC10] = "HyperAC10"  // Evil
+		itemNames[W_HVAC20] = "HyperAC20"  // Evil
+
+		itemNames[100] = localize$(DNL_AC5_SHORT)
+		itemNames[101] = localize$(DNL_AC10_SHORT)
+		itemNames[102] = localize$(DNL_AC20_SHORT)
+		itemNames[103] = localize$(DNL_LBXAC10_SHORT)
+		itemNames[104] = localize$(DNL_LBXAC20_SHORT)
+		itemNames[105] = localize$(DNL_CLBXAC10_SHORT)
+		itemNames[106] = localize$(DNL_CLBXAC20_SHORT)
+		itemNames[107] = localize$(DNL_RTXAC2)
+		itemNames[108] = localize$(DNL_RTXAC5)
+		itemNames[109] = localize$(DNL_UAC2_SHORT)
+		itemNames[110] = localize$(DNL_UAC5_SHORT)
+		itemNames[111] = localize$(DNL_UAC10_SHORT)
+		itemNames[112] = localize$(DNL_UAC20_SHORT)
+		itemNames[113] = localize$(DNL_CUAC2_SHORT)
+		itemNames[114] = localize$(DNL_CUAC5_SHORT)
+		itemNames[115] = localize$(DNL_CUAC10_SHORT)
+		itemNames[116] = localize$(DNL_CUAC20_SHORT)
+		itemNames[117] = localize$(DNL_LGAUSS)
+		itemNames[118] = localize$(DNL_GAUSS)
+		itemNames[119] = localize$(DNL_HGAUSS)
+		itemNames[120] = localize$(DNL_CGAUSS)
+		itemNames[121] = localize$(DNL_MG)
+		itemNames[122] = localize$(DNL_CMG)
+		itemNames[123] = localize$(DNL_LONGTOM)
+
+		itemNames [FirstMechChitID + M_ArcticWolf ] = localize$ (DNL_ARCTICWOLF)
+		itemNames [FirstMechChitID + M_Argus] = localize$ (DNL_ARGUS)
+		itemNames [FirstMechChitID + M_Atlas ] = localize$ (DNL_ATLAS)
+		itemNames [FirstMechChitID + M_Awesome ] = localize$ (DNL_AWESOME)
+		itemNames [FirstMechChitID + M_BlackKnight] = localize$ (DNL_BLACKKNIGHT)
+		itemNames [FirstMechChitID + M_Bushwacker ] = localize$ (DNL_BUSHWACKER)
+		itemNames [FirstMechChitID + M_Catapult ] = localize$ (DNL_CATAPULT)
+		itemNames [FirstMechChitID + M_CauldronBorn ] = localize$ (DNL_CAULDRONBORN)
+		itemNames [FirstMechChitID + M_Chimera] = localize$ (DNL_CHIMERA)
+		itemNames [FirstMechChitID + M_Cougar ] = localize$ (DNL_COUGAR)
+		itemNames [FirstMechChitID + M_Daishi ] = localize$ (DNL_DAISHI)
+		itemNames [FirstMechChitID + M_Dragon ] = localize$ (DNL_DRAGON)
+		itemNames [FirstMechChitID + M_Fafnir ] = localize$ (DNL_FAFNIR)
+		itemNames [FirstMechChitID + M_Flea ] = localize$ (DNL_FLEA)
+		itemNames [FirstMechChitID + M_Gladiator ] = localize$ (DNL_GLADIATOR)
+		itemNames [FirstMechChitID + M_Hauptmann ] = localize$ (DNL_HAUPTMANN)
+		itemNames [FirstMechChitID + M_Hellhound ] = localize$ (DNL_HELLHOUND)
+		itemNames [FirstMechChitID + M_Hellspawn ] = localize$ (DNL_HELLSPAWN)
+		itemNames [FirstMechChitID + M_Highlander ] = localize$ (DNL_HIGHLANDER)
+		itemNames [FirstMechChitID + M_Hunchback ] = localize$ (DNL_HUNCHBACK)
+		itemNames [FirstMechChitID + M_Kodiak ] = localize$ (DNL_KODIAK)
+		itemNames [FirstMechChitID + M_Loki] = localize$ (DNL_LOKI)
+		itemNames [FirstMechChitID + M_Longbow ] = localize$ (DNL_LONGBOW)
+		itemNames [FirstMechChitID + M_Madcat ] = localize$ (DNL_MADCAT)
+		itemNames [FirstMechChitID + M_Madcat_MKII ] = localize$ (DNL_MADCAT2)
+		itemNames [FirstMechChitID + M_Masakari ] = localize$ (DNL_MASAKARI)
+		itemNames [FirstMechChitID + M_Mauler ] = localize$ (DNL_MAULER)
+		itemNames [FirstMechChitID + M_Novacat ] = localize$ (DNL_NOVACAT)
+		itemNames [FirstMechChitID + M_Osiris ] = localize$ (DNL_OSIRIS)
+		itemNames [FirstMechChitID + M_Owens ] = localize$ (DNL_OWENS)
+		itemNames [FirstMechChitID + M_Puma ] = localize$ (DNL_PUMA)
+		itemNames [FirstMechChitID + M_Raven ] = localize$ (DNL_RAVEN)
+		itemNames [FirstMechChitID + M_Ryoken] = localize$ (DNL_RYOKEN)
+		itemNames [FirstMechChitID + M_Shadowcat ] = localize$ (DNL_SHADOWCAT)
+		itemNames [FirstMechChitID + M_Sunder ] = localize$ (DNL_SUNDER)
+		itemNames [FirstMechChitID + M_Templar ] = localize$ (DNL_TEMPLAR)
+		itemNames [FirstMechChitID + M_Thanatos ] = localize$ (DNL_THANATOS)
+		itemNames [FirstMechChitID + M_Thor ] = localize$ (DNL_THOR)
+		itemNames [FirstMechChitID + M_Uller ] = localize$ (DNL_ULLER)
+		itemNames [FirstMechChitID + M_Uziel ] = localize$ (DNL_UZIEL)
+		itemNames [FirstMechChitID + M_Victor ] = localize$ (DNL_VICTOR)
+		itemNames [FirstMechChitID + M_Vulture ] = localize$ (DNL_VULTURE)
+		itemNames [FirstMechChitID + M_Wolfhound] = localize$ (DNL_WOLFHOUND)
+		itemNames [FirstMechChitID + M_Zeus ] = localize$ (DNL_ZEUS)
+		itemNames [FirstMechChitID + M_Avatar ] = "Avatar"	// mektek
+		itemNames [FirstMechChitID + M_Warhammer ] = "Warhammer"	// mektek
+		itemNames [FirstMechChitID + M_Strider ] = "Strider"	// mektek
+		itemNames [FirstMechChitID + M_Marauder ] = "Marauder"	// mektek
+		itemNames [FirstMechChitID + M_Bloodasp ] = "Blood Asp"	// mektek
+		itemNames [FirstMechChitID + M_UrbanmechIIC ] = "Urban Mech Clan"	// mektek
+		itemNames [FirstMechChitID + M_Stalker ] = "Stalker"	// mektek
+		itemNames [FirstMechChitID + M_Ares ] = "Ares"	// mektek
+		itemNames [FirstMechChitID + M_Urbanmech ] = "Urban Mech IS"	// mektek
+		itemNames [FirstMechChitID + M_BrcticWolf ] = "BrcticWolf"	// Tronix
+
+		itemNames [FirstPersonnelChitID + 0 ] = localize$( IDS_AISATHASTUS )
+		itemNames [FirstPersonnelChitID + 1 ] = localize$( IDS_JAMESBRACKED )
+		itemNames [FirstPersonnelChitID + 2 ] = localize$( IDS_MIRIASSIKESSLER )
+		itemNames [FirstPersonnelChitID + 3 ] =localize$( IDS_JACOBSILVERMAN )
+		itemNames [FirstPersonnelChitID + 4 ] =localize$( IDS_RUDYREYNOLDS )
+		itemNames [FirstPersonnelChitID + 5 ] =localize$( IDS_SARAHMAGLIONI )
+		itemNames [FirstPersonnelChitID + 6 ] =localize$( IDS_DANIEL_BURKE )
+		itemNames [FirstPersonnelChitID + 7 ] =localize$( IDS_ANDREW_MASON )
+		itemNames [FirstPersonnelChitID + 8 ] =localize$( IDS_SHEILA_DEVENS )
+		itemNames [FirstPersonnelChitID + 9 ] =localize$( IDS_MICHAEL_OBANNON )
+		itemNames [FirstPersonnelChitID + 10 ] =localize$( IDS_EMILY_MCCORMICK )
+		itemNames [FirstPersonnelChitID + 11 ] =localize$( IDS_SETH_ANDERS )
+		itemNames [FirstPersonnelChitID + 12 ] =localize$( IDS_ROBERT_ROMERO )
+		itemNames [FirstPersonnelChitID + 13 ] =localize$( IDS_JAKE_CAMERON )
+		itemNames [FirstPersonnelChitID + 14 ] =localize$( IDS_CHARLES_HARDING )
+		itemNames [FirstPersonnelChitID + 15 ] =localize$( IDS_CYNTHIA_ROBINSON )
+		itemNames [FirstPersonnelChitID + 16 ] =localize$( IDS_KENT_BARLOW )
+		itemNames [FirstPersonnelChitID + 17 ] =localize$( IDS_DERRICK_MASTERSON )
+		itemNames [FirstPersonnelChitID + 18 ] =localize$( IDS_JOHNNY_JONES )
+		itemNames [FirstPersonnelChitID + 19 ] =localize$( IDS_ERIK_MACMARTIN )
+		itemNames [FirstPersonnelChitID + 20 ] =localize$( IDS_AMBER_WORTHY )
+		itemNames [FirstPersonnelChitID + 21 ] =localize$( IDS_STEVEN_EDWARDS )
+
+		// consts
+		int 		MARKET_INVENTORY_LIST_ID			= 800
+		int 		PLAYER_INVENTORY_LIST_ID			= 801
+		int 		TRANSACTION_WINDOW_ID				= 802
+
+		int 		DRAGDROP_INITIATED					= 1000
+		int 		DRAGDROP_IN_PROGRESS				= 1001
+		int 		DRAGDROP_RESOLVING					= 1002
+		int 		INSTANTANEOUS_TRANSFER_INITIATED	= 1003
+		int 		TRANSACTION_COMPLETE				= 1004
+		int			TRANSACTION_CANCELLED				= 1005
+		int 		TRANSACTION_MODE_BUY 				= 1006
+		int 		TRANSACTION_MODE_SELL				= 1007
+		int 		NONE								= 0
+
+		// Transaction completion variables
+		int			gTransactionOriginList			= NONE 	// MARKET_INVENTORY_LIST_ID, PLAYER_INVENTORY_LIST_ID, TRANSACTION_WINDOW_ID
+		int			gTransactionTargetList          = NONE 	// MARKET_INVENTORY_LIST_ID, PLAYER_INVENTORY_LIST_ID, TRANSACTION_WINDOW_ID
+		int			gTransactionProgress			= NONE 	// DRAGDROP_INITIATED, DRAGDROP_IN_PROGRESS, INSTANTANEOUS_TRANSFER_INITIATED, TRANSACTION_COMPLETE
+		int			gTransactionMode 				= NONE	// TRANSACTION_MODE_BUY, TRANSACTION_MODE_SELL
+		int			gTransactionItemID				= -1
+		int			gTransactionListSize			= 0
+		int			gPlayerInventoryDirty 			= 1
+		int			gMarketInventoryDirty 			= 1
+		int			gTransactionInventoryDirty 		= 1
+		int			gIsLastMech                     = 0
+
+		pane p_background = GPATH "freemarket-background.tga"
+
+		object o_target_drop_mask = drop_mask
+		object o_target_drop_mask2 = drop_mask
+		o_target_drop_mask.message = DRAGDROP_RESOLVING
+		o_target_drop_mask2.message = DRAGDROP_RESOLVING
+		object o_default_drop_mask = drop_mask
+		o_default_drop_mask.message = TRANSACTION_CANCELLED
+		o_default_drop_mask.location = 0, 0, DROP_MASK_Z-1
+
+		object o_mainui = mainui
+		initialize(o_mainui)
+		activate(o_mainui)
+		focus(o_mainui)
+		font3d regfont = FPATH localize$(IDS_F_ML_LABEL)
+		font3d boldfont= FPATH localize$(IDS_F_ML_DATA)
+	
+		int lineStartIndex
+		int lineEndIndex
+		int previousWordBreak
+		int lastLineWidth
+		int costWidth
+		int colwidth
+		int nToSpew
+    }
+
+
+	// This is where all transactions are completed, callbacks made, etc. All other code should set global flags
+	// 		and state defined in the GUI_CREATE section such that this code can do its thing...
+	GUI_EXECUTE
+	{
+
+		if ( ! exists( @infobox@ ) ) //just make sure it starts
+		{
+			script_run MB_SPATH "infobox.script" , 0x1000
+		}
+
+
+		// Figure out what the target region should be:
+		// This is set up such that the gTransactionTargetList will only be set if a transaction is valid
+		if ( gTransactionProgress == DRAGDROP_INITIATED || gTransactionProgress == INSTANTANEOUS_TRANSFER_INITIATED )
+		{
+			// make sure target list is not set already:
+			gTransactionTargetList = NONE
+			if ( gTransactionOriginList == TRANSACTION_WINDOW_ID )
+			{
+				if ( gTransactionMode == TRANSACTION_MODE_BUY )
+				{
+					gTransactionTargetList = MARKET_INVENTORY_LIST_ID
+				}
+				else if ( gTransactionMode == TRANSACTION_MODE_SELL )
+				{
+					gTransactionTargetList = PLAYER_INVENTORY_LIST_ID
+				}
+			}
+
+			if ( gTransactionOriginList == PLAYER_INVENTORY_LIST_ID && (gTransactionMode == TRANSACTION_MODE_SELL || gTransactionMode == NONE) )
+			{
+				gTransactionTargetList = TRANSACTION_WINDOW_ID
+			}
+
+			if ( gTransactionOriginList == MARKET_INVENTORY_LIST_ID && (gTransactionMode == TRANSACTION_MODE_BUY || gTransactionMode == NONE) )
+			{
+				gTransactionTargetList = TRANSACTION_WINDOW_ID
+			}
+		}
+
+		// Create a "drop mask", which is an invisible region covering the screen which will
+		//	send a message if a mouse event occurs over it (specifically a 'mouse button released' message)
+		if ( gTransactionProgress == DRAGDROP_INITIATED )
+		{
+			gTransactionProgress = DRAGDROP_IN_PROGRESS
+			o_default_drop_mask.region = 0, 0 to  getresx(), getresy()
+			// Create the mask region over one of the three target windows
+			if ( gTransactionTargetList == PLAYER_INVENTORY_LIST_ID )
+			{
+				o_target_drop_mask.location = o_mainui.o_playerInventory.o_playerList.o_inventoryList.location
+				o_target_drop_mask.location.z = DROP_MASK_Z
+				o_target_drop_mask.region = o_mainui.o_playerInventory.o_playerList.o_inventoryList.region
+			}
+
+			if ( gTransactionTargetList == MARKET_INVENTORY_LIST_ID )
+			{
+				o_target_drop_mask.location = o_mainui.o_marketInventory.o_marketList.o_inventoryList.location
+				o_target_drop_mask.location.z = DROP_MASK_Z
+				o_target_drop_mask.region = o_mainui.o_marketInventory.o_marketList.o_inventoryList.region
+			}
+
+			if ( gTransactionTargetList == TRANSACTION_WINDOW_ID )
+			{
+				o_target_drop_mask.location = o_mainui.o_transaction_window.o_transactionList.location
+				o_target_drop_mask.location.z = DROP_MASK_Z
+				o_target_drop_mask.region = 0, 0 to o_mainui.o_transaction_window._width, o_mainui.o_transaction_window.o_transactionList.max_displayed
+
+				if ( gTransactionOriginList == MARKET_INVENTORY_LIST_ID )
+				{
+					o_target_drop_mask2.location = o_mainui.o_playerInventory.o_playerList.o_inventoryList.location
+					o_target_drop_mask2.location.z = DROP_MASK_Z
+					o_target_drop_mask2.region = o_mainui.o_playerInventory.o_playerList.o_inventoryList.region
+				}
+				else
+				{
+					o_target_drop_mask2.location = o_mainui.o_marketInventory.o_marketList.o_inventoryList.location
+					o_target_drop_mask2.location.z = DROP_MASK_Z
+					o_target_drop_mask2.region = o_mainui.o_marketInventory.o_marketList.o_inventoryList.region
+				}
+			}
+			activate( o_target_drop_mask )
+			activate( o_target_drop_mask2 )
+			activate( o_default_drop_mask )
+		}
+
+		if ( gTransactionProgress == TRANSACTION_CANCELLED )
+		{
+			gTransactionProgress 	= NONE
+			gTransactionOriginList 	= 0
+			gTransactionTargetList  = 0
+			gTransactionItemID		= -1
+			deactivate( o_target_drop_mask )
+			deactivate( o_target_drop_mask2 )
+			deactivate( o_default_drop_mask )
+		}
+
+		// Code after this point is run if the player has dropped an icon on the proper drop spot, or double-clicked an icon
+		if ( gTransactionProgress == DRAGDROP_RESOLVING || gTransactionProgress == INSTANTANEOUS_TRANSFER_INITIATED )
+		{
+			deactivate( o_target_drop_mask )
+			deactivate( o_target_drop_mask2 )
+			deactivate( o_default_drop_mask )
+
+			if ( gTransactionOriginList == PLAYER_INVENTORY_LIST_ID && gTransactionTargetList == TRANSACTION_WINDOW_ID)
+			{
+				callback ($$FM_CallbackHandler$$, FMOfferToSellItem, gTransactionItemID, gIsLastMech, gTransactionListSize )
+				//
+				if (gIsLastMech == 1)
+				{
+					oError	= o_fm_ErrorScreen
+					oError.location = 0,0, BACKGROUND_Z + 100
+					oError.error_header	= LOCALIZE$(IDS_ERROR_BM_LASTMECH)
+					oError.error_message= LOCALIZE$(IDS_ERROR_BM_LASTMECH_MSG)
+					initialize(oError)
+					activate(oError)
+				}
+				else
+					play addWeapon,1
+
+				// Set transaction mode
+				if ( gTransactionListSize > 0 )
+					gTransactionMode = TRANSACTION_MODE_SELL
+				else
+					gTransactionMode = NONE
+
+				gPlayerInventoryDirty = 1
+				gTransactionInventoryDirty = 1
+			}
+
+			if ( gTransactionOriginList == MARKET_INVENTORY_LIST_ID && gTransactionTargetList == TRANSACTION_WINDOW_ID )
+			{
+				callback ($$FM_CallbackHandler$$, FMOfferToBuyItem, gTransactionItemID, gTransactionListSize )
+
+				// Set transaction mode
+				if ( gTransactionListSize > 0 )
+					gTransactionMode = TRANSACTION_MODE_BUY
+				else
+					gTransactionMode = NONE
+
+				play addWeapon,1
+
+				gMarketInventoryDirty = 1
+				gTransactionInventoryDirty = 1
+			}
+
+			if ( gTransactionOriginList == TRANSACTION_WINDOW_ID )
+			{
+				gTransactionInventoryDirty = 1
+				if ( gTransactionTargetList == MARKET_INVENTORY_LIST_ID )
+				{
+					callback ($$FM_CallbackHandler$$, FMCancelOfferToBuyItem, gTransactionItemID, gTransactionListSize )
+					gMarketInventoryDirty = 1
+				}
+				if ( gTransactionTargetList == PLAYER_INVENTORY_LIST_ID )
+				{
+					callback ($$FM_CallbackHandler$$, FMCancelOfferToSellItem, gTransactionItemID, gTransactionListSize )
+					gPlayerInventoryDirty = 1
+				}
+
+				// Set transaction mode
+				if ( gTransactionListSize == 0 )
+					gTransactionMode = NONE
+
+			}
+			// Indicate end of transaction
+			gTransactionProgress = NONE
+		}
+	}
+
+
+	GUI_INIT
+	{
+	}
+
+	GUI_DRAW
+	{
+		// render p_background, 0, 0
+	}
+}
+
+//////////////////////// MAIN UI //////////////////////////////////
+
+mainui
+{
+
+	GUI_CREATE
+	{
+
+		priority = 0x0001
+		pane p_background = GPATH "freemarket-background.tga" // -dsilverman
+		position bg_pos			= 0, 0, 0 // -dsilverman
+		object o_playerInventory = player_inventory
+		object o_marketInventory = market_inventory
+		object o_transaction_window = transaction_window
+
+		object o_close_confirm
+
+		o_playerInventory.objectLocation = 10, 0, BACKGROUND_Z
+		o_playerInventory.id = PLAYER_INVENTORY_LIST_ID
+		initialize( o_playerInventory )
+
+
+		o_marketInventory.objectLocation = 453, 0, BACKGROUND_Z
+		o_marketInventory.id = MARKET_INVENTORY_LIST_ID
+		initialize( o_marketInventory )
+
+		o_transaction_window._origin = 332, 28, 20
+		o_transaction_window._width  = 108
+		o_transaction_window._height = 246
+		o_transaction_window.id = TRANSACTION_WINDOW_ID
+		initialize( o_transaction_window )
+
+		position navButtons = 653, 554, BACKGROUND_Z + 1
+
+		//Menu Navigation Buttons
+		object o_CloseButton            			= s_multistatepane
+		o_CloseButton.id							= 302
+		o_CloseButton.file              			= WPATH "button_reg_135x23_4state.tga"
+		o_CloseButton.text              			= localize$(IDS_CLOSE)
+		o_CloseButton.nRollover         			= 0
+		o_CloseButton.total_states      			= 4
+		o_CloseButton.location          			= navButtons.x, navButtons.y, navButtons.z
+		o_CloseButton.gFont3d           			= FPATH microstyle10boldextStr
+//		o_CloseButton.gFont3d           			= FPATH localize$(IDS_F_ML_BUTTON)
+		initialize (o_CloseButton)
+
+		object o_item_pointer = item_pointer
+		o_item_pointer.location = 0,0,300
+		o_item_pointer.priority = 0x1556
+		initialize( o_item_pointer )
+
+		// For listbox
+		int showinfo
+		int sel_weapon
+		int sel_list_id
+
+
+	}
+
+	GUI_EXECUTE
+	{
+	}
+
+	GUI_ACTIVATE
+	{
+		activate (o_item_pointer)
+	}
+
+	GUI_DEACTIVATE
+	{
+		deactivate (o_item_pointer)
+	}
+
+	GUI_DRAW
+	{
+		render p_background, bg_pos//-dsilverman
+
+		//comstar title text
+		print3d_attributes = smallfont, 0xffFFFFFF, 1, 1, 1, 0, 0, just_left
+		print3d_margins = 15, 516 to 241,530
+		print3d_position = 15, 516
+		print3d localize$(DNL_COMSTAR)
+	}
+
+
+	GUI_MAILBOX
+	{
+		int doClose = false
+		switch (sender)
+		{
+			case o_close_confirm:
+				{
+					if getmessage() == 0	// DO CLOSE
+					{
+						doClose = true
+					}
+				}
+			break
+			case o_CloseButton:
+				{
+					if (o_transaction_window.o_transactionList.list_size != 0)
+					{
+						o_close_confirm                 = o_ErrorScreen
+						o_close_confirm.error_header    = localize$(IDS_FM_CONFIRM_CLOSE_HEADER)
+						o_close_confirm.error_message   = localize$(IDS_FM_CONFIRM_CLOSE_MESSAGE)
+						o_close_confirm.button_mode     = TWO_BUTTON_MODE
+						o_close_confirm.buttonText[0]   = localize$(IDS_GN_YES)
+						o_close_confirm.buttonText[1]   = localize$(IDS_GN_NO)
+						initialize(o_close_confirm)
+						activate(o_close_confirm)
+
+						focus (o_close_confirm.mbutton[1])
+
+						return
+					}
+					else
+					{
+						doClose = true
+					}
+				}
+			break
+		}
+
+		if (doClose == 1)
+		{
+			if exists(@infobox@)
+			{
+				script_end "infobox.script"
+			}
+			play btnTriggeredSound,1
+
+			callback ($$Shell_CallbackHandler$$, ShellClearBlackMarketScreen)
+			@mouse@pointer.showMousePointer = 1
+			@SHELL@currentScreen = @SHELL@lastScreen[@SHELL@lastScreenDepth]
+			@SHELL@lastScreenDepth--
+
+			if ( @SHELL@currentScreen == MECHBAY_SCREEN )
+			{
+				callback($$Shell_CallbackHandler$$, ShellInitCampaignMechLab)
+			}
+
+			unfocus
+		}
+
+	}
+}
+
+category_filter
+{
+	GUI_CREATE
+	{
+		int 			id
+		position		objectLocation
+		int 			list_size
+		string 			list_members[6]
+		int 			loopIndex
+		int				lastSelected = 0
+
+
+		object o_listbox				= s_droplistbox
+		o_listbox.boxFont3d				= FPATH localize$(IDS_F_ML_LABEL)
+		o_listbox.itemHeight			= 23
+		o_listbox.itemWidth				= 269
+		o_listbox.arrowHeight			= 15
+		o_listbox.label					= localize$(IDS_ML_WP_LIST)
+		o_listbox.labelFont3d			= FPATH localize$(IDS_F_ML_LABEL)
+		o_listbox.offsetLabel			= -1, -17
+		o_listbox.max_displayed			= 5
+	}
+
+	GUI_EXECUTE
+	{
+		if ( o_listbox.nselected != lastSelected )
+		{
+			lastSelected = o_listbox.nselected
+			parent._dirty = 1
+		}
+	}
+
+	GUI_INIT
+	{
+		o_listbox.id					= id
+		o_listbox.location				= objectLocation
+		o_listbox.list_size				= list_size
+
+		for ( loopIndex=0; loopIndex<list_size; loopIndex++)
+		{
+			o_listbox.list_item[ loopIndex ] = list_members[ loopIndex ]
+		}
+		initialize( o_listbox )
+		activate( o_listbox )
+	}
+
+	GUI_ACTIVATE
+	{
+	}
+	GUI_DEACTIVATE
+	{
+	}
+	GUI_DRAW
+	{
+	}
+	GUI_MAILBOX
+	{
+	}
+}
+
+inventory_list
+{
+	GUI_CREATE
+	{
+		priority = 0x1100
+		// "public"
+		position 			objectLocation		= 0, 0, BACKGROUND_Z + 10
+		int				nOfCategories	= 0
+		int 				nOfItems 		= 0
+		int 				objectWidth		= 310
+		int 				objectHeight		= 535
+		int				id
+
+		// "private"
+		int 				_dirty			= 1
+		int 				callbackType		= 0
+		int 				initialized		= 0
+
+		// 'const'
+		int 		PAGE_ALL_WEAPONS			= 0
+		int 		PAGE_BEAM_WEAPONS			= 1
+		int 		PAGE_BALLISTIC_WEAPONS			= 2
+		int 		PAGE_MISSILE_WEAPONS			= 3
+		int 		PAGE_ALL_CHASSIS			= 4
+		int 		PAGE_LIGHT_CHASSIS			= 5
+		int 		PAGE_MEDIUM_CHASSIS			= 6
+		int 		PAGE_HEAVY_CHASSIS			= 7
+		int 		PAGE_ASSAULT_CHASSIS			= 8
+		int 		PAGE_PERSONNEL				= 9
+
+		// INVENTORY_LIST_SIZE_MAX is computed as approximate sum of all weapons + personnel + chassis + safety buffer = 44+70+20+50=200
+		int 			INVENTORY_LIST_SIZE_MAX		= 200
+		bitmap_create black 					= 60,120
+
+		// "private"
+		object o_label						= static_label
+		object o_tabs						= tabbed_pages
+		object o_categoryFilter					= category_filter
+		object o_inventoryList					= s_mc_listbox_blackMarket
+
+		// List init arrays
+		int ids[INVENTORY_LIST_SIZE_MAX]
+		int inventory_count [INVENTORY_LIST_SIZE_MAX]
+		float trade_value [INVENTORY_LIST_SIZE_MAX]
+		float salvage_damage[INVENTORY_LIST_SIZE_MAX]
+		float salvage_range[INVENTORY_LIST_SIZE_MAX]
+		float salvage_heat[INVENTORY_LIST_SIZE_MAX]
+		float salvage_weapon_recycle[INVENTORY_LIST_SIZE_MAX]
+		float offering_damage[INVENTORY_LIST_SIZE_MAX]
+		float offering_range[INVENTORY_LIST_SIZE_MAX]
+		float offering_heat[INVENTORY_LIST_SIZE_MAX]
+		float offering_weapon_recycle[INVENTORY_LIST_SIZE_MAX]
+		float market_damage[INVENTORY_LIST_SIZE_MAX]
+		float market_range[INVENTORY_LIST_SIZE_MAX]
+		float market_heat[INVENTORY_LIST_SIZE_MAX]
+		float market_weapon_recycle[INVENTORY_LIST_SIZE_MAX]
+		float acquiring_damage[INVENTORY_LIST_SIZE_MAX]
+		float acquiring_range[INVENTORY_LIST_SIZE_MAX]
+		float acquiring_heat[INVENTORY_LIST_SIZE_MAX]
+		float acquiring_weapon_recycle[INVENTORY_LIST_SIZE_MAX]
+
+		//
+		o_inventoryList.boxFont3d			= FPATH localize$(IDS_F_ML_LABEL)		//MUST BE INITIALIZED
+
+		o_inventoryList.NUM_OF_COLUMNS			= 4										//MUST BE INITIALIZED
+		o_inventoryList.column_header_height		= 20
+		o_inventoryList.arrowheight			= 20
+		// This is the display height :
+		o_inventoryList.max_displayed			= objectHeight - 208
+		o_inventoryList.uniform_item_height		= 0
+		//
+		o_inventoryList.labelFont3d			= FPATH localize$(IDS_F_ML_LABEL)		//CAN BE INITIALIZED
+		o_inventoryList.offsetLabel			= 0,-18									//CAN BE INITIALIZED offsetLabel of text from button = 0,-25
+		o_inventoryList.buttonwidth			= 16									//CAN BE INITIALIZED
+		o_inventoryList.first_delay			= 10									//time delay value n/60; for the buttons
+		o_inventoryList.second_delay			= 3										//time delay value n/60; for the buttons
+
+		int 		inventoryPageSelected 		= PAGE_ALL_WEAPONS
+		int			inventoryPageCallback 	= FMDataSetupPlayerWeaponChits
+	}
+
+
+	GUI_EXECUTE
+	{
+		if ( _dirty == 1 )
+		{
+			// Figure out what the active inventory display should be
+			if ( o_tabs.on_tab == 0 )
+			{
+				// Setup category list :
+				o_categoryFilter.list_size = 1
+				o_categoryFilter.list_members[0] = localize$( IDS_PERSONNEL )
+				initialize( o_categoryFilter )
+
+				// Personnel
+				if ( id == MARKET_INVENTORY_LIST_ID )
+					inventoryPageCallback = FMDataSetupMarketPersonnelChits
+				else
+					inventoryPageCallback = FMDataSetupPlayerPersonnelChits
+
+				inventoryPageSelected = PAGE_PERSONNEL
+			}
+			if ( o_tabs.on_tab == 1 )
+			{
+				// Chassis
+				// Setup category list :
+				o_categoryFilter.list_size = 5
+				o_categoryFilter.list_members[0] 	= localize$( IDS_ALL_MECHS )
+				o_categoryFilter.list_members[1] 	= localize$( IDS_LIGHT_MECHS )
+				o_categoryFilter.list_members[2] 	= localize$( IDS_MEDIUM_MECHS )
+				o_categoryFilter.list_members[3] 	= localize$( IDS_HEAVY_MECHS )
+				o_categoryFilter.list_members[4] 	= localize$( IDS_ASSAULT_MECHS )
+				initialize( o_categoryFilter )
+				activate( o_categoryFilter )
+
+				if ( id == MARKET_INVENTORY_LIST_ID )
+					inventoryPageCallback = FMDataSetupMarketMechChits
+				else
+					inventoryPageCallback = FMDataSetupPlayerMechChits
+
+				inventoryPageSelected = PAGE_ALL_CHASSIS + o_categoryFilter.o_listbox.nselected
+				inventoryPageCallback = inventoryPageCallback + o_categoryFilter.o_listbox.nselected
+			}
+			if ( o_tabs.on_tab == 2 )
+			{
+				// Weapons
+				// Setup category list :
+				o_categoryFilter.list_size = 4
+				o_categoryFilter.list_members[0] 	= localize$( IDS_ML_BM_LISTALL )
+				o_categoryFilter.list_members[1] 	= localize$( IDS_ML_WP_LISTBEAM )
+				o_categoryFilter.list_members[2] 	= localize$( IDS_ML_WP_LISTBALLISTIC )
+				o_categoryFilter.list_members[3] 	= localize$( IDS_ML_WP_LISTMISSILE )
+				initialize( o_categoryFilter )
+				activate( o_categoryFilter )
+
+				if ( id == MARKET_INVENTORY_LIST_ID )
+					inventoryPageCallback = FMDataSetupMarketWeaponChits
+				else
+					inventoryPageCallback = FMDataSetupPlayerWeaponChits
+
+				inventoryPageSelected = PAGE_ALL_WEAPONS + o_categoryFilter.o_listbox.nselected
+				inventoryPageCallback = inventoryPageCallback + o_categoryFilter.o_listbox.nselected
+			}
+			spew "inventoryPageSelected = " conv$( inventoryPageSelected )
+			spew "inventoryPageCallback = " conv$( inventoryPageCallback )
+
+			callback ($$FM_CallbackHandler$$, inventoryPageCallback, ids[], trade_value[], salvage_damage[], salvage_range[], salvage_heat[], salvage_weapon_recycle[], inventory_count[], mechinfo.mechWeightClassArray[], nOfItems, INVENTORY_LIST_SIZE_MAX )
+
+			int scrollPosition = o_inventoryList.top_of_list
+			if (scrollPosition<0)
+			{
+				scrollPosition = 0; // bug fix # 6133
+			}
+
+			o_inventoryList.list_size  				= nOfItems
+			int counter	= 0
+			int w
+
+ 			print3d_attributes = o_inventoryList.boxFont3d, o_inventoryList.boxTextColor,1,1,1,0,0,o_inventoryList.column[1].fontAlignment
+			lprint3d_margins = o_inventoryList.column[1].location.x + o_inventoryList.offsetx[1],0 to getresx(),getresy()
+			lprint3d_position = o_inventoryList.column[1].location.x + o_inventoryList.offsetx[1],0
+			colwidth = o_inventoryList.column[1].o_header.buttonwidth
+
+			nToSpew = 8
+			for w = 0; w < nOfItems; w++
+			{
+				// Filter out the mech chassis classes
+				if ( ids[w] > -1 )
+				{
+					// The following 30 or so kludgy lines accomplish the following:
+					// When the Weapons list box displays the names of the weapons in col 1 (next to the icon),
+					// it wraps the name if it over-extends the alloted margins. Since I want the cost of the
+					// weapon to appear on the next line below the name, I need to know if the code is going
+					// to wrap the text automatically, or if I need to put in a \n myself. I do this by
+					// iterating through the text word by word, and check to see if the width of the final line of text is greater
+					// than the column width (after appending the cost string). If it is, I don't add the line break.
+					// Note: if something goes wrong, the commented spew are very helpful in viewing what the code is actually doing.
+					// set nToSpew to the list item index that is not printing properly.
+					lineStartIndex = 0
+					lineEndIndex = 0
+
+					//if ( w==nToSpew )
+					//{
+					//	spew "(" itemnames[ids[w]] ")", "l=" conv$( length$( itemnames[ids[w]] ) )
+					//	spew "columnWidth = " conv$( o_inventoryList.column[1].o_header.buttonwidth )
+					//}
+
+					while ( lineEndIndex < length$( itemnames[ids[w]] ) )
+					{
+						previousWordBreak = lineEndIndex
+						// find next wordbreak:
+						lineEndIndex++
+						while ( lineEndIndex < length$( itemnames[ids[w]] ) && !equal$( mid$( itemnames[ids[w]], lineEndIndex-1, lineEndIndex ), " " ) )
+						{
+							lineEndIndex++
+						}
+
+						//if ( w==nToSpew )
+						//{
+						//	spew ">" mid$( itemnames[ids[w]], lineStartIndex, lineEndIndex ) "< " conv$( lineStartIndex ) "," conv$( lineEndIndex ) ":" conv$( getprint3dwidth( mid$( itemnames[ids[w]], lineStartIndex, lineEndIndex ) ) )
+						//	spew "li=" conv$( lineEndIndex )
+						//}
+
+						if ( getprint3dwidth( mid$( itemnames[ids[w]], lineStartIndex, lineEndIndex ) ) >= o_inventoryList.column[1].o_header.buttonwidth-1 )
+						{
+							lineStartIndex = previousWordBreak
+						}
+					}
+
+					lastLineWidth = getprint3dwidth( mid$( itemnames[ids[w]], lineStartIndex, lineEndIndex ) ) //  " " conv$( trade_value[w] ) )
+					costWidth = getprint3dwidth( conv$( trade_value[w] ) )
+
+					//if ( w==nToSpew )
+					//{
+					//	spew ">" mid$( itemnames[ids[w]], lineStartIndex, lineEndIndex ) "< " conv$( lineStartIndex ) "," conv$( lineEndIndex ) ":" conv$( getprint3dwidth( mid$( itemnames[ids[w]], lineStartIndex, lineEndIndex ) ) )
+					//	spew "print3dWidth=" conv$( lastLineWidth ) ", colWidth = " conv$( colwidth )
+					//	spew "{" mid$( itemnames[ids[w]], lineStartIndex, lineEndIndex ) " " conv$( trade_value[w] ) "}"
+					//}
+
+
+					if ( lastLineWidth + costWidth >= colwidth )
+					{
+						o_inventoryList.column[1].list_item[counter] = itemnames[ids[w]] " " conv$( trade_value[w] )
+					}
+					else
+					{
+						o_inventoryList.column[1].list_item[counter] = itemnames[ids[w]] "\n" conv$( trade_value[w] )
+					}
+                    
+					o_inventoryList.column[0].list_item[counter]	= conv$(ids[w])
+					if ( trade_value[w] > 0 )
+						o_inventoryList.column[1].list_item[counter]	= itemnames[ids[w]] "\n" fmtcommanum$(trade_value[w])
+					else
+						o_inventoryList.column[1].list_item[counter]	= itemnames[ids[w]]
+
+					o_inventoryList.column[3].list_item[counter]	= fmtcommanum$(inventory_count[w])
+					o_inventoryList.list_order[counter]				= counter
+					counter++
+				}
+				else
+				{
+					o_inventoryList.list_size--
+				}
+			}
+
+			// set up the icons, they need to be weapons and Mechs
+			for ( w =0; w< o_inventoryList.list_size; w++ )
+			{
+				if ( ids[w]  < FirstMechChitID ) //it is a weapon
+				{
+					o_inventoryList.column[0].list_icon[w] = MB_GPATH "weapon_" o_inventoryList.column[0].list_item[w] ".tga",1,volatile
+					alphamode (o_inventoryList.column[0].list_icon[w]) = am_alpha_alphainvalpha
+				}
+				else
+				{
+					if ( ids[w] < FirstPersonnelChitID ) //its a Mech
+					{
+						o_inventoryList.column[0].list_icon[w] = MB_GPATH "mech_" conv$(ids[w]- FirstMechChitID) ".tga",1,volatile
+						alphamode (o_inventoryList.column[0].list_icon[w]) = am_alpha_alphainvalpha
+					}
+					else
+					{
+						// its a person
+						o_inventoryList.column[0].list_icon[w] = MB_GPATH "personnel_" conv$(ids[w]- FirstPersonnelChitID) ".tga",1,volatile
+						alphamode (o_inventoryList.column[0].list_icon[w]) = am_alpha_alphainvalpha
+						o_inventoryList.column[3].list_item[w] =  "-"
+					}
+				}
+			}
+
+			initialize (o_inventoryList)
+
+			o_inventoryList.column[0].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+			o_inventoryList.column[1].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+			o_inventoryList.column[2].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+			o_inventoryList.column[3].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+
+			o_inventoryList.column[0].o_header.s_text	= localize$(IDS_ML_ITEM)
+			o_inventoryList.column[1].o_header.s_text	= localize$(IDS_ML_WP_NAME)
+			o_inventoryList.column[2].o_header.s_text	= localize$(IDS_ML_VALUE)
+			o_inventoryList.column[3].o_header.s_text	= "#"
+
+			mail(-4, scrollPosition, o_inventoryList)
+
+			_dirty = 0;
+		}
+	}
+
+	GUI_INIT
+	{
+		o_label._origin 					= objectLocation.x, objectLocation.y + 32, objectLocation.z + 10
+		o_label._width						= objectWidth
+		o_label._bold 						= 0
+	    o_label._scale						= 1//2
+		initialize( o_label )
+
+		o_tabs.objectLocation 					= objectLocation.x, objectLocation.y+60, objectLocation.z + 10
+		o_tabs._width 						= objectWidth
+		o_tabs._height 						= objectHeight-100
+		initialize( o_tabs )
+		activate( o_tabs )
+
+		o_categoryFilter.objectLocation				= objectLocation.x + 10, objectLocation.y + 125, objectLocation.z + 10
+		o_categoryFilter.list_size				= nOfCategories
+ 		o_categoryFilter.id	 				= id
+		initialize( o_categoryFilter )
+		activate( o_categoryFilter )
+
+
+		o_inventoryList.location				= objectLocation.x + 10, objectLocation.y + 150, objectLocation.z + 10
+		o_inventoryList.itemWidth				= objectWidth - 42
+		o_inventoryList.itemHeight				= 1
+		o_inventoryList.itemHeight_padding			= 15
+		o_inventoryList.list_size  				= nOfItems
+		o_inventoryList.column[0].location.x			= 5
+		o_inventoryList.column[1].location.x			= 65
+		o_inventoryList.column[2].location.x			= 225
+		o_inventoryList.column[3].location.x			= 225
+		o_inventoryList.column[0].fontcolor			= packcolor(255,0,0,255)
+		o_inventoryList.column[1].fontcolor			= packcolor(255,255,255,255)
+		o_inventoryList.column[2].fontcolor			= packcolor(255,255,255,255)
+		o_inventoryList.column[3].fontcolor			= packcolor(255,255,255,255)
+		o_inventoryList.offsetx[1]				= 5
+		o_inventoryList.column[0].icondisplays	= true
+		o_inventoryList.column[0].numeric			= true
+		o_inventoryList.column[2].numeric			= true
+		o_inventoryList.column[3].numeric			= true
+		o_inventoryList.column[0].fontAlignment			= 0
+		o_inventoryList.column[1].fontAlignment			= just_left
+		o_inventoryList.column[2].fontAlignment			= just_right
+		o_inventoryList.column[3].fontAlignment			= just_center
+		o_inventoryList.id					= id
+
+		initialize( o_inventoryList )
+
+		o_inventoryList.column[0].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+		o_inventoryList.column[1].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+		o_inventoryList.column[2].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+		o_inventoryList.column[3].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+
+		o_inventoryList.column[0].o_header.s_text	= localize$(IDS_ML_ITEM)
+		o_inventoryList.column[1].o_header.s_text	= localize$(IDS_ML_WP_NAME)
+		o_inventoryList.column[2].o_header.s_text	= localize$(IDS_ML_VALUE)
+		o_inventoryList.column[3].o_header.s_text	= "#"
+
+		// region = 0, 0 to objectWidth, o_inventoryList.max_displayed
+	}
+	GUI_ACTIVATE
+	{
+	}
+	GUI_DEACTIVATE
+	{
+	}
+	GUI_DRAW
+	{
+	}
+	GUI_MAILBOX
+	{
+	}
+}
+
+transaction_window
+{
+	GUI_CREATE
+	{
+		// "public"
+		position 	_origin
+		int 		_width
+		int 		_height
+		int		id 			= TRANSACTION_WINDOW_ID
+		int		listHeight		= 281//300
+		int		_dirty 			= 1
+
+		int 		showinfo
+		int 		sel_weapon
+		int 		sel_list_id
+
+		// "private"
+		object 		rct_1 			= static_frame
+		object 		lbl_CurrentAccount  	= static_label
+		object 		lbl_Balance         	= static_label
+		object 		lbl_CBills          	= static_label
+		object 		lbl_PlayerBalance      	= static_label  // The actual current balance
+		object 		lbl_SellBuyFor      	= static_label
+		object 		lbl_CBills2          	= static_label
+		object 		lbl_TransactionTotal  	= static_label // The cost of the current transaction (+/-)
+		object 		o_transactionList		= s_mc_listbox_blackMarket
+		object 		rct_2 			= static_frame
+		object 		btn_sell		= s_multistatepane
+		object 		btn_buy        		= s_multistatepane
+		object 		btn_clear        	= s_multistatepane
+
+		int 		nOfItems
+
+		// "Const"
+		int 				INVENTORY_LIST_SIZE_MAX = 200
+		bitmap_create 		black				= 60,120
+
+		// List init arrays
+		int ids[INVENTORY_LIST_SIZE_MAX]
+		int inventory_count [INVENTORY_LIST_SIZE_MAX]
+		float trade_value [INVENTORY_LIST_SIZE_MAX]
+		float salvage_damage[INVENTORY_LIST_SIZE_MAX]
+		float salvage_range[INVENTORY_LIST_SIZE_MAX]
+		float salvage_heat[INVENTORY_LIST_SIZE_MAX]
+		float salvage_weapon_recycle[INVENTORY_LIST_SIZE_MAX]
+		float offering_damage[INVENTORY_LIST_SIZE_MAX]
+		float offering_range[INVENTORY_LIST_SIZE_MAX]
+		float offering_heat[INVENTORY_LIST_SIZE_MAX]
+		float offering_weapon_recycle[INVENTORY_LIST_SIZE_MAX]
+		float market_damage[INVENTORY_LIST_SIZE_MAX]
+		float market_range[INVENTORY_LIST_SIZE_MAX]
+		float market_heat[INVENTORY_LIST_SIZE_MAX]
+		float market_weapon_recycle[INVENTORY_LIST_SIZE_MAX]
+		float acquiring_damage[INVENTORY_LIST_SIZE_MAX]
+		float acquiring_range[INVENTORY_LIST_SIZE_MAX]
+		float acquiring_heat[INVENTORY_LIST_SIZE_MAX]
+		float acquiring_weapon_recycle[INVENTORY_LIST_SIZE_MAX]
+
+
+	}
+
+	GUI_EXECUTE
+	{
+		float totalTradeValue = 0.0
+		if ( gTransactionInventoryDirty || _dirty == 1 )
+		{
+			if ( gTransactionMode == TRANSACTION_MODE_BUY )
+			{
+				btn_sell.state = BUTTON_DISABLED
+				btn_buy.state = BUTTON_ENABLED
+				btn_clear.state = BUTTON_ENABLED
+			}
+			if ( gTransactionMode == TRANSACTION_MODE_SELL )
+			{
+				btn_sell.state = BUTTON_ENABLED
+				btn_buy.state = BUTTON_DISABLED
+				btn_clear.state = BUTTON_ENABLED
+			}
+			if ( gTransactionMode == NONE )
+			{
+				btn_sell.state = BUTTON_DISABLED
+				btn_buy.state = BUTTON_DISABLED
+				btn_clear.state = BUTTON_DISABLED
+			}
+
+			callback ($$FM_CallbackHandler$$, FMDataSetupTransactingChits, ids[], trade_value[], salvage_damage[], salvage_range[], salvage_heat[], salvage_weapon_recycle[], inventory_count[], mechinfo.mechWeightClassArray[], nOfItems, INVENTORY_LIST_SIZE_MAX )
+
+			o_transactionList.list_size  				= nOfItems
+			int counter	= 0
+			int w
+			for w = 0; w < nOfItems; w++
+			{
+				// Filter out the mech chassis classes
+				if ( ids[w] > -1 )
+				{
+					o_transactionList.column[0].list_item[counter]	= conv$(ids[w])
+					//o_inventoryList.column[1].list_item[counter]	= itemnames[ids[w]]
+					//o_inventoryList.column[2].list_item[counter]	= conv$(trade_value[w])
+					o_transactionList.column[3].list_item[counter]	= conv$(inventory_count[w])
+					o_transactionList.list_order[counter]				= counter
+					totalTradeValue += trade_value[w]*inventory_count[w]
+					counter++
+				}
+				else
+				{
+					o_transactionList.list_size--
+				}
+			}
+
+			// set up the icons, they need to be weapons and Mechs
+			for w =0; w< o_transactionList.list_size; w++
+			{
+				if ( ids[w]  < FirstMechChitID ) //it is a weapon
+				{
+					o_transactionList.column[0].list_icon[w] = MB_GPATH "weapon_" o_transactionList.column[0].list_item[w] ".tga",1,volatile
+					alphamode (o_transactionList.column[0].list_icon[w]) = am_alpha_alphainvalpha
+				}
+				else
+				{
+					if ( ids[w] < FirstPersonnelChitID ) //its a Mech
+					{
+						o_transactionList.column[0].list_icon[w] = MB_GPATH "mech_" conv$(ids[w]- FirstMechChitID) ".tga",1,volatile
+						alphamode (o_transactionList.column[0].list_icon[w]) = am_alpha_alphainvalpha
+					}
+					else
+					{
+						// its a person
+						o_transactionList.column[0].list_icon[w] = MB_GPATH "personnel_" conv$(ids[w]- FirstPersonnelChitID) ".tga",1,volatile
+						alphamode (o_transactionList.column[0].list_icon[w]) = am_alpha_alphainvalpha
+						o_transactionList.column[3].list_item[w] =  "-"
+					}
+				}
+			}
+
+			lbl_PlayerBalance.text = fmtcommanum$(callback($$GetMoneyBalance$$) )
+
+			lbl_TransactionTotal.text = fmtcommanum$(totalTradeValue )
+
+			if ( gTransactionMode == TRANSACTION_MODE_BUY )
+			{
+				if ( totalTradeValue > callback($$GetMoneyBalance$$) )
+				{
+					btn_buy.state = BUTTON_DISABLED
+					lbl_TransactionTotal._textColor = packcolor (255,20,20,255)
+				}
+				else
+				{
+					btn_buy.state = BUTTON_ENABLED
+					lbl_TransactionTotal._textColor = packcolor (255,255,255,255)
+				}
+			}
+
+			if ( gTransactionMode == NONE )
+			{
+				lbl_TransactionTotal._textColor = packcolor (255,255,255,255)
+			}
+
+			initialize (o_transactionList)
+			initialize (lbl_TransactionTotal)
+			initialize (lbl_PlayerBalance)
+			_dirty = 0
+			gTransactionInventoryDirty = 0
+		}
+	}
+
+	GUI_INIT
+	{
+		// Item initialization and placement :
+		rct_1._origin 					= _origin
+		rct_1._width 					= _width
+		rct_1._height 					= 65
+
+		//
+		lbl_CurrentAccount._origin 		= _origin.x, _origin.y+1, location.z + 10
+		lbl_CurrentAccount._width		= _width
+		lbl_CurrentAccount.text			= localize$( IDS_CURRENT_ACCOUNT )
+		initialize( lbl_CurrentAccount )
+
+		lbl_Balance._origin 			= _origin.x, _origin.y+15, location.z + 10
+		lbl_Balance._width				= _width
+		lbl_Balance.text				= localize$( IDS_BALANCE )
+		initialize( lbl_Balance )
+
+		lbl_CBills._origin 				= _origin.x, _origin.y+30, location.z + 10
+		lbl_CBills._width				= _width
+		lbl_CBills.text					= localize$( IDS_C_BILLS )
+		initialize( lbl_CBills )
+
+		lbl_PlayerBalance._origin 		= _origin.x, _origin.y+45, location.z + 10
+		lbl_PlayerBalance._width		= _width
+		lbl_PlayerBalance.text			= fmtcommanum$(callback($$GetMoneyBalance$$) )
+		initialize( lbl_PlayerBalance )
+
+		// The display height of the list
+		o_transactionList.location				= _origin.x, _origin.y + rct_1._height, location.z + 10
+		o_transactionList.max_displayed				= listHeight
+
+		o_transactionList.id					= TRANSACTION_WINDOW_ID
+		o_transactionList.boxFont3d				= FPATH localize$(IDS_F_ML_LABEL)		//MUST BE INITIALIZED
+		o_transactionList.NUM_OF_COLUMNS				= 4						//MUST BE INITIALIZED
+		o_transactionList.column_header_height			= 20
+		o_transactionList.arrowheight				= 20
+		o_transactionList.uniform_item_height			= 0
+		o_transactionList.labelFont3d				= FPATH localize$(IDS_F_ML_LABEL)		//CAN BE INITIALIZED
+		o_transactionList.offsetLabel				= 0,-18						//CAN BE INITIALIZED offsetLabel of text from button = 0,-25
+		o_transactionList.buttonwidth				= 16						//CAN BE INITIALIZED
+		o_transactionList.first_delay				= 10						//time delay value n/60; for the buttons
+		o_transactionList.second_delay				= 3						//time delay value n/60; for the buttons
+		o_transactionList.itemWidth				= _width - 17					// subtract to account for scroll bar width
+		o_transactionList.itemHeight				= 1
+		o_transactionList.itemHeight_padding			= 15
+		o_transactionList.list_size  				= nOfItems
+		o_transactionList.column[0].location.x			= 5
+		o_transactionList.column[1].location.x			= 65
+		o_transactionList.column[2].location.x			= 65
+		o_transactionList.column[3].location.x			= 65
+		o_transactionList.column[0].fontcolor			= packcolor(255,0,0,255)
+		// o_transactionList.column[1].fontcolor			= packcolor(255,255,255,255)
+		// o_transactionList.column[2].fontcolor			= packcolor(255,255,255,255)
+		o_transactionList.column[3].fontcolor			= packcolor(255,255,255,255)
+		o_transactionList.offsetx[1]				= 5
+		o_transactionList.column[0].icondisplays			= true
+		o_transactionList.column[0].numeric			= true
+		// o_transactionList.column[2].numeric			= true
+		o_transactionList.column[3].numeric			= true
+		o_transactionList.column[0].fontAlignment			= 0
+		// o_transactionList.column[1].fontAlignment			= just_left
+		// o_transactionList.column[2].fontAlignment		= just_right
+		o_transactionList.column[3].fontAlignment		= just_center
+		initialize( o_transactionList )
+
+		o_transactionList.column[0].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+		o_transactionList.column[1].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+		o_transactionList.column[2].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+		o_transactionList.column[3].o_header.f_font	= FPATH localize$(IDS_F_ML_LABEL)
+
+		o_transactionList.column[0].o_header.s_text	= localize$(IDS_ML_ITEM)
+		o_transactionList.column[1].o_header.s_text	= localize$(IDS_ML_WP_NAME)
+		o_transactionList.column[2].o_header.s_text	= localize$(IDS_ML_VALUE)
+		o_transactionList.column[3].o_header.s_text	= "#"
+
+		initialize( o_transactionList )
+		activate( o_transactionList )
+
+		int listBottomY = _origin.y+rct_1._height+listHeight
+
+		rct_2._origin 				= _origin.x, listBottomY, _origin.z
+		rct_2._width 				= _width
+		rct_2._height 				= 50
+
+		lbl_SellBuyFor._origin 			= _origin.x, listBottomY+2, _origin.z
+		lbl_SellBuyFor._width			= _width
+		lbl_SellBuyFor.text			= localize$( IDS_SELL_BUY_FOR )
+
+		lbl_CBills2._origin			= _origin.x, listBottomY+17, _origin.z
+		lbl_CBills2._width			= _width
+		lbl_CBills2.text			= localize$( IDS_C_BILLS )
+
+		lbl_TransactionTotal._origin 		= _origin.x, listBottomY+32, _origin.z
+		lbl_TransactionTotal._width		= _width
+		lbl_TransactionTotal.text		= "0"
+
+		btn_sell.file				= WPATH "button_reg_99x23_3state.tga"
+		btn_sell.total_states			= 3
+		btn_sell.text				= localize$( IDS_SELL )
+		btn_sell.location			= _origin.x + 5, listBottomY+59, _origin.z + 10
+		btn_sell.gFont3d			= FPATH microStyle9BoldStr
+		btn_sell.id				= 312
+		initialize(btn_sell)
+
+		btn_buy.file				= WPATH "button_reg_99x23_3state.tga"
+		btn_buy.total_states			= 3
+		btn_buy.text				= localize$( IDS_BUY )
+		btn_buy.location			= _origin.x + 5, listBottomY+84, _origin.z + 10
+		btn_buy.gFont3d				= FPATH microStyle9BoldStr
+		btn_buy.id				= 311
+		initialize( btn_buy )
+
+		btn_clear.file				= WPATH "button_reg_99x23_3state.tga"
+		btn_clear.total_states			= 3
+		btn_clear.text				= localize$( IDS_CLEAR )
+		btn_clear.location			= _origin.x + 5, listBottomY+109, _origin.z + 10
+		btn_clear.gFont3d			= FPATH microStyle9BoldStr
+		btn_clear.id		   		= 313
+		initialize( btn_clear )
+	}
+
+	GUI_ACTIVATE
+	{
+	}
+	GUI_DEACTIVATE
+	{
+	}
+	GUI_DRAW
+	{
+	}
+	GUI_MAILBOX
+	{
+		if ( sender == btn_sell )
+		{
+			spew "Transaction: Sale completed"
+			callback ($$FM_CallbackHandler$$, FMCompleteSales, gTransactionListSize )
+			gPlayerInventoryDirty = 1
+			gMarketInventoryDirty = 1
+			gTransactionInventoryDirty = 1
+		}
+		else
+		if ( sender == btn_buy )
+		{
+			spew "Transaction: Purchase completed"
+			callback ($$FM_CallbackHandler$$, FMCompletePurchases, gTransactionListSize )
+			gPlayerInventoryDirty = 1
+			gMarketInventoryDirty = 1
+			gTransactionInventoryDirty = 1
+		}
+		else
+		if ( sender == btn_clear )
+		{
+			spew "Transaction: All transactions cleared"
+			callback ($$FM_CallbackHandler$$, FMCancelAllTransactions, gTransactionMode, gTransactionListSize )
+			gPlayerInventoryDirty = 1
+			gMarketInventoryDirty = 1
+			gTransactionInventoryDirty = 1
+		}
+		// Set transaction mode
+		if ( gTransactionListSize == 0 )
+			gTransactionMode = NONE
+	}
+}
+
+player_inventory
+{
+
+	GUI_CREATE
+	{
+		// "public"
+        position objectLocation = 10, 36
+		// "private"
+		object o_playerList 	= inventory_list
+		int id = PLAYER_INVENTORY_LIST_ID
+		o_playerList.id = PLAYER_INVENTORY_LIST_ID
+		o_playerList.o_label.text = localize$( IDS_CURRENT_INVENTORY )
+		o_playerList.o_tabs.o_radiobutton[0].id	= 305
+		o_playerList.o_tabs.o_radiobutton[1].id	= 306
+		o_playerList.o_tabs.o_radiobutton[2].id	= 307
+	}
+
+	GUI_EXECUTE
+	{
+		if ( gPlayerInventoryDirty == 1 )
+		{
+			gPlayerInventoryDirty = 0
+			o_playerList._dirty = 1
+		}
+	}
+	GUI_INIT
+	{
+		// Move interface elements to their relative positions :
+		o_playerList.objectLocation 	= objectLocation.x, objectLocation.y+10, objectLocation.z
+		// region = o_playerList.region
+		initialize(o_playerList)
+		activate(o_playerList)
+	}
+}
+
+market_inventory
+{
+
+	GUI_CREATE
+	{
+		// "public"
+        position objectLocation = 10, 36
+//        position objectLocation = 10, 10, 50
+		// "private"
+		object o_marketList 	= inventory_list
+		int id = MARKET_INVENTORY_LIST_ID
+		o_marketList.id = MARKET_INVENTORY_LIST_ID
+		o_marketList.o_label.text = localize$( IDS_MARKET_ITEMS )
+		o_marketList.o_tabs.o_radiobutton[0].id	= 308
+		o_marketList.o_tabs.o_radiobutton[1].id	= 309
+		o_marketList.o_tabs.o_radiobutton[2].id	= 310
+	}
+
+	GUI_EXECUTE
+	{
+		if ( gMarketInventoryDirty == 1 )
+		{
+			gMarketInventoryDirty = 0
+			o_marketList._dirty = 1
+		}
+	}
+	GUI_INIT
+	{
+		// Move interface elements to their relative positions :
+		o_marketList.objectLocation 	= objectLocation.x, objectLocation.y+10, objectLocation.z
+
+		initialize(o_marketList)
+		activate(o_marketList)
+		// region = o_marketList.region
+	}
+}
+
+
+tabbed_pages
+{
+	GUI_CREATE
+	{
+		// "public"
+		position objectLocation 	= 0, 0, BACKGROUND_Z + 20
+		int nOfTabs    				= 3
+		int _height
+		int _width
+
+		// "private"
+		object o_radiobutton[3]
+		int tabsx
+		int tabsy
+		int on_tab
+
+		int i
+		for(i = 0; i < nOfTabs; i++)
+		{
+			o_radiobutton[i]			= s_multistatepanetoggle
+			o_radiobutton[i].file			= GPATH "3state_tabs.tga"
+			o_radiobutton[i].gFont3d		= FPATH microStyle9BoldStr
+			o_radiobutton[i].total_states	= 3
+		}
+
+		o_radiobutton[0].text				= localize$( IDS_PERSONNEL )
+		o_radiobutton[1].text				= localize$( IDS_CHASSIS )
+		o_radiobutton[2].text				= localize$( IDS_WEAPONS )
+
+		for(i = 0; i < nOfTabs; i++)
+		{
+			initialize(o_radiobutton[i])
+		}
+
+		mail(2, o_radiobutton[0])
+
+	}
+
+	GUI_INIT
+	{
+		tabsx 					= objectLocation.x + 3
+		tabsy 					= objectLocation.y
+		for(i = 0; i < nOfTabs; i++)
+		{
+			o_radiobutton[i].location = objectLocation.x + (i * 101) + 3, objectLocation.y, parent.location.z + 1
+			initialize(o_radiobutton[i])
+			activate( o_radiobutton[i] )
+		}
+	}
+
+	GUI_DRAW
+	{
+		// Draw left vertical bounding box line
+		setpencolor(255, 255, 255, 255)
+		drawline tabsx, 			tabsy+2 	 		to tabsx,	 	   		tabsy + _height
+		drawline tabsx - 1, 		tabsy+2 			to tabsx - 1, 	  		tabsy + _height
+
+		// Draw right vertical bounding box line
+		drawline tabsx + _width-6, 	tabsy+2	  			to tabsx + _width-6, 		tabsy + _height
+		drawline tabsx + _width-5, 	tabsy+2	 			to tabsx + _width-5, 		tabsy + _height
+
+		// Draw bottom bounding box line (double thick)
+		drawline tabsx,	   		tabsy + _height-1 	to tabsx + _width -4, 	tabsy + _height-1
+		drawline tabsx,		 	tabsy + _height 	to tabsx + _width -4, 	tabsy + _height
+	}
+
+	GUI_MAILBOX
+	{
+		int i
+		for(i = 0; i < nOfTabs; i++)
+		{
+			if (sender != o_radioButton[i])
+			{
+				// turn off every button but the one just received
+				mail(1, o_radioButton[i])
+			}
+		}
+
+		if sender == o_radiobutton[0]
+		{
+			spew "display personnel"
+			parent._dirty = 1
+			parent.o_categoryFilter.o_listbox.nselected = 0
+			on_tab = 0
+		}
+
+		if sender == o_radiobutton[1]
+		{
+			spew "display chassis"
+			parent._dirty = 1
+			parent.o_categoryFilter.o_listbox.nselected = 0
+			on_tab = 1
+		}
+
+		if sender == o_radiobutton[2]
+		{
+			spew "display weapons"
+			parent._dirty = 1
+			parent.o_categoryFilter.o_listbox.nselected = 0
+			on_tab = 2
+		}
+	}
+}
+
+static_label
+{
+	GUI_CREATE
+	{
+		position 		_origin
+		int				_width
+		int				_height			= 20
+		string			text
+		int				_dirty			= true
+		Font3d			_font 			= FPATH microStyle8BoldStr
+		int				_textColor		= packcolor (255,255,255,255)
+		int 			_scale           = 1
+		int 			_wrap            = 0
+		int				_proportional    = 1
+		int				_bold            = false
+		int				_italic          = false
+		int         	_justification   = just_center // just_left, just_center, just_right
+	}
+
+	GUI_INIT
+	{
+		// location = _origin
+		if ( _bold == true )
+			_font = FPATH microStyle8BoldExtStr
+		else
+			_font = FPATH microStyle8BoldStr
+	}
+	GUI_DRAW
+	{
+		// location = _origin
+	 	print3d_attributes 	= _font, _textColor, _scale, _wrap, _proportional, _bold, _italic, _justification
+		lprint3d_position 	= _origin.x, _origin.y, location.z
+		_height = getprint3dheight("text")
+		// print3d_margins 	= 0, 0 to _width, _height
+		print3d_margins 	= _origin to _origin.x + _width, _origin.y + _height+1, location.z
+		print3d text
+	}
+	GUI_MAILBOX
+	{
+	}
+}
+
+static_frame
+{
+	GUI_CREATE
+	{
+		position 		_origin
+		int				_width
+		int				_height
+
+		int 			_dirty = true
+	}
+
+	GUI_INIT
+	{
+	}
+
+
+	GUI_DRAW
+	{
+		//
+		setpencolor(255, 255, 255, 255)
+		// drawframe _origin to _origin.x + _width, _origin.y + _height
+		// drawrect _origin to _origin.x + _width, _origin.y + _height
+		drawline _origin to _origin.x + _width, _origin.y
+		drawline _origin to _origin.x, _origin.y + _height
+		drawline _origin.x + _width, _origin.y to _origin.x + _width, _origin.y + _height
+		drawline _origin.x, _origin.y + _height to _origin.x + _width, _origin.y + _height
+
+	}
+	GUI_MAILBOX
+	{
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+item_pointer
+{
+	GUI_CREATE
+	{
+		int 			prev_selected_id	= -1
+		int 			draw				= true
+		int 	   		showMousePointer 	= 1
+		pane 	   		p_pointer			= GPATH "mouse_pointer.tga",1,volatile
+		pane 	   		p_icon				= GPATH "mouse_pointer.tga",1,volatile
+		int				originListID  // sets what list the pointer cam off of
+
+		alphamode(p_pointer)	= am_alpha_alphainvalpha
+		origin(p_pointer)		= 0, 0
+		alphamode(p_icon)		= am_alpha_alphainvalpha
+		origin(p_icon) 			= 0, 0
+		framerate				= 5
+	}
+
+	GUI_EXECUTE
+	{
+		if ( gTransactionProgress == DRAGDROP_IN_PROGRESS )
+		{
+			if ( o_target_drop_mask.overValidDropPoint == 1 || o_target_drop_mask2.overValidDropPoint == 1 )
+			{
+				p_pointer = GPATH "mouse_pointer.tga",1,volatile
+			}
+			else
+			{
+				p_pointer = GPATH "mouse_pointer_na.tga",1,volatile
+			}
+
+			origin(p_pointer)		= 0, 0
+			color (p_pointer) 		= 255,255,255,255
+
+			if ( prev_selected_id != gTransactionItemID )
+			{
+				if (gTransactionItemID < FirstMechChitID)
+				{
+					p_icon = MB_GPATH "weapon_" conv$(gTransactionItemID) ".tga",1,volatile
+					spew "Pointer is " "weapon_" conv$(gTransactionItemID) ".tga"
+				}
+				else
+				{
+					if ( gTransactionItemID < FirstPersonnelChitID )
+					{
+						p_icon = MB_GPATH "mech_" conv$(gTransactionItemID-FirstMechChitID) ".tga",1,volatile
+						spew "Pointer is " "mech_" conv$(gTransactionItemID-FirstMechChitID) ".tga"
+					}
+					else
+					{
+						p_icon = MB_GPATH "personnel_" conv$(gTransactionItemID-FirstPersonnelChitID) ".tga",1,volatile
+						spew "Pointer is " "personnel_" conv$(gTransactionItemID-FirstPersonnelChitID) ".tga"
+					}
+				}
+
+				alphamode(p_icon) = am_alpha_alphainvalpha
+				origin (p_icon) = 35,30
+				color (p_icon) = 255,255,255,110
+
+				prev_selected_id = gTransactionItemID
+				draw = true
+			}
+		}
+		else
+		{
+			alphamode(p_pointer)	= am_alpha_alphainvalpha
+			origin(p_pointer)		= 0, 0
+			color (p_pointer) = 255,255,255,255
+			p_pointer = GPATH "mouse_pointer.tga",1,volatile
+
+			alphamode(p_icon)	= am_alpha_alphainvalpha
+			origin(p_icon)		= 0, 0
+			color (p_icon) = 255,255,255,255
+			p_icon = GPATH "mouse_pointer.tga",1,volatile
+
+			prev_selected_id = -1
+		}
+	}
+
+	GUI_DRAW
+	{
+		location = mouse.x,mouse.y,200
+		render p_pointer, mouse.x, mouse.y
+		render p_icon, mouse.x, mouse.y
+	}
+}
+
+
+
+//////////////////////////////////////////////////////////////////
+//This mask will cover the screen when the pointer is being dragged
+//if the pointer is released on the drop mask, it will clear the pointer
+//also, if the pointer's origin was in the offering or acquiring lists
+//then it will be removed from that list and placed back on the original
+drop_mask
+{
+	GUI_CREATE
+	{
+		int 		maskedObjectID = 0
+		int			message
+		int 		overValidDropPoint
+	}
+
+	GUI_DEACTIVATE
+	{
+		region		= 0,0 to 0,0
+	}
+
+	GUI_EXECUTE
+	{
+		if ( message == DRAGDROP_RESOLVING )
+		{
+			// spew conv$( mouse.x ) ", " conv$( mouse.y ) "; " conv$( region.p1.x ) ", " conv$( region.p1.y )
+			if ( mouse.x >= location.x + region.p1.x && mouse.x <= location.x + region.p2.x )
+			{
+				if ( mouse.y >= location.y + region.p1.y && mouse.y <= location.y + region.p2.y )
+				{
+					OverValidDropPoint = 1
+					return
+				}
+			}
+			OverValidDropPoint = 0
+		}
+	}
+
+	LBUTTON_UPDATE
+	{
+		if mouse.left == BUTTON_RELEASED
+		{
+			spew "Button released: " conv$( message )
+			@Freemarket@gTransactionProgress = message
+			region = 0,0 to 0,0
+		}
+		else
+		{
+			pass_on
+		}
+	}
+}
+
+
+
+
+
+o_fm_ErrorScreen
+{
+	GUI_CREATE
+	{
+		// use the whole region
+		location				= 0, 0, 500
+		region					= 0, 0 to getresx(), getresy()
+
+		Font3d gHeaderFont3d	= FPATH localize$(IDS_F_GEN_SCREEN_TITLE)
+		Font3d gFont3d			= FPATH localize$(IDS_F_GEN_DESCRIPTION)
+
+		int initialized = false
+		int extended_size = 0
+		pane gFrame
+
+		framerate				= 30
+
+		sound btnTriggeredSound = APATH "sfx_button5.wav"
+
+		// These three variables below MUST BE INITIALIZED
+		string error_header		= localize$(IDS_GN_ERROR)
+		string error_message	= ""
+		string buttonText
+
+		// default text message for button
+		buttonText = localize$(IDS_GN_OK)
+
+		// button object
+		object mbutton
+
+		// variables for fading in and out
+		int alpha_val = 5
+		int fadeout = false
+	}
+
+	GUI_INIT
+	{
+		// set up button object
+		mbutton = s_multistatepane
+		mbutton.file = WPATH "button_reg_138x23_3state.tga"
+		mbutton.total_states = 3
+		mbutton.id = 0
+		mbutton.text = buttonText
+
+		if (extended_size == 0)
+		{
+			gFrame = GPATH "dialog_350x250.tga"
+
+			// set up the location of button object and then initialize
+			mbutton.location = getresx() / 2 - 71, (getresy() / 2) + 72, location.z + 20
+			initialize(mbutton)
+		}
+		else
+		{
+			gFrame = GPATH "dialog_500x300.tga"
+
+			// set up the location of button object and then initialize
+			mbutton.location = getresx() / 2 - 71, (getresy() / 2) + 90, location.z + 20
+			initialize(mbutton)
+		}
+
+		initialized = true
+	}
+
+	GUI_ACTIVATE
+	{
+		activate(mbutton)
+		focus(mbutton)
+	}
+
+	GUI_DEACTIVATE
+	{
+		deactivate(mbutton)
+	}
+
+	GUI_EXECUTE
+	{
+		if fadeout == true
+		{
+			// Fading out(Exiting)
+			if alpha_val > 0
+			{
+				alpha_val = alpha_val - 5
+				if alpha_val <= 0
+				{
+					alpha_val = 0
+					deactivate(this)
+				}
+			}
+		}
+		else
+		{
+			// Fading in(Entering)
+			if alpha_val < 150
+			{
+				alpha_val += 5
+				if alpha_val >= 150
+				{
+					alpha_val = 150
+				}
+			}
+		}
+	}
+
+	GUI_DRAW
+	{
+		// fade in or fade out
+		setpencolor(0, 0, 0, alpha_val)
+		drawrect 0, 0 to getresx(), getresy()
+
+		// Redraw the frame if we are not fading out(exiting)
+		if ((initialized) && (fadeout == false))
+		{
+			color (gframe) = packcolor(255, 255, 255, alpha_val)
+			if (extended_size == 0)
+			{
+				render gframe, getresx() / 2 - 175, getresy() / 2 - 125
+
+				// Header
+			 	print3d_attributes	= gHeaderFont3d,0xffffffff,1,0,1,0,0,2
+				print3d_margins		= getresx() / 2 - 175, (getresy() / 2) - 118  to getresx() / 2 + 175, getresy() / 2 - 50
+				print3d_position	= getresx() / 2 - 175, (getresy() / 2) - 118
+				print3d error_header
+
+			 	print3d_attributes	= gFont3d,0xffffffff,1,1,1,0,0,0
+				print3d_margins		= (getresx() / 2) - 145, getresy() / 2 - 75 to getresx() / 2 + 145, getresy() / 2 + 75
+				print3d_position	= (getresx() / 2) - 145, getresy() / 2 - 75
+				print3d error_message
+			}
+			else
+			{
+				render gframe, getresx() / 2 - 250, getresy() / 2 - 150
+
+				// Header
+			 	print3d_attributes	= gHeaderFont3d,0xffffffff,1,0,1,0,0,2
+				print3d_margins		= getresx() / 2 - 185, (getresy() / 2) - 140  to getresx() / 2 + 175, getresy() / 2 - 80
+				print3d_position	= getresx() / 2 - 185, (getresy() / 2) - 140
+				print3d error_header
+
+			 	print3d_attributes	= gFont3d,0xffffffff,1,-1,1,0,0,0
+				print3d_margins		= (getresx() / 2) - 225, getresy() / 2 - 100 to getresx() / 2 + 225, getresy() / 2 + 85
+				print3d_position	= (getresx() / 2) - 225, getresy() / 2 - 100
+				print3d error_message
+			}
+		}
+	}
+
+	GUI_MAILBOX
+	{
+		// deactivate this object
+		if (sender == mbutton)
+		{
+			play btnTriggeredSound,1
+
+			// Tell this script to fade out and deactivate all its objects
+			fadeout = true
+			deactivate(mbutton)
+		}
+	}
+}
+

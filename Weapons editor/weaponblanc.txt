@@ -1,0 +1,24 @@
+1. You need to find some folder where you can save your files. Lets it will be <path>.
+2. Unpack there weaponsubsystems from core.mw4 by mw4extractor. Don't forget to enable use id names.
+3. Copy to <path> my archive and unpack it there. So it will be something like this:
+<path>
+ |--weaponsubsystems
+ |--...subsystem
+ |--...subsystem
+ |--WeaponBalancer_1.0
+ |--resFile.txt
+ |--statFile.txt
+ |--Manual.txt
+ |--mw4weaponBalancer.jar
+4. Open command line. All programs->Accessoires->Command Prompt or you can search cmd.
+5. To verify your java installation print java -version.
+6. Execute command: cd <path>\WeaponBalancer_1.0
+7. To test java once again execute command: java -jar mw4weaponBalancer.jar
+mw4weaponBalancer.jar is a console programm and it can't work without args so it will return some sort of help info.
+8. To see all stats in command prompt execute command: java -jar mw4weaponBalancer.jar -mainFldr <path>\weaponsubsystems getStats
+If you have some spaces in your <path> you need to use quotes: java -jar mw4weaponBalancer.jar -mainFldr "<path>\weaponsubsystems" getStats
+9. Export some weapon group to file: java -jar mw4weaponBalancer.jar -grFldr <path>\weaponsubsystems\acweaponsubsystem -resFile <path>\WeaponBalancer_1.0\resFile.txt getStats
+10. Change some values in <path>\WeaponBalancer_1.0\resFile.txt
+11. Applying changes: java -jar mw4weaponBalancer.jar -mainFldr <path>\weaponsubsystems -resFldr <path>\WeaponBalancer_1.0 -statSrcFile <path>\WeaponBalancer_1.0\resFile.txt setStats
+After this command there will be created new files for which you have changed configuration.
+12. Load them back to core.mw4 by extractor.

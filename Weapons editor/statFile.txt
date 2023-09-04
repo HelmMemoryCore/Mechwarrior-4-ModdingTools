@@ -1,0 +1,3 @@
+	slots	distance	speed
+hvac2	2	1500	3300
+lac5	3	800	2700

@@ -1,0 +1,319 @@
+000-00F* [unknown]
+
+010* -	mechs\avatar\avatar.data{solidobb}
+
+014* -	mechs\avatar\avatar.data{element}
+
+018-053* [unkown]
+
+MechWarrior4__MWObject
+
+054 -	SecondaryDeathEntityResource	mechs\avatar_destroyed\avatar_destroyed.data
+
+058 -	SecondaryDestroyedEffectResource effects\mechdeath\endmechdeath.data
+
+05C* -	PTR: Unknown - may be unused
+
+060 -	PartDestructionEffectResource	effects\mechpart_destruction\mechpart_destruction.data
+
+064 -	DeathEntityResource		mechs\avatar_destroyed\avatar_destroyed.data
+
+068 -	DestroyedEffectResource		effects\mechdeath\mechdeath.data
+
+06C -	VehicleTonnage			
+
+070 -	MaxVehicleTonnage
+
+074 -	VehicleBattleValue
+
+078 -	VehicleTradeValue
+
+07C -	SplashDamageRadius
+
+080 -	SplashDamageAmount
+
+084 -	SplashHeatAmount
+
+088*-	content\mechs\avatar\avatar.animscript
+
+Note: from end of Animscript to 188 appears to be garbage
+--------------------------------------------------------------------------------
+188	EyeSiteName	"site_eyepoint"
+
+Note: from end of "Eyesitename" to 288 appears to be garbage
+--------------------------------------------------------------------------------
+288 -	CoolantEffectResource	effects\coolant\generalmech_coolant.data
+
+28C -	OverHeatEffectResource	effects\heat\overheat.data
+
+290 -	EjectEffectResource	effects\eject\generalmech_eject.data
+
+294 -	Ptr: mechs\avatar\avatar.data{hierarchicalobb}
+
+298 -	NameIndex
+
+------------------------------------------------------------------------------------
+MechWarrior4__Vehicle
+
+29C -	MaxSlope
+
+2A0 -	StartSlopeDeceleration
+
+2A4 -	SlopeDecel1
+
+2A8 -	SlopeDecel2
+
+2AC -	SlopeDecel3
+
+2B0 -	TopSpeedTurnRate
+
+2B4 -	FullStopTurnRate
+
+2B8 -	MinSpeed
+
+2BC -	MaxSpeed
+
+2C0 -	MinReverseSpeed
+
+2C4 -	MaxReverseSpeed
+
+2C8 -	MinMaxSpeed
+
+2CC -	MaxGimpSpeed
+
+2D0 -	MinStandTransitionSpeed
+
+2D4 -	Acceleration
+
+2D8 -	Decceleration
+
+2DC -	ReverseAccelerationMultiplier
+
+2E0 -	ReverseDeccelerationMultiplier
+
+2E4 -	TargetLockTime
+
+2F0 -	AttackType
+
+2F4 -	TreadLength
+
+-----------------------------------------------------------
+MechWarrior4__Mech
+
+2F8 -	TiltSpeed
+
+2FC -	TiltDegree
+
+300 -	FootReturnSeconds
+
+304 -	PercentageOfTurnToStartTilt
+
+308 -	PercentageOfSpeedToStartTilt
+
+30C -	FallAdjustmentSeconds
+
+310 -	GetUpAdjustmentSeconds
+
+314 -	FallAdjustmentDelaySeconds
+
+318 -	GetUpAdjustmentDelaySeconds
+
+31C -	DampenWorldJoint
+
+320 -	DampenRootJoint
+
+324 -	DampenTorsoJoint
+
+328 -	DampenHipJoint
+
+32C -	DampenTranslationJoint
+
+330 -	UndampenWorldJoint
+
+334 -	UndampenRootJoint
+
+338 -	UndampenTorsoJoint
+
+33C -	UndampenHipJoint
+
+340 -	UndampenTranslationJoint
+
+344 -	ScaleInternalTiltDegree
+
+348 -	TorsoScaleTakeHit
+
+34C -	HipScaleTakeHit
+
+350 -	RootScaleTakeHit
+
+354 -	MinimumDamageForHitAnimation
+
+358 -	MinimumDamageForInternalHitAnima
+
+35C -	TorsoHitSpringMotionLimit
+
+360 -	TorsoHitSpringDeceleration
+
+364 -	TorsoHitSpringReturnSpeed
+
+368 -	TorsoHitSpringSpeed
+
+36C -	HipHitSpringMotionLimit
+
+370 -	HipHitSpringDeceleration
+
+374 -	HipHitSpringReturnSpeed
+
+378 -	HipHitSpringSpeed
+
+37C -	RootHitSpringMotionLimit
+
+380 -	RootHitSpringDeceleration
+
+384 -	RootHitSpringReturnSpeed
+
+388 -	RootHitSpringSpeed
+
+38C -	ExternalHitScaleBeamDamage
+
+390 -	ExternalHitScaleMissileDamage
+
+394 -	ExternalHitScaleProjectileDamage
+
+398 -	ExternalHitScaleSplashDamage
+
+39C -	ExternalHitScaleHeatDamage
+
+3A0 -	InternalHitScaleBeamDamage
+
+3A4 -	InternalHitScaleMissileDamage
+
+3A8 -	InternalHitScaleProjectileDamage
+
+3AC -	InternalHitScaleSplashDamage
+
+3B0 -	InternalHitScaleHeatDamage
+
+3B4 -	InternalSpinHitScaleBeamDamage
+
+3B8 -	InternalSpinHitScaleMissileDamag
+
+3BC -	InternalSpinHitScaleProjectileDa
+
+3C0 -	InternalSpinHitScaleSplashDamage
+
+3C4 -	InternalSpinHitScaleHeatDamage
+
+3C8 -	SpinForceBeamDamage
+
+3CC -	SpinForceMissileDamage
+
+3D0 -	SpinForceProjectileDamage
+
+3D4 -	SpinForceSplashDamage
+
+3D8 -	SpinForceHeatDamage
+
+3DC -	EyeSpringMotionLimit
+
+3E8 -	EyeSpringConstant
+
+3F4 -	EyeSpringDrag
+
+400 -	EyeSpringStopThreshold
+
+40C -	JumpJetEffect		effects\jumpjet\jumpjet.data
+
+410 -	DropJumpEffect		effects\jumpjet\dropjump.data
+
+414 -	InitialJumpJetEffect	effects\jumpjet\initialjumpjet.data
+
+418 -	SearchLightResource	[PTR]
+
+41C -	Cradle			vehicles\jump_cradle\jump_cradle.data
+
+420 -	CradleDeathEffect	effects\cradle_death\cradle_death.data
+
+424 -	LeftJumpJetSiteName	"site_lujetport"
+---------------------------------------------------------------------
+Note: From LeftJumpJetSiteName to RightJumpJetSiteName unknown, but
+43C -	SpeedDemandMPS
+
+440 -	CurrentSpeedMPS
+
+474 -	LocalGroundPitch
+
+478 -	LocalGroundRoll
+
+47C -	RawLocalGroundPitch
+
+480 -	RawLocalGroundRoll
+
+----------------------------------------------------------------------------
+524 -	RightJumpJetSiteName	"site_rujetport"
+
+Note: from end of RightJumpJetSiteName to 624 appears to be garbage
+-----------------------------------------------------------------------------
+624*-	[PTR]		effects\materialeffectholders\mech_foot_large.contents
+
+628 -	MaxHeat
+
+62c*-	[PTR]		subsystems\heatmanager.data
+
+630*-	[PTR]		mechs\avatar\avatar.data{footsteps}
+
+634 -	MechID
+
+638 -	TechType
+
+63c-63F* [Unknown]
+
+640 -	CanLoadJumpJets
+
+641 -	CanLoadECM
+
+642 -	CanLoadBeagle
+
+643 -	CanLoadLightAmp
+
+644 -	CanLoadAMS
+
+645 -	CanLoadLAMS
+
+648-64B	JumpJetTonnage
+
+64C -	CageDamageEffect	effects\mech_cage\mech_cage_hit.data
+
+650 -	DamageNeededForCageEffect
+
+654 -	MechRamEffect		effects\mech_ram\genericmechtomech_hit.data
+
+658 -	MechGlassRamEffect	effects\mech_ram\genericmechtoglass_hit.data
+
+65C -	WakeEffectResource	effects\boatwake\mechwake.data
+
+660 -	DragoonValue
+
+664-667	AdvancedGyroTonnage
+
+668 -	CanLoadEnhancedOptics
+
+669 -	CanLoadIFF_Jammer
+
+66A -	CanLoadAdvancedGyro
+
+66C -	BattleKillBonus
+
+670 -	BattleDamageRatio
+[END OF FILE]
+----------------------------------------------------------
+Vehicle items that overlay MechWarrior4__Mech (Good for HDP?)
+
+41C -	VehicleMovingSFX
+
+420 -	VehicleIdleSFX
+
+424 -	VehicleDyingSFX
+
+
+

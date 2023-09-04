@@ -1,0 +1,1547 @@
+// Mechwarrior: Vengeance
+// Copyright © 1999-2001
+//John Scully, Cyberlore
+//The list boxes for Black Market trades
+
+// Multi column listbox
+s_mc_listbox_blackMarket
+{
+	GUI_CREATE
+	{
+		object	column[MAX_MC_COLUMNS]
+		object	list_button[MAX_MC_ITEMS]
+		int		list_order[MAX_MC_ITEMS]
+
+		for int i=0; i < MAX_MC_COLUMNS; i++
+		{
+			column[i] = s_mc_column_blackMarket
+			column[i].id = i
+		}
+
+		//Defines the list as
+
+		int			id = 0
+		font3d	boxFont3d													//MUST BE INITIALIZED
+		int		backColor				= packcolor (0, 0, 0, 0)			//CAN BE INITIALIZED
+		int		controlColor			= packcolor (0, 0, 0, 255)			//CAN BE INITIALIZED
+		int		boxTextColor			= packcolor (0,0,0,255)				//CAN BE INITIALIZED
+		int		selectedColor			= packcolor (255,255,255,255)		//CAN BE INITIALIZED
+		int		SelectedHighlightColor	= packcolor (50, 120, 255, 0)		//CAN BE INITIALIZED
+		int		framehighlightColor		= packcolor (200,200,230,255)		//CAN BE INITIALIZED
+		int		ItemHighlightColor		= packcolor (255,255,255,255)		//CAN BE INITIALIZED
+		int		boxhighlightColor		= packcolor (50, 120, 255, 100)		//CAN BE INITIALIZED
+		int		boxTextSelectedColor	= packcolor (255,255,255,255)		//CAN BE INITIALIZED
+		int		labelTextColor			= packcolor (255,255,255,255)		//CAN BE INITIALIZED
+		int		gutterColor				= packcolor (0, 0, 0, 0)			//CAN BE INITIALIZED
+		int		borderColor				= packcolor (255, 255, 255, 255)	//CAN BE INITIALIZED
+		int		headercolor				= packcolor (68, 68, 85, 255)
+		int		headerbordercolor		= packcolor (255, 255, 255, 255)
+		int		headerpressedcolor		= packcolor (68, 68, 85, 255)
+		int		headertextcolor			= packcolor (255, 255, 255, 255)
+		int		facecolor				= packcolor (187, 187, 204, 255)
+		int		shadowcolor				= packcolor	(119, 119, 119, 255)
+
+		int		itemWidth =	0										//MUST BE INITIALIZED
+		int		itemHeight = 0										//MUST BE INITIALIZED
+		int		itemHeight_padding = 0
+		int		list_size = 0										//MUST BE INITIALIZED
+		int		NUM_OF_COLUMNS
+		int		column_header_height
+		int		variable_list_size = 0
+		int		max_displayed										//MUST BE INITIALIZED
+		int		top_of_list											//MUST BE INITIALIZED
+		int		last_of_list
+		int		start_of_list
+		int		itemHeighth[MAX_MC_ITEMS]
+		int		column_for_height_size = -1
+		int		controlkey = -1
+		int		using_keyboard = false
+		int		user_SELECTED_header
+		int		sort_forward_flag = false
+		int		last_SELECTED_header
+		int		uniform_item_height
+		int		offsetx[MAX_MC_COLUMNS]
+
+		string		label = ""											//CAN BE INITIALIZED
+		font3d		labelFont3d											//MUST BE INITIALIZED
+		position	offsetLabel											//CAN BE INITIALIZED
+		int			buttonWidth = 16									//CAN BE INITIALIZED
+		int			arrowHeight = 10									//CAN BE INITIALIZED; IT CONTROLS THE HEIGHT OF THE THUMBSLIDER ARROWS
+		int			get_itemheight = FALSE								//CAN BE INITIALIZED; FLAGS WHETHER YOU WANT TO USE THE FONTHEIGHT AS THE HEIGHT FOR EACH ITEM
+
+		//LOCAL WORK VARIABLES
+		int			num_displayed									//THE NUMBER OF ITEMS DISPLAYED INSIDE THE LIST BOX; THIS IS AFFECTED IN THE INIT
+		int			nSelected = 0									//the current selected item from the list of items
+		int			lit												//the value of the hightlighted item (not selected)
+		int			over_me = false											//am I over the list's region?
+//		string		list_item[MAX_MC_ITEMS]  //--------------MAX_MC_ITEMS MUST BE SET BY YOU.
+		int			first_delay = 30								//time delay value n/60; for the buttons
+		int			second_delay = 5								//time delay value n/60; for the buttons
+		position	mouse_capture									//used to grab the mouse position and detect whether the mouse has been moved
+		int			creating_listbox = true
+
+
+
+		//CREATE CHILDREN BUTTONS--THEY MUST EXIST FOR THE DROPBOX TO WORK!!
+		object o_uparrow		= s_arrow_mc_listbox_blackMarket
+		object o_downarrow		= s_arrow_mc_listbox_blackMarket
+		o_downarrow.up			= false			// identifies this as the arrow down button
+		object o_thumbslider	= s_thumbslide_mc_listbox_blackMarket
+		object o_thumbregiontop = s_thumbregion_mc_listbox_blackMarket
+		object o_thumbregionbot = s_thumbregion_mc_listbox_blackMarket
+
+		framerate = 15
+	}
+
+	GUI_ACTIVATE
+	{
+		activate(o_uparrow)
+		activate(o_downarrow)
+		activate(o_thumbslider)
+		activate(o_thumbregiontop)
+		activate(o_thumbregionbot)
+		for int q = top_of_list; q <= last_of_list; q++
+		{
+			activate(list_button[list_order[q]])
+		}
+
+		for q=0; q < MAX_MC_COLUMNS; q++
+		{
+			activate(column[q])
+		}
+	}
+
+	GUI_DEACTIVATE
+	{
+		deactivate(o_uparrow)
+		deactivate(o_downarrow)
+		deactivate(o_thumbslider)
+		deactivate(o_thumbregiontop)
+		deactivate(o_thumbregionbot)
+
+
+		for int q = 0; q < MAX_MC_ITEMS; q++
+		{
+			deactivate(list_button[list_order[q]])
+		}
+
+
+		for q=0; q < MAX_MC_COLUMNS; q++
+		{
+			deactivate(column[q])
+		}
+	}
+
+	GUI_INIT
+	{
+		//makes sure every item is off when re-initializing
+		if ( top_of_list < 0 )
+			top_of_list = 0
+
+		for int q = top_of_list; q <= last_of_list; q++
+		{
+			deactivate(list_button[list_order[q]])
+		}
+
+		lit = 0
+		if get_itemheight == true
+		{
+			print3d_attributes = boxFont3d, boxTextColor,1,1,1,0,0
+			itemHeight = getprint3dheight("Temp")+1
+		}
+
+		num_displayed = max_displayed-column_header_height
+
+		if creating_listbox
+		{
+			creating_listbox = false
+			location.y += column_header_height
+		}
+			region = 0,1 to itemWidth,itemHeight*num_displayed
+
+		int x = 0
+		int k = 0
+		int tallest = 0
+		int loc_y = 0
+		variable_list_size = 0
+
+		for int i = 0; i < list_size; i++
+		{
+			list_button[i] = s_mc_list_button_blackMarket
+			list_button[i].location = location.x,location.y+loc_y,location.z-1
+			list_button[i].id = i
+
+			if uniform_item_height < 1
+			{
+				tallest = 0
+				for k = 0; k < NUM_OF_COLUMNS; k++
+				{
+					if column[k].icondisplays == true
+					{
+						for x = 0; x <500; x++
+						{
+							if (itemheight*x) > getheight(column[k].list_icon[i])
+								break
+						}
+					}
+					else
+					{
+						print3d_attributes = boxFont3d, boxTextColor,1,1,1,0,0
+
+						if k < NUM_OF_COLUMNS-1
+							print3d_margins = column[k].location.x,0 to column[k+1].location.x,getresy()
+						else
+							print3d_margins = column[k].location.x,0 to itemwidth-2,getresy()
+
+						print3d_position = column[k].location.x,0
+
+						for x = 0; x <500; x++
+						{
+							if (itemheight*x) > getprint3dheight(column[k].list_item[i])
+								break
+						}
+					}
+
+					if x > tallest
+						tallest = x
+				}
+			}
+			else
+			{
+				tallest = uniform_item_height
+			}
+
+			list_button[i].region = 0,0 to itemWidth,(itemheight*(tallest+itemHeight_padding))
+			list_button[i].buttonHeight = (itemheight*(tallest+itemHeight_padding))
+
+			loc_y += (itemheight*(tallest+itemHeight_padding))
+			variable_list_size += (tallest+itemHeight_padding)
+
+			initialize(list_button[i])
+		}
+
+
+		initialize (o_uparrow)
+		initialize (o_downarrow)
+		initialize (o_thumbslider)
+
+		for k = 0; k < NUM_OF_COLUMNS; k++
+		{
+			column[k].o_header = s_headerbutton_blackMarket
+			column[k].o_header.location = location.x,location.y-column_header_height,location.z+2
+			initialize(column[k])
+			if column_header_height < 1
+				deactivate (column[k].o_header)
+		}
+
+		// determines what size the thumslider needs to be: if it's too small, the minimum size is 15
+		if list_size > 0
+		{
+			if list_button[list_size-1].location.y + list_button[list_size-1].region.p2.y > location.y+region.p2.y
+	  		{
+				if o_thumbslider.use_bitmap
+					o_thumbslider.handleheight = getheight(o_thumbslider.p_thumbslider)
+				else
+					o_thumbslider.handleheight = (region.p2.y+column_header_height-(arrowHeight*2)-2) / (variable_list_size/num_displayed)
+
+				o_thumbslider.region = 0,-2 to buttonwidth,o_thumbslider.handleheight+2
+				o_uparrow.region = 0,0 to buttonwidth,arrowHeight
+				o_downarrow.region = 0,0 to buttonwidth,arrowHeight
+				if o_thumbslider.handleheight < 15
+				{
+					o_thumbslider.handleheight = 15
+					o_thumbslider.region = 0,-2 to buttonwidth,o_thumbslider.handleheight+2
+				}
+	 		}
+	 		else
+	 		{
+				if o_thumbslider.use_bitmap
+					o_thumbslider.handleheight = getheight(o_thumbslider.p_thumbslider)
+				else
+	 				o_thumbslider.handleheight = (region.p2.y+column_header_height-(arrowHeight*2)-2)
+
+				o_thumbslider.region = 0,0 to 0,0
+				o_uparrow.region = 0,0 to 0,0
+				o_downarrow.region = 0,0 to 0,0
+			}
+		}
+		else
+		{
+			if o_thumbslider.use_bitmap
+				o_thumbslider.handleheight = getheight(o_thumbslider.p_thumbslider)
+			else
+	 			o_thumbslider.handleheight = (region.p2.y+column_header_height-(arrowHeight*2)-2)
+
+			o_thumbslider.region = 0,0 to 0,0
+			o_uparrow.region = 0,0 to 0,0
+			o_downarrow.region = 0,0 to 0,0
+		}
+
+		//make sure the child objects are in the right locations
+		o_uparrow.location = location.x+itemWidth+1, location.y-column_header_height, location.z+5
+		o_downarrow.location = location.x+itemWidth+1, location.y+(itemHeight*num_displayed)-arrowHeight, location.z+5
+
+		o_thumbslider.location = location.x+itemWidth+1, location.y+arrowHeight+1-column_header_height, location.z+4
+
+		o_thumbregiontop.location = location.x+itemWidth+1,location.y+arrowHeight-column_header_height,location.z+3
+		o_thumbregionbot.location = location.x+itemWidth+1,(o_thumbslider.location.y+o_thumbslider.handleheight)-column_header_height,location.z+3
+
+		start_of_list = 0
+		mail(nSelected,this)
+	}
+
+	LBUTTON_UPDATE
+	{
+		if (mouse.left == BUTTON_CLICKED)
+		{
+			if mouse.x < location.x+itemWidth			// ensures that you are clicking inside the list box
+			{
+				focus(this)
+			}
+		}
+	}
+
+	REGION_ENTERED
+	{
+		over_me = true
+	}
+
+	REGION_EXITED
+	{
+		over_me = false
+	}
+
+	GUI_MAILBOX
+	{
+		focus(this)
+
+		if (sender == o_thumbslider)
+		{
+			if getmessage() < (location.y-column_header_height+arrowHeight+1)
+				o_thumbslider.location.y = location.y-column_header_height+arrowHeight+1
+			if getmessage() > (location.y+(itemHeight*(num_displayed))-arrowHeight-(o_thumbslider.handleheight))-1
+				o_thumbslider.location.y = (location.y+(itemHeight*(num_displayed))-arrowHeight-1-o_thumbslider.handleheight)
+
+			//1.) find out how many pixels from the top of the thumbslider region 2.) calc total pixels to move thumbslider/result of num of items-num being drawn (to prevent any empty spaces)
+			//3.) find top item by taking the total area of pixels/num of pixels for one step (or scroll)
+
+			float tmp = (o_thumbslider.location.y) - (location.y-column_header_height+arrowHeight+1)
+			o_thumbslider.step_height = ((itemHeight*num_displayed)+column_header_height-(arrowHeight*2)-(o_thumbslider.handleheight)-2) / (variable_list_size-num_displayed)
+			float tmp2 = 0
+			if (o_thumbslider.step_height)
+				tmp2 = tmp/o_thumbslider.step_height + 0.0001
+			start_of_list = tmp2
+			if start_of_list > variable_list_size-num_displayed
+			{
+				start_of_list = variable_list_size-num_displayed + 1
+			}
+
+			mail(top_of_list)
+		}
+		else
+		if getmessage() == -4
+		{
+			int tempnum = getmessage(1)
+			int x
+
+			if top_of_list >= list_size
+			{
+				top_of_list = list_size - 1
+			}
+			if (list_size > 0)
+			{
+				if list_button[list_order[list_size-1]].location.y+list_button[list_order[list_size-1]].buttonheight > location.y+(itemHeight*num_displayed) //start_of_list+num_displayed < variable_list_size
+				{
+					int move_amount = 0
+
+					move_amount = list_button[list_order[tempnum]].location.y	- location.y
+
+					start_of_list = move_amount
+					for int i = 0; i < list_size; i++
+					{
+						list_button[list_order[i]].location.y -= move_amount
+					}
+
+					// tell the thumbslider to reposition itself
+					mail(0, o_thumbslider)
+				}
+			}
+		}
+		else
+		//up button pressed
+		if (sender == o_uparrow || sender == o_thumbregiontop || getmessage() == -2)
+		{
+			if start_of_list > 0
+			{
+				int move_amount
+				if location.y > list_button[list_order[top_of_list]].location.y
+				{
+					move_amount = location.y - list_button[list_order[top_of_list]].location.y
+				}
+				else
+				{
+					move_amount = list_button[list_order[top_of_list-1]].buttonheight
+				}
+
+//				start_of_list -= (move_amount/itemheight)
+				start_of_list -= move_amount
+				for int i = 0; i < list_size; i++
+				{
+					list_button[list_order[i]].location.y += move_amount
+				}
+
+				// tell the thumbslider to reposition itself
+				mail(0, o_thumbslider)
+
+				mail(top_of_list)
+			}
+		}
+		else
+		if (sender == o_downarrow || sender == o_thumbregionbot || getmessage() == -3)
+		{
+			if list_button[list_order[list_size-1]].location.y+list_button[list_order[list_size-1]].buttonheight > location.y+(itemHeight*num_displayed) //start_of_list+num_displayed < variable_list_size
+			{
+				int move_amount
+				if location.y-column_header_height > list_button[list_order[top_of_list]].location.y
+				{
+					move_amount = list_button[list_order[top_of_list]].location.y+list_button[list_order[top_of_list]].buttonHeight-location.y
+				}
+				else
+				{
+					move_amount = list_button[list_order[top_of_list]].buttonheight
+				}
+
+//				start_of_list += (move_amount/itemheight)
+				start_of_list += move_amount
+				for int i = 0; i < list_size; i++
+				{
+					list_button[list_order[i]].location.y -= move_amount
+				}
+
+				// tell the thumbslider to reposition itself
+				mail(0, o_thumbslider)
+
+				mail(top_of_list)
+			}
+		}
+		else
+		{
+			if getmessage() == -1
+			{
+			}
+			else
+			if getmessage() > -1
+				nSelected = getmessage()
+			else
+			if getmessage() < -9
+			{
+				if user_SELECTED_header != last_SELECTED_header
+				{
+					sort_forward_flag = true
+					last_SELECTED_header = user_SELECTED_header
+				}
+				else
+					sort_forward_flag = !sort_forward_flag
+
+				int pass
+				int in_order = false
+				INT INBETWEEN
+				int	char_pos
+				int loop_limit = list_size-1
+				int greatest_value = 0
+				int greatest_loc = loop_limit
+				int text_character
+				int greatest_text
+				string text_character_s
+
+				if column[user_SELECTED_header].numeric == true
+				{
+					while(loop_limit > 0) && in_order == false
+					{
+						in_order = true
+						greatest_value = 0
+						for pass = 0; pass <= loop_limit ; pass++
+						{
+							text_character_s = column[user_SELECTED_header].list_item[list_order[pass]]
+
+							if greatest_value < makeint(text_character_s)
+							{
+								greatest_value = makeint(text_character_s)
+								greatest_loc = pass
+								in_order = false
+							}
+						}
+							if in_order == false
+							{
+								inbetween = list_order[loop_limit]
+								list_order[loop_limit] = list_order[greatest_loc]
+								list_order[greatest_loc] = inbetween
+							}
+							loop_limit--
+					}
+
+					if sort_forward_flag == false
+					{
+						for pass = 0; pass <= ((list_size-1)/2) ; pass++
+						{
+							inbetween = list_order[pass]
+							list_order[pass] = list_order[list_size-1-pass]
+							list_order[list_size-1-pass] = inbetween
+						}
+					}
+				}
+				else
+				{
+					while(loop_limit > 0) && in_order == false
+					{
+						in_order = true
+						greatest_loc = loop_limit
+						for pass = 0; pass <= loop_limit ; pass++
+						{
+							char_pos = 0
+							text_character = querychar(mid$(column[user_SELECTED_header].list_item[list_order[pass]],char_pos,char_pos+1),0)
+							greatest_text = querychar(mid$(column[user_SELECTED_header].list_item[list_order[greatest_loc]],char_pos,char_pos+1),0)
+							if pass != greatest_loc
+							{
+								while greatest_text == text_character
+								{
+									char_pos++
+									if char_pos > length$(column[user_SELECTED_header].list_item[list_order[pass]])-1 || char_pos > length$(column[user_SELECTED_header].list_item[list_order[greatest_loc]])-1
+									{
+										break
+									}
+									else
+									{
+										text_character = querychar(mid$(column[user_SELECTED_header].list_item[list_order[pass]],char_pos,char_pos+1),0)
+										greatest_text = querychar(mid$(column[user_SELECTED_header].list_item[list_order[greatest_loc]],char_pos,char_pos+1),0)
+									}
+								}
+
+								if greatest_text < text_character
+								{
+									greatest_loc = pass
+									in_order = false
+								}
+							}
+						}
+
+ 						if in_order == false
+						{
+							inbetween = list_order[loop_limit]
+							list_order[loop_limit] = list_order[greatest_loc]
+							list_order[greatest_loc] = inbetween
+						}
+						loop_limit--
+					}
+
+					if sort_forward_flag == false
+					{
+						for pass = 0; pass <= ((list_size-1)/2) ; pass++
+						{
+							inbetween = list_order[pass]
+							list_order[pass] = list_order[list_size-1-pass]
+							list_order[list_size-1-pass] = inbetween
+						}
+					}
+
+
+				}
+
+			}
+		}
+
+		int flag = false
+		int loc_y = 0-(itemHeight*start_of_list)
+
+		for int find_top = 0; find_top <= list_size-1; find_top++
+		{
+			list_button[list_order[find_top]].location = location.x,location.y+loc_y,location.z+2
+			loc_y += list_button[list_order[find_top]].buttonHeight
+			if flag == false && (list_button[list_order[find_top]].location.y+list_button[list_order[find_top]].region.p2.y) > location.y
+			{
+				flag = true
+				top_of_list = find_top
+			}
+		}
+
+		last_of_list = 0
+		for int sleep = 0; sleep < list_size; sleep++
+		{
+			if (list_button[list_order[sleep]].location.y+list_button[list_order[sleep]].buttonHeight) <= location.y || (list_button[list_order[sleep]].location.y >= location.y+(itemheight*num_displayed))
+				deactivate(list_button[list_order[sleep]])
+			else
+			{
+				activate(list_button[list_order[sleep]])
+				last_of_list = sleep
+			}
+		}
+
+		int gap_to_create
+		int inside_list
+		int height
+		int width
+		if list_size > 0
+		{
+			for(int j=0; j < NUM_OF_COLUMNS;j++)
+			{
+				if column[j].icondisplays
+				{
+					refresh (column[j].list_icon[list_order[top_of_list]])
+					gap_to_create = location.y-list_button[list_order[top_of_list]].location.y
+					if gap_to_create >= 0
+					{
+						blit parent.black(0,0 to getwidth(column[j].list_icon[list_order[top_of_list]]),gap_to_create-list_button[list_order[top_of_list]].offsety[j]+1), 0,0 on column[j].list_icon[list_order[top_of_list]]
+						update (column[j].list_icon[list_order[top_of_list]])
+					}
+
+					for inside_list = top_of_list+1; inside_list < last_of_list; inside_list++
+					{
+						refresh (column[j].list_icon[list_order[inside_list]])
+					}
+
+					height = getheight(column[j].list_icon[list_order[last_of_list]])
+					width = getwidth(column[j].list_icon[list_order[last_of_list]])
+
+					refresh (column[j].list_icon[list_order[last_of_list]])
+					gap_to_create = list_button[list_order[last_of_list]].location.y+list_button[list_order[last_of_list]].offsety[j]+height-(location.y+region.p2.y)
+
+					if list_button[list_order[last_of_list]].location.y+list_button[list_order[last_of_list]].offsety[j] <= (location.y+region.p2.y)
+					{
+						blit parent.black(0,0 to width,height), 0,(height-gap_to_create) on column[j].list_icon[list_order[last_of_list]]
+					}
+					else
+					{
+						blit parent.black, 0,0 on column[j].list_icon[list_order[last_of_list]]
+					}
+					update (column[j].list_icon[list_order[last_of_list]])
+				}
+			}
+
+			list_button[list_order[top_of_list]].region = 0,(location.y-list_button[list_order[top_of_list]].location.y) to itemwidth,list_button[list_order[top_of_list]].buttonheight
+
+			for inside_list = top_of_list+1; inside_list < last_of_list; inside_list++
+			{
+				list_button[list_order[inside_list]].region = 0,0 to itemWidth,list_button[list_order[inside_list]].buttonHeight
+			}
+
+			if list_button[list_order[last_of_list]].location.y+list_button[list_order[last_of_list]].buttonheight > location.y+region.p2.y
+				list_button[list_order[last_of_list]].region = 0,0 to itemwidth,(location.y+(itemheight*num_displayed))-list_button[list_order[last_of_list]].location.y
+			else
+				list_button[list_order[last_of_list]].region = 0,0 to itemwidth,list_button[list_order[last_of_list]].buttonHeight
+		}
+	}
+
+
+	GUI_EXECUTE
+	{
+		//resize negative space thumbslider regions ALWAYS
+		o_thumbregiontop.region = 0,0 to buttonWidth, (o_thumbslider.location.y-o_thumbregiontop.location.y)
+		o_thumbregionbot.location.y = (o_thumbslider.location.y+o_thumbslider.handleheight)
+	 	o_thumbregionbot.region = 0,0 to buttonWidth, (o_downarrow.location.y)-(o_thumbslider.location.y+o_thumbslider.handleheight))
+
+		if mouse_capture.x != mouse.x || mouse_capture.y != mouse.y
+		{
+			if using_keyboard
+			{
+				using_keyboard = false
+				list_button[lit].over_me = false
+			}
+			mouse_capture = mouse.x,mouse.y
+		}
+	}
+
+	GUI_DRAW
+	{
+		// draw the list
+			// draw background box
+			setpencolor(backColor)
+			ldrawrect 0,0-column_header_height to itemwidth,((num_displayed)*(itemheight))
+			setpencolor(borderColor)
+			drawline location.x, location.y to location.x + itemwidth, location.y
+			drawline location.x, location.y to location.x, location.y + (num_displayed * itemheight)
+
+			setpencolor(shadowcolor)
+			drawline location.x + itemwidth, location.y to location.x + itemwidth, location.y + (num_displayed * itemheight)
+			drawline location.x, location.y  + (num_displayed * itemheight) to location.x + itemwidth, location.y + (num_displayed * itemheight)
+//			ldrawframe 0,0-column_header_height to itemwidth,((num_displayed)*(itemheight))
+
+		// draw hot border
+//	 	if gotfocus(this)
+//		{
+//			setpencolor(framehighlightcolor)
+//			ldrawframe 0,0-column_header_height to itemwidth,itemheight*num_displayed
+//		}
+
+//		//Use for an optional label for the top of box
+		print3d_attributes = labelFont3D, labelTextColor,1,1,1,0,0
+		lprint3d_position = offsetLabel.x+1, offsetLabel.y-column_header_height
+		lprint3d_margins = offsetLabel.x, offsetLabel.y-column_header_height to (offsetLabel.x + getprint3dwidth(label)+2),(offsetLabel.y + getprint3dheight(label)+3)
+		print3d label
+	}
+}
+
+s_thumbslide_mc_listbox_blackMarket  // resizing handle
+{
+	GUI_CREATE
+	{
+		float handleheight					// this is very important for calculating behaviours
+		float step_height					// float for the math part of thumbslider
+		float result						// float to get the finished valuse to add to location
+		int thumb_pressed = false			// was this slider pressed with left mouse button variable
+		pane p_thumbslider
+		int offsetx = 0
+		int use_bitmap = false
+		int mouse_loc
+	}
+
+	GUI_INIT
+	{
+		if exists(p_thumbslider)
+		{
+			offsetx = ((parent.buttonWidth-getwidth(p_thumbslider))/2)
+			use_bitmap = true
+		}
+	}
+
+
+	GUI_MAILBOX
+	{
+		if parent.list_button[parent.list_order[parent.list_size-1]].location.y+parent.list_button[parent.list_order[parent.list_size-1]].buttonheight < parent.location.y+(parent.num_displayed*sender.itemheight)		//if we are at the bottm of the list box, make sure that it's lined up against the down button correctly
+		{
+			location.y = parent.location.y+(parent.itemHeight*(parent.num_displayed))-parent.arrowHeight-handleheight-1
+			parent.start_of_list = parent.variable_list_size-parent.num_displayed-1
+			parent.start_of_list = parent.variable_list_size-parent.num_displayed
+		}
+		else			//position formula = 1.) calc the size of the thumslider area/calc num of steps to slide = the pixel height of a single step  2.) calc the location of the very top of thumbslider  3.) add to the location the result of top_of_list times the step height
+		{
+			step_height = ((parent.itemHeight*parent.num_displayed)+parent.column_header_height-(parent.arrowHeight*2)-(handleheight)-2) / (parent.variable_list_size-parent.num_displayed)
+			location.y = parent.location.y-parent.column_header_height+parent.arrowHeight+1
+			result = (parent.start_of_list * step_height)
+			location.y += result
+		}
+	}
+
+	REGION_ENTERED
+	{
+		if ( exists( @infobox@ ) )
+			mail(parent.id, @infobox@)
+	}
+
+
+	LBUTTON_UPDATE
+	{
+		if (mouse.left == BUTTON_PRESSED)					// this keeps a glitch from happening when using the thumbregions
+		{
+			thumb_pressed = true							//now we can know that the user wanted to drag the thumbslider
+			mouse_loc = mouse.y - location.y
+		}
+		else
+		if thumb_pressed
+		{
+			if (mouse.left == BUTTON_HELD)					// this drags the thumbslider as long as the button is held
+			{
+				location.y = mouse.y - mouse_loc //-(handleheight/2)
+				mail (location.y)
+				always_in_region = true
+			}
+			else											// if anything else but held, release the thumbslider
+			{
+				always_in_region = false
+				thumb_pressed = false
+			}
+		}
+	}
+
+	GUI_DRAW
+	{
+		setpencolor(parent.gutterColor)
+		drawrect parent.location.x+parent.itemwidth+1, parent.location.y-parent.column_header_height to parent.location.x+parent.itemwidth+parent.buttonWidth+1, parent.location.y+(parent.itemHeight*(parent.num_displayed))
+
+		setpencolor(parent.bordercolor)
+		drawframe parent.location.x+parent.itemwidth+1, parent.location.y-parent.column_header_height to parent.location.x+parent.itemwidth+parent.buttonWidth+1, parent.location.y+(parent.itemHeight*(parent.num_displayed))
+
+		if use_bitmap
+		{
+			render p_thumbslider, location.x+offsetx,location.y
+		}
+		else
+		{
+			setpencolor(parent.facecolor)
+			drawrect location.x + 2, location.y + 1 to (location.x + parent.buttonWidth) - 1, (location.y + handleheight) - 1
+
+			setpencolor(parent.borderColor)
+			drawline location.x + 2, location.y + 1 to (location.x + parent.buttonWidth) - 1, location.y + 1
+			drawline location.x + 2, location.y + 1 to location.x + 2, location.y + handleheight - 1
+
+			setpencolor(parent.shadowcolor)
+			drawline location.x + 2, location.y + handleheight - 1 to (location.x + parent.buttonWidth) - 1, location.y + handleheight - 1
+			drawline (location.x + parent.buttonWidth) - 1, location.y + 1 to (location.x + parent.buttonWidth) - 1, location.y + handleheight - 1
+		}
+	}
+}
+
+s_arrow_mc_listbox_blackMarket
+{
+	GUI_CREATE
+	{
+		int up = true								//this object is used for either the up or down arrow; this is the flag so it knows
+		int timeToMove								//created to store a delay value for button presses
+		float offsety									//keeps arrow in center
+		float offsetx
+
+		pane p_arrow								// if you choose to us bitmaps for the arrows
+		int use_bitmap = false
+		framerate = 10
+	}
+
+	GUI_INIT
+	{
+		if exists(p_arrow)
+		{
+			parent.buttonwidth = getwidth(p_arrow)
+			parent.arrowHeight = getheight(p_arrow)
+			offsety = 0
+			offsetx = 0
+			use_bitmap = true
+		}
+		else
+		{
+			offsety = ((parent.arrowHeight-6)/2)+1
+			offsetx = ((parent.buttonWidth-12)/2)+1
+		}
+	}
+
+	REGION_ENTERED
+	{
+		if ( exists( @infobox@ ) )
+			mail(parent.id, @infobox@)
+	}
+
+	LBUTTON_UPDATE
+	{
+		if (mouse.left == BUTTON_PRESSED)
+		{
+			timeToMove = gettime()+parent.first_delay		//if delay = 25,25/60 of a second to wait after first click; gettime() takes the current clock value
+			mail( 0 )						//sends 0 (the value is not important in this case) to parent to do what's necessary to move the thumbslider
+		}
+
+		if (mouse.left == BUTTON_HELD)
+		{
+			if gettime() > timeToMove
+			{
+				// notify parent object (the one running s_listbox)
+				mail( 0 )						//sends 0 (the value is not important in this case) to parent to do what's necessary to move the thumbslider
+				timeToMove = gettime()+parent.second_delay		//if delay = 5, 5/60 of a second to wait after mouse button has been held down
+			}
+		}
+	}
+
+	GUI_DRAW
+	{
+		// draw background
+		setpencolor(parent.faceColor)
+		drawrect location.x, location.y to location.x+parent.buttonWidth, location.y+parent.arrowHeight
+
+		// draw border
+		setpencolor(parent.borderColor)
+		drawline location.x, location.y to location.x + parent.buttonWidth, location.y
+		drawline location.x, location.y to location.x, location.y + parent.arrowheight
+		setpencolor(parent.shadowcolor)
+		drawline location.x + parent.buttonWidth, location.y to location.x + parent.buttonWidth, location.y
+		drawline location.x, location.y + parent.arrowheight to location.x + parent.buttonWidth, location.y + parent.arrowheight
+
+		// draw border
+//		setpencolor(parent.borderColor)
+//		drawframe location.x, location.y to location.x+parent.buttonWidth, location.y+parent.arrowHeight
+
+		setpencolor(parent.ControlColor)
+		if up == true
+		{
+			if use_bitmap
+			{
+				render p_arrow, location.x,location.y      // if you decide to use a graphic for each arrow, here's where they need to be
+			}
+			else
+			{
+				drawline location.x+5+offsetx,location.y-1+offsety to location.x+6+offsetx,location.y-1+offsety
+				drawline location.x+4+offsetx,location.y+offsety to location.x+7+offsetx,location.y+offsety
+				drawline location.x+3+offsetx,location.y+1+offsety to location.x+8+offsetx,location.y+1+offsety
+				drawline location.x+2+offsetx,location.y+2+offsety to location.x+9+offsetx,location.y+2+offsety
+				drawline location.x+1+offsetx,location.y+3+offsety to location.x+10+offsetx,location.y+3+offsety
+				drawline location.x+offsetx,location.y+4+offsety to location.x+11+offsetx,location.y+4+offsety
+			}
+		}
+		else
+		{
+			if use_bitmap
+			{
+				render p_arrow, location.x,location.y      // if you decide to use a graphic for each arrow, here's where they need to be
+			}
+			else
+			{
+				drawline location.x+offsetx,location.y+offsety to location.x+11+offsetx,location.y+offsety
+				drawline location.x+1+offsetx,location.y+1+offsety to location.x+10+offsetx,location.y+1+offsety
+				drawline location.x+2+offsetx,location.y+2+offsety to location.x+9+offsetx,location.y+2+offsety
+				drawline location.x+3+offsetx,location.y+3+offsety to location.x+8+offsetx,location.y+3+offsety
+				drawline location.x+4+offsetx,location.y+4+offsety to location.x+7+offsetx,location.y+4+offsety
+				drawline location.x+5+offsetx,location.y+5+offsety to location.x+6+offsetx,location.y+5+offsety
+			}
+		}
+	}
+}
+
+//script for scalable invisible regions for the thumbslider negative space
+s_thumbregion_mc_listbox_blackMarket
+{
+	GUI_CREATE
+	{
+		int timeToMove						//created to store a delay value for button presses
+		int region_pressed = false
+	}
+
+	REGION_ENTERED
+	{
+		if ( exists( @infobox@ ) )
+			mail(parent.id, @infobox@)
+	}
+
+	REGION_EXITED
+	{
+		region_pressed = false
+	}
+
+
+	LBUTTON_UPDATE
+	{
+		if (mouse.left == BUTTON_PRESSED)
+		{
+			region_pressed = true
+			timeToMove = gettime()+parent.first_delay		//if delay = 25, 25/60 of a second to wait after first click; gettime() takes the current clock value
+			mail( 0 )						//sends 0 (the value is not important in this case) to parent to do what's necessary to move the thumbslider
+		}
+		else
+		{
+			if (mouse.left == BUTTON_HELD)
+			{
+				if gettime() > timeToMove && region_pressed
+				{
+					// notify parent object (the one running s_droplistbox)
+					mail( 0 )					//sends 0 (the value is not important in this case) to parent to do what's necessary to move the thumbslider
+					timeToMove = gettime()+parent.second_delay	//if delay = 25, 5/60 of a second to wait after mouse button has been held down
+				}
+			}
+			else
+			{
+				region_pressed = false
+			}
+		}
+	}
+}
+
+s_mc_column_blackMarket
+{
+	GUI_CREATE
+	{
+		string		list_item[MAX_MC_ITEMS]  //--------------MAX_MC_ITEMS MUST BE SET BY YOU.
+		pane		list_icon[MAX_MC_ITEMS]
+		int			columnWidth
+		font		fontStyle
+		int			fontColor = packcolor(0,0,0,255)
+		int			fontAlignment
+		int			icondisplays = false
+		int			numeric = false
+		int			id
+
+		object		o_header
+	}
+
+	GUI_ACTIVATE
+	{
+		activate(o_header)
+	}
+
+	GUI_DEACTIVATE
+	{
+		deactivate(o_header)
+	}
+
+	GUI_MAILBOX
+	{
+		parent.user_SELECTED_header = id
+		mail (-10)
+	}
+
+	GUI_INIT
+	{
+		if id != 0
+		{
+			if id == (parent.NUM_OF_COLUMNS-1)
+				o_header.buttonwidth = parent.itemwidth-location.x
+			else
+				o_header.buttonwidth = parent.column[id+1].location.x-location.x
+
+			o_header.location.x = parent.location.x+parent.column[id].location.x
+		}
+		else
+		{
+			o_header.location.x = parent.location.x
+
+			if id == (parent.NUM_OF_COLUMNS-1)
+				o_header.buttonwidth = parent.itemwidth
+			else
+				o_header.buttonwidth = parent.column[id+1].location.x
+		}
+		o_header.region = 0,0 to o_header.buttonwidth,parent.column_header_height
+	}
+}
+
+s_mc_list_button_blackMarket
+{
+	GUI_CREATE
+	{
+		location = getresx()+2,getresy()+2,parent.location.z-2
+		int			buttonHeight
+		int			id
+		int			over_me
+		int			offsety[parent.NUM_OF_COLUMNS]
+		int			count
+		int			clicktime
+
+		sound addWeapon				= APATH "sfx_add_weapon.wav"
+
+		dblclick(this, true)
+		int mouse_held = false
+		int held_delay = 0
+
+		int mechChitInfoIDs [FirstPersonnelChitID + 40]
+
+		mechChitInfoIDs [FirstMechChitID + M_ArcticWolf	  ]=  325
+		mechChitInfoIDs [FirstMechChitID + M_Argus		  ]=  326
+		mechChitInfoIDs [FirstMechChitID + M_Atlas		  ]=  327
+		mechChitInfoIDs [FirstMechChitID + M_Awesome	  ]=  328
+		mechChitInfoIDs [FirstMechChitID + M_BlackKnight  ]=  329
+		mechChitInfoIDs [FirstMechChitID + M_Bushwacker	  ]=  330
+		mechChitInfoIDs [FirstMechChitID + M_Catapult	  ]=  331
+		mechChitInfoIDs [FirstMechChitID + M_CauldronBorn ]=  332
+		mechChitInfoIDs [FirstMechChitID + M_Chimera	  ]=  333
+		mechChitInfoIDs [FirstMechChitID + M_Cougar	      ]=  334
+		mechChitInfoIDs [FirstMechChitID + M_Daishi	      ]=  335
+		mechChitInfoIDs [FirstMechChitID + M_Dragon	      ]=  336
+		mechChitInfoIDs [FirstMechChitID + M_Fafnir		  ]=  337
+		mechChitInfoIDs [FirstMechChitID + M_Flea		  ]=  338
+		mechChitInfoIDs [FirstMechChitID + M_Gladiator 	  ]=  339
+		mechChitInfoIDs [FirstMechChitID + M_Hauptmann 	  ]=  340
+		mechChitInfoIDs [FirstMechChitID + M_Hellhound	  ]=  341
+		mechChitInfoIDs [FirstMechChitID + M_Hellspawn	  ]=  342
+		mechChitInfoIDs [FirstMechChitID + M_Highlander	  ]=  343
+		mechChitInfoIDs [FirstMechChitID + M_Hunchback	  ]=  344
+		mechChitInfoIDs [FirstMechChitID + M_Kodiak	      ]=  345
+		mechChitInfoIDs [FirstMechChitID + M_Loki		  ]=  346
+		mechChitInfoIDs [FirstMechChitID + M_Longbow   	  ]=  347
+		mechChitInfoIDs [FirstMechChitID + M_Madcat	      ]=  348
+		mechChitInfoIDs [FirstMechChitID + M_Madcat_MKII  ]=  349
+		mechChitInfoIDs [FirstMechChitID + M_Masakari	  ]=  350
+		mechChitInfoIDs [FirstMechChitID + M_Mauler	      ]=  351
+		mechChitInfoIDs [FirstMechChitID + M_Novacat	  ]=  352
+		mechChitInfoIDs [FirstMechChitID + M_Osiris	      ]=  353
+		mechChitInfoIDs [FirstMechChitID + M_Owens     	  ]=  354
+		mechChitInfoIDs [FirstMechChitID + M_Puma      	  ]=  355
+		mechChitInfoIDs [FirstMechChitID + M_Raven		  ]=  356
+		mechChitInfoIDs [FirstMechChitID + M_Ryoken	      ]=  357
+		mechChitInfoIDs [FirstMechChitID + M_Shadowcat	  ]=  358
+		mechChitInfoIDs [FirstMechChitID + M_Sunder	      ]=  359
+		mechChitInfoIDs [FirstMechChitID + M_Templar	  ]=  360
+		mechChitInfoIDs [FirstMechChitID + M_Thanatos	  ]=  361
+		mechChitInfoIDs [FirstMechChitID + M_Thor		  ]=  362
+		mechChitInfoIDs [FirstMechChitID + M_Uller		  ]=  363
+		mechChitInfoIDs [FirstMechChitID + M_Uziel		  ]=  364
+		mechChitInfoIDs [FirstMechChitID + M_Victor    	  ]=  365
+		mechChitInfoIDs [FirstMechChitID + M_Vulture	  ]=  366
+		mechChitInfoIDs [FirstMechChitID + M_Wolfhound	  ]=  367
+		mechChitInfoIDs [FirstMechChitID + M_Zeus		  ]=  368
+		mechChitInfoIDs [FirstMechChitID + M_Avatar		  ]=  369	// mektek
+		mechChitInfoIDs [FirstMechChitID + M_Warhammer		  ]=  370	// mektek
+		mechChitInfoIDs [FirstMechChitID + M_Strider		  ]=  371	// mektek
+		mechChitInfoIDs [FirstMechChitID + M_Marauder		  ]=  372	// mektek
+		mechChitInfoIDs [FirstMechChitID + M_Bloodasp		  ]=  373	// mektek
+		mechChitInfoIDs [FirstMechChitID + M_UrbanmechIIC	  ]=  374	// mektek
+		mechChitInfoIDs [FirstMechChitID + M_Stalker	  ]=  375	// mektek
+		mechChitInfoIDs [FirstMechChitID + M_Ares	  ]=  376	// mektek
+		mechChitInfoIDs [FirstMechChitID + M_Urbanmech	  ]=  377	// mektek
+		mechChitInfoIDs [FirstMechChitID + M_BrcticWolf  	  ]=  378	// Arctic Wolf II	// Mechstorm
+
+		mechChitInfoIDs [FirstPersonnelChitID + 0]    = 650
+		mechChitInfoIDs [FirstPersonnelChitID + 1]    = 651
+		mechChitInfoIDs [FirstPersonnelChitID + 2]    = 652
+		mechChitInfoIDs [FirstPersonnelChitID + 3]    = 653
+		mechChitInfoIDs [FirstPersonnelChitID + 4]    = 654
+		mechChitInfoIDs [FirstPersonnelChitID + 5]    = 655
+		mechChitInfoIDs [FirstPersonnelChitID + 6]    = 656
+		mechChitInfoIDs [FirstPersonnelChitID + 7]    = 657
+		mechChitInfoIDs [FirstPersonnelChitID + 8]    = 658
+		mechChitInfoIDs [FirstPersonnelChitID + 9]    = 659
+		mechChitInfoIDs [FirstPersonnelChitID+ 10]    = 660
+		mechChitInfoIDs [FirstPersonnelChitID+ 11]    = 661
+		mechChitInfoIDs [FirstPersonnelChitID+ 12]    = 662
+		mechChitInfoIDs [FirstPersonnelChitID+ 13]    = 663
+		mechChitInfoIDs [FirstPersonnelChitID+ 14]    = 664
+		mechChitInfoIDs [FirstPersonnelChitID+ 15]    = 665
+		mechChitInfoIDs [FirstPersonnelChitID+ 16]    = 666
+		mechChitInfoIDs [FirstPersonnelChitID+ 17]    = 667
+		mechChitInfoIDs [FirstPersonnelChitID+ 18]    = 668
+		mechChitInfoIDs [FirstPersonnelChitID+ 19]    = 669
+		mechChitInfoIDs [FirstPersonnelChitID+ 20]    = 670
+		mechChitInfoIDs [FirstPersonnelChitID+ 21]    = 671
+		mechChitInfoIDs [FirstPersonnelChitID+ 22]    = 672
+		mechChitInfoIDs [FirstPersonnelChitID+ 23]    = 673
+		mechChitInfoIDs [FirstPersonnelChitID+ 24]    = 674
+		mechChitInfoIDs [FirstPersonnelChitID+ 25]    = 675
+		mechChitInfoIDs [FirstPersonnelChitID+ 26]    = 676
+		mechChitInfoIDs [FirstPersonnelChitID+ 27]    = 677
+		mechChitInfoIDs [FirstPersonnelChitID+ 28]    = 678
+
+		framerate = 20
+	}
+
+	GUI_INIT
+	{
+		for int i = 0; i < parent.num_of_columns; i++
+		{
+			if parent.column[i].icondisplays && exists(parent.column[i].list_icon[id]))
+				offsety[i] = ((buttonHeight-getheight(parent.column[i].list_icon[id]))/2)
+		}
+	}
+
+	REGION_ENTERED
+	{
+		if parent.using_keyboard == false
+		{
+			for int h = 0; h < parent.list_size;h++
+			{
+				if parent.list_order[h] == id
+				{
+					parent.lit = h
+					break
+				}
+			}
+			over_me = true
+		}
+
+		// parent.parent.showinfo		= true
+		// parent.parent.sel_weapon	= parent.lit
+		// parent.parent.sel_list_id	= parent.id
+
+		int infoID = makeint(parent.column[0].list_item[id])
+		if infoID >= FirstMechChitID
+		{
+			infoID = mechChitInfoIDs [infoID];
+			// containingClass.showinfo = false
+		}
+
+		if ( exists( @infobox@ ) )
+			mail(infoID, @infobox@)
+	}
+
+	REGION_EXITED
+	{
+		if parent.using_keyboard == false
+			over_me = false
+	}
+
+	GUI_EXECUTE
+	{
+		//if (mouse_held)
+		//	held_delay++
+
+		//// Value of held_delay can be changed if necessary
+		//if (held_delay > 2)
+		//{
+		//	parent.parent.parent.o_item_pointer.selected_item_id	= makeint(parent.column[0].list_item[id])
+		//	parent.parent.parent.o_item_pointer.originListID		= parent.id
+		//	mouse_held = false
+		//	held_delay = 0
+		//}
+	}
+
+	LBUTTON_UPDATE
+	{
+		mouse_held = false
+
+		int itemID = makeint(parent.column[0].list_item[id])
+		if mouse.left == BUTTON_PRESSED
+		{
+			if parent.start_of_list < 0
+				parent.start_of_list = 0
+			mail(id)
+
+			// use delay flag if too fast :
+			// mouse_held = true
+			@Freemarket@gTransactionProgress = @Freemarket@DRAGDROP_INITIATED
+			@Freemarket@gTransactionOriginList = parent.id
+			@Freemarket@gTransactionTargetList = 0
+			@Freemarket@gTransactionItemID = itemID
+		}
+		// else
+		if mouse.left == BUTTON_DCLICKED
+		{
+			spew "button dclicked"
+			int isLastMech = 0
+
+			@Freemarket@gTransactionProgress = @Freemarket@INSTANTANEOUS_TRANSFER_INITIATED
+			@Freemarket@gTransactionOriginList = parent.id
+			@Freemarket@gTransactionTargetList = 0
+			@Freemarket@gTransactionItemID = itemID
+		}
+	}
+
+	GUI_DRAW
+	{
+		if parent.location.y <= location.y+region.p2.y && location.y <= parent.location.y+parent.region.p2.y
+		{
+			//Prints list itself
+			lprint3d_margins = 0,region.p1.y+1 to parent.itemWidth+2,region.p2.y+2
+
+			if (parent.nSelected == id)
+			{
+				setpencolor(parent.SelectedHighlightColor)
+				ldrawrect 1,region.p1.y+1 to parent.itemWidth, region.p2.y
+			}
+
+			if over_me
+			{
+				setpencolor(parent.boxhighlightcolor)
+				ldrawrect 1,region.p1.y+1  to parent.itemWidth, region.p2.y
+			}
+
+			for count=0; count < parent.NUM_OF_COLUMNS;count++
+			{
+				if parent.column[count].icondisplays == false
+				{
+					if count < parent.NUM_OF_COLUMNS-1
+						lprint3d_margins = parent.column[count].location.x + parent.offsetx[count],region.p1.y+2 to parent.column[count+1].location.x,region.p2.y
+					else
+						lprint3d_margins = parent.column[count].location.x + parent.offsetx[count],region.p1.y+2 to parent.itemwidth-2,region.p2.y
+
+					print3d_attributes = parent.boxFont3d, parent.column[count].fontColor, 1,1,1,0,0,parent.column[count].fontAlignment
+
+
+					//prints highlighted text/box
+					if over_me
+					{
+						//if you want, you may color the text
+						print3d_attributes = parent.boxFont3d, parent.itemhighlightcolor, 1,1,1,0,0,parent.column[count].fontAlignment  //IF YOU WANT TO CHANGE TEXT COLOR WITH HIGHLIGHT
+					}
+
+					//changes color of text for the previous item selected
+  					if (parent.nSelected == id)
+  					{
+  						print3d_attributes = parent.boxFont3d, parent.boxTextSelectedColor, 1,1,1,0,0,parent.column[count].fontAlignment
+  					}
+
+					lprint3d_position = parent.column[count].location.x + parent.offsetx[count],2		//set the position for the print
+
+					if (length$(parent.column[count].list_item[id]) > 0)		//checks is there is anything to print
+					{
+						print3d parent.column[count].list_item[id]			//prints the next item
+					}
+				}
+				else
+				{
+					if parent.column[count].fontAlignment == 0
+					{
+						render parent.column[count].list_icon[id], location.x+parent.column[count].location.x,location.y+offsety[count]
+					}
+					else
+					if parent.column[count].fontAlignment == 1
+					{
+						if count < parent.NUM_OF_COLUMNS-1
+							render parent.column[count].list_icon[id], location.x+(parent.column[count+1].location.x-2-getwidth(parent.column[count].list_icon[id])),location.y+offsety[count]
+						else
+							render parent.column[count].list_icon[id], location.x+(parent.itemWidth-2-getwidth(parent.column[count].list_icon[id])),location.y+offsety[count]
+					}
+					else
+					if parent.column[count].fontAlignment == 2
+					{
+						if count < parent.NUM_OF_COLUMNS-1
+							render parent.column[count].list_icon[id], location.x+parent.column[count].location.x+((parent.column[count+1].location.x-parent.column[count].location.x-2-getwidth(parent.column[count].list_icon[id]))/2),location.y+offsety[count]
+						else
+							render parent.column[count].list_icon[id], location.x+parent.column[count].location.x+((parent.itemWidth-parent.column[count].location.x-2-getwidth(parent.column[count].list_icon[id]))/2),location.y+offsety[count]
+					}
+
+				}
+			}
+		}
+	}
+
+}
+
+s_headerbutton_blackMarket
+{
+	GUI_CREATE
+	{
+		//member variables
+		string		s_text			= ""
+
+		int			c_color			= 0xff000000
+		int			c_disabled		= 0
+		int			c_enabled		= 0xff000000
+		int			c_rollover		= 0
+		int			c_selected		= 0
+
+		font3d		f_font
+		int			n_scale			= 1
+		int			bl_wrap			= FALSE
+		int			bl_prop			= TRUE
+		int			bl_bold			= FALSE
+		int			bl_italic		= FALSE
+		int			n_just			= just_center
+		cube		cu_margins		= 0,0,0 to 0,0,0
+		int			bl_relPos		= FALSE
+		int			bl_relMargins	= FALSE
+
+		int			buttonwidth
+		int			button_down = false
+		//gosscript variables
+
+		location	= 0,0,0
+	}
+
+	GUI_INIT
+	{
+
+		//TODO: auto calc margins.
+
+	}
+
+	REGION_ENTERED
+	{
+		// mail(containingClass.id, @infobox@)
+	}
+
+	REGION_EXITED
+	{
+		button_down = false
+	}
+
+	GUI_MAILBOX
+	{
+
+		int msg = getmessage()
+
+		if(msg == CC_DISABLED)
+			c_color = c_disabled
+		else
+		if (msg == CC_ENABLED)
+			c_color = c_enabled
+		else
+		if (msg == CC_ROLLOVER)
+			c_color = c_rollover
+		else
+		if (msg == CC_SELECTED)
+			c_color = c_selected
+		else
+			spew "Unknown mail: ",msg
+
+		if(c_color == 0)
+		{
+			c_color = c_enabled
+		}
+	}
+
+	GUI_DRAW
+	{
+		// draw background
+		setpencolor(parent.parent.headercolor)
+		drawrect location.x, location.y to location.x+buttonWidth, location.y+parent.parent.column_header_height
+
+		// draw border
+		setpencolor(parent.parent.headerborderColor)
+		drawframe location.x, location.y to location.x+buttonWidth, location.y+parent.parent.column_header_height
+
+		if button_down
+		{
+			// draw highlight
+			setpencolor(parent.parent.headerpressedcolor)
+			drawrect location.x, location.y to location.x+buttonWidth, location.y+parent.parent.column_header_height
+		}
+
+		if(! equal$(s_text,""))
+		{
+			//set up attributes
+			print3d_attributes = f_font,parent.parent.headertextcolor,n_scale,bl_wrap,bl_prop,bl_bold,bl_italic,n_just
+
+			//set up print location
+			lprint3d_position = 0,(parent.parent.column_header_height-getprint3dheight(s_text))/2), location.z+2
+
+			//set up margins, if none provided set them to the length of the text
+			print3d_margins = location.x, location.y to (location.x + region.p2.x),(location.y + region.p2.y)
+
+			//draw the text
+			print3d s_text
+		}
+		else
+			print3d_position = location
+	}
+
+}
+
+o_bm_lb_ErrorScreen
+{
+	GUI_CREATE
+	{
+		// use the whole region
+		location				= 0, 0, 500
+		region					= 0, 0 to getresx(), getresy()
+
+		Font3d gHeaderFont3d	= FPATH localize$(IDS_F_GEN_SCREEN_TITLE)
+		Font3d gFont3d			= FPATH localize$(IDS_F_GEN_DESCRIPTION)
+
+		int initialized = false
+		int extended_size = 0
+		pane gFrame
+
+		framerate				= 30
+
+		sound btnTriggeredSound = APATH "sfx_button5.wav"
+
+		// These three variables below MUST BE INITIALIZED
+		string error_header		= localize$(IDS_GN_ERROR)
+		string error_message	= ""
+		string buttonText
+
+		// default text message for button
+		buttonText = localize$(IDS_GN_OK)
+
+		// button object
+		object mbutton
+
+		// variables for fading in and out
+		int alpha_val = 5
+		int fadeout = false
+	}
+
+	GUI_INIT
+	{
+		// set up button object
+		mbutton = s_multistatepane
+		mbutton.file = WPATH "button_reg_138x23_3state.tga"
+		mbutton.total_states = 3
+		mbutton.id = 0
+		mbutton.text = buttonText
+
+		if (extended_size == 0)
+		{
+			gFrame = GPATH "dialog_350x250.tga"
+
+			// set up the location of button object and then initialize
+			mbutton.location = getresx() / 2 - 71, (getresy() / 2) + 72, location.z + 20
+			initialize(mbutton)
+		}
+		else
+		{
+			gFrame = GPATH "dialog_500x300.tga"
+
+			// set up the location of button object and then initialize
+			mbutton.location = getresx() / 2 - 71, (getresy() / 2) + 90, location.z + 20
+			initialize(mbutton)
+		}
+
+		initialized = true
+	}
+
+	GUI_ACTIVATE
+	{
+		activate(mbutton)
+		focus(mbutton)
+	}
+
+	GUI_DEACTIVATE
+	{
+		deactivate(mbutton)
+	}
+
+	GUI_EXECUTE
+	{
+		if fadeout == true
+		{
+			// Fading out(Exiting)
+			if alpha_val > 0
+			{
+				alpha_val = alpha_val - 5
+				if alpha_val <= 0
+				{
+					alpha_val = 0
+					deactivate(this)
+				}
+			}
+		}
+		else
+		{
+			// Fading in(Entering)
+			if alpha_val < 150
+			{
+				alpha_val += 5
+				if alpha_val >= 150
+				{
+					alpha_val = 150
+				}
+			}
+		}
+	}
+
+	GUI_DRAW
+	{
+		// fade in or fade out
+		setpencolor(0, 0, 0, alpha_val)
+		drawrect 0, 0 to getresx(), getresy()
+
+		// Redraw the frame if we are not fading out(exiting)
+		if ((initialized) && (fadeout == false))
+		{
+			color (gframe) = packcolor(255, 255, 255, alpha_val)
+			if (extended_size == 0)
+			{
+				render gframe, getresx() / 2 - 175, getresy() / 2 - 125
+
+				// Header
+			 	print3d_attributes	= gHeaderFont3d,0xffffffff,1,0,1,0,0,2
+				print3d_margins		= getresx() / 2 - 175, (getresy() / 2) - 118  to getresx() / 2 + 175, getresy() / 2 - 50
+				print3d_position	= getresx() / 2 - 175, (getresy() / 2) - 118
+				print3d error_header
+
+			 	print3d_attributes	= gFont3d,0xffffffff,1,1,1,0,0,0
+				print3d_margins		= (getresx() / 2) - 145, getresy() / 2 - 75 to getresx() / 2 + 145, getresy() / 2 + 75
+				print3d_position	= (getresx() / 2) - 145, getresy() / 2 - 75
+				print3d error_message
+			}
+			else
+			{
+				render gframe, getresx() / 2 - 250, getresy() / 2 - 150
+
+				// Header
+			 	print3d_attributes	= gHeaderFont3d,0xffffffff,1,0,1,0,0,2
+				print3d_margins		= getresx() / 2 - 185, (getresy() / 2) - 140  to getresx() / 2 + 175, getresy() / 2 - 80
+				print3d_position	= getresx() / 2 - 185, (getresy() / 2) - 140
+				print3d error_header
+
+			 	print3d_attributes	= gFont3d,0xffffffff,1,-1,1,0,0,0
+				print3d_margins		= (getresx() / 2) - 225, getresy() / 2 - 100 to getresx() / 2 + 225, getresy() / 2 + 85
+				print3d_position	= (getresx() / 2) - 225, getresy() / 2 - 100
+				print3d error_message
+			}
+		}
+	}
+
+	GUI_MAILBOX
+	{
+		// deactivate this object
+		if (sender == mbutton)
+		{
+			play btnTriggeredSound,1
+
+			// Tell this script to fade out and deactivate all its objects
+			fadeout = true
+			deactivate(mbutton)
+		}
+	}
+}

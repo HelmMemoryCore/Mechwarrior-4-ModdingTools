@@ -1,0 +1,58 @@
+Instruction
+Binary Patcher 1.0
+
+This program used to modify parameters in binary files. It takes original files and creates new modified files.
+WARNING: there is no warranty that this program works at all. I tested it on my project and it is working.
+
+Requirements: for using this software you need to install Java Runtime Environment 7 (jre7)
+
+format: <arg> <argValue> <arg> <argValue> ... <command>
+Possible args:
+-rootDir - folder which contains unpacked data
+-infoFile - file which describes data families
+-format - file format can be csv or json
+
+Possible commands:
+getStats - print all stats from infoFile to <family-name>.<format> file
+setStats - generate new stats from <family-name>.<format> to result dir
+
+
+This program works in console.
+Returns help:
+java -jar BinaryPatcher_1.0.jar
+
+Getting stats example:
+java -jar BinaryPatcher_1.0.jar -rootDir "<path>" -infoFile "infoFile" -format <format> getStats
+
+Generate new stat files:
+java -jar BinaryPatcher_1.0.jar -rootDir "<path>" -infoFile "infoFile" -format <format> setStats
+
+Generated result file can be edited in LibreOffice calc. Use semicolon separator.
+
+Info file description
+
+Info file is a json file which describes data places for modification.
+
+Info file describes set of parameter families. Each family has some stats and regular expression to filter family files. This is a java Regex.
+In described example there is "binaryInfo1" family which is described by ".*_bin.data" regex. It means that file "data/bank/table_bin.data" is in family and "data/bank/table_bin.png" is not in family.
+Stats is a set of parameters. Each parameter has name, start position and type. Start position is a starting byte in binary file. There are three types possible Float, Byte and Int
+
+
+{
+    "binaryInfo1":{
+        "stats":{
+            "param1":{
+                "name":"param1",
+                "start":56,
+                "type":"Float"
+            },
+            "param2":{
+                "name":"param2",
+                "start":60,
+                "type":"Byte"
+            }
+        },
+        "path":".*_bin.data"
+    }
+}
+

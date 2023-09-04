@@ -1,0 +1,12 @@
+So, you are going to do modeling for Mechwarrior...
+Well it is full of pitfalls, so I created a set of mini-guides to help you out.
+
+The biggest issues:
+1. keep the # of vertices per mesh lower than 256...
+(That is AFTER TESSELATION AND UNWELDING)
+2. Avoid acute angles
+
+Read the attached guide for all the good stuff.
+
+6-4-2009 I have added an EXCELLENT guide to how to make a MECH for mechwarrior by FireSlave from NBT.
+There may be some specifics that are different in practice, we will see as things progress
